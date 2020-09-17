@@ -13,7 +13,7 @@ WCHAR szTitle[MAX_LOADSTRING];                  // 제목 표시줄 텍스트입
 WCHAR szWindowClass[MAX_LOADSTRING];            // 기본 창 클래스 이름입니다.
 HBITMAP hbmMem, hbmMemOld;
 HDC hdc_BlackStone, hdc_WhiteStone, hdc_BackGround, hdc_Board;
-HDC hdc, MemDC, hdcMem;
+HDC hdc, hdcMem; //MemDC
 HWND hWindow;
 HWND hChatInputBox, hChatBox;
 HWND hWCS, hBCS;
@@ -182,10 +182,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     
     FILE* fp = NULL;
 
-    //char buffer[64] = "";
-    //if(message == WM_PAINT)
-    //   printf("hWnd : %p\t msg : %-15s wParam : %d\t lParam : %d\n", hWnd, Read(message, buffer), wParam, lParam);
-    
+    /*char buffer[64] = "";
+    if(message == WM_PAINT)
+       printf("hWnd : %p\t msg : %-15s wParam : %d\t lParam : %d\n", hWnd, Read(message, buffer), wParam, lParam);
+    */
     switch (message)
     {
     case WM_CREATE:
@@ -200,6 +200,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         hdc_WhiteStone = CreateCompatibleDC(hdc);
         hdc_BackGround = CreateCompatibleDC(hdc);
         hdc_Board = CreateCompatibleDC(hdc);
+		hdcMem = CreateCompatibleDC(hdc);
 
         ReleaseDC(hWnd, hdc);
 
@@ -210,6 +211,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         bitBackGround = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_BACKGROUND));
         bitBoard = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_BOARD));
 
+		
         SelectObject(hdc_BlackStone, bitBlackStone);
         SelectObject(hdc_WhiteStone, bitWhiteStone);
         SelectObject(hdc_BackGround, bitBackGround);
@@ -360,7 +362,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 DeleteDC(hdc_BackGround);
                 DeleteDC(hdc_Board);
                 DeleteDC(hdc);
-                DeleteDC(MemDC);
+                //DeleteDC(MemDC);
                 DeleteDC(hdcMem);
 
                 // PostQuitMessage(0);
@@ -562,13 +564,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
       
     case WM_PAINT:
         {
+			
             PAINTSTRUCT ps;
             hdc = BeginPaint(hWnd, &ps);
             // TODO: 여기에 hdc를 사용하는 그리기 코드를 추가합니다...
 
-            MemDC = CreateCompatibleDC(hdc);
+            //MemDC = CreateCompatibleDC(hdc); ;;;;;;
 
-            hdcMem = CreateCompatibleDC(hdc); //2
+            //hdcMem = CreateCompatibleDC(hdc); //2 프로그램 초기화때로 이동
             hbmMem = CreateCompatibleBitmap(hdc, 1200, 820);//3
             hbmMemOld = (HBITMAP)SelectObject(hdcMem, hbmMem);//4
 
@@ -580,13 +583,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             SelectObject(hdcMem, hbmMemOld); //-4
             DeleteObject(hbmMem); //-3
-            DeleteDC(hdcMem); //-2
-
+            // DeleteDC(hdcMem); //-2 프로그램 끝날때로 이동
+			
             EndPaint(hWnd, &ps);
         }
         break;
 
     case WM_DESTROY:
+		DeleteDC(hdcMem);
         PostQuitMessage(0);
         break;
 
@@ -683,7 +687,7 @@ void WinDrawBoard()
             int sqc = Game.Read({ x, y }).sequence();
             if (sqc != 0 && Print_Sequance_Switch == true) 
             {
-                TextOut(hdcMem, SPACE_SIZE * (x - 1) + 25, SPACE_SIZE * (y - 1) + 18, std::to_wstring(sqc).c_str(), std::to_wstring(sqc).length());
+                TextOut(hdcMem, SPACE_SIZE * (x - 1) + 25, SPACE_SIZE * (y - 1) + 18, std::to_wstring(sqc).c_str(), (int)std::to_wstring(sqc).length());
             }
         }
     }
@@ -708,7 +712,16 @@ void WinDrawBoard()
 }
 
 void AppendText(HWND hEdit, LPCWSTR pText) {
-    SendMessage(hEdit, EM_SETSEL, 0, -1);
+    //SendMessage(hEdit, EM_SETSEL, 0, -1);
+	if (GetWindowTextLength(hChatBox) > 100)
+	{
+		WCHAR buffer[50];
+		GetWindowText(hEdit, buffer, 20);
+		cout << wcschr(buffer, _T('\n')) - buffer + 1;
+		SendMessage(hEdit, EM_SETSEL, 0, (LPARAM)(wcschr(buffer, _T('\n')) - buffer + 1) );
+		SendMessage(hEdit, EM_REPLACESEL, 0, (LPARAM)_T(""));
+		// todo
+	}
     SendMessage(hEdit, EM_SETSEL, -1, -1);
     SendMessage(hEdit, EM_REPLACESEL, 0, (LPARAM)pText); // append!
 }
