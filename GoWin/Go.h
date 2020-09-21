@@ -74,6 +74,13 @@ public:
 			m_white_player.add_captured_stone(captured_stone);
 	}
 
+	void Init()	{
+		m_white_player.set_captured_stone(0);
+		m_black_player.set_captured_stone(0);
+		clear_placement();
+		m_sequence = 1;
+	}
+
 	// function
 	void add_placement(PlacementInfo placement) { m_placement.push_back(new Node(placement)); }
 	void delete_placement() { m_placement.delete_back(); }

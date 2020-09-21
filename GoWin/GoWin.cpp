@@ -415,6 +415,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
                         mysocket.Send((char*)&msg, BUFSIZE);
                     }
+					SetWindowText(hBCS, to_wstring(Game.info().black_player().captured_stone()).c_str());
+					SetWindowText(hWCS, to_wstring(Game.info().white_player().captured_stone()).c_str());
                     InvalidateRect(hWnd, NULL, FALSE);
                     SendTextEdit(hChatBox, _T("[System] 초기화 했습니다."));
                     //MessageBox(hWnd, _T("초기화 했습니다."), _T("알림"), MB_OK);

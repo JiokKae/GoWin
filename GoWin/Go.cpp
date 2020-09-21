@@ -33,10 +33,10 @@ bool Go::Init() {
 	if (m_info.sequence() == 1)
 		return false;
 	boardLog.clear();
-	m_board.init();
-	m_info.clear_placement();
 
-	m_info.set_sequence(1);
+	m_board.init();
+	m_info.Init();
+	
 	return true;
 }
 
