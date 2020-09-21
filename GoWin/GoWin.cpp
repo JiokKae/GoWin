@@ -36,8 +36,7 @@ INT_PTR CALLBACK    Netbox(HWND, UINT, WPARAM, LPARAM);
 
 void DrawStone(Stone);
 void WinDrawBoard();
-void AppendText(HWND edit, LPCWSTR pText);
-void SendTextEdit(LPCWSTR pText);
+void SendTextEdit(HWND edit, LPCWSTR pText);
 
 Coord2d         mouse;
 BoardGraphic    boardInfo({ 0, 0 }, 806, 806, SPACE_SIZE, 6);
@@ -372,14 +371,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 break;
             case IDM_SERVER_CREATE:
                 if (mysocket.Create(hWnd) != INVALID_SOCKET) {
-                    SendTextEdit(_T("[System] 서버 생성"));
+                    SendTextEdit(hChatBox, _T("[System] 서버 생성"));
                     HMENU hMenu = GetMenu(hWnd);
                     HMENU hSubMenu = GetSubMenu(hMenu, 1);
                     EnableMenuItem(hMenu, GetMenuItemID(hSubMenu, 0), MF_GRAYED);
 
                 }
                 else {
-                    SendTextEdit(_T("[System] 서버 생성 실패"));
+                    SendTextEdit(hChatBox, _T("[System] 서버 생성 실패"));
                 }
                 break;
             case IDM_SERVER_ENTER:
@@ -417,7 +416,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         mysocket.Send((char*)&msg, BUFSIZE);
                     }
                     InvalidateRect(hWnd, NULL, FALSE);
-                    SendTextEdit(_T("[System] 초기화 했습니다."));
+                    SendTextEdit(hChatBox, _T("[System] 초기화 했습니다."));
                     //MessageBox(hWnd, _T("초기화 했습니다."), _T("알림"), MB_OK);
                 }
                 SetFocus(hWnd);
@@ -435,7 +434,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         mysocket.Send((char*)&msg, BUFSIZE);
                     }
                     InvalidateRect(hWnd, NULL, FALSE);
-                    SendTextEdit(_T("[System] 한수 쉬었습니다."));
+                    SendTextEdit(hChatBox, _T("[System] 한수 쉬었습니다."));
                 }
                 SetFocus(hWnd);
                 break;
@@ -459,11 +458,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             // 클라이언트의 접속요청이 있을때
         case FD_ACCEPT:
             if (mysocket.FD_Accept()) {
-                SendTextEdit(_T("클라이언트 접속 !!"));
+                SendTextEdit(hChatBox, _T("클라이언트 접속 !!"));
             }
             else
             {
-                SendTextEdit(_T("클라이언트 접속요청수락 실패 !!"));
+                SendTextEdit(hChatBox, _T("클라이언트 접속요청수락 실패 !!"));
             }
             break;
 
@@ -478,8 +477,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 case CHATTING:
                 {
                     CHAT_MSG* chat_msg = (CHAT_MSG*)&msg;
-                    AppendText(hChatBox, _T("상대 : "));
-                    SendTextEdit(chat_msg->buf);
+					wstring chatMSG = _T("상대 : ");
+					chatMSG.append(chat_msg->buf);
+                    SendTextEdit(hChatBox, chatMSG.c_str());
                     break;
                 }
                 case PLACEMENT:
@@ -529,7 +529,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             // 클라이언트가 접속을 해제했을때
         case FD_CLOSE:
             mysocket.FD_Close((SOCKET)wParam);
-            SendTextEdit(_T("클라이언트 연결 해제"));
+            SendTextEdit(hChatBox, _T("클라이언트 연결 해제"));
             break;
         }
         return TRUE;
@@ -541,10 +541,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         case KEY_ENTER:
             if (GetWindowTextLength(hChatInputBox) != 0)
             {
-                AppendText(hChatBox, _T("당신 : "));
-                WCHAR buffer[512];
-                GetWindowText(hChatInputBox, buffer, 512);
-                SendTextEdit(buffer);
+				WCHAR buffer[512];
+				GetWindowText(hChatInputBox, buffer, 512);
+
+				wstring newText = _T("당신 : ");
+				newText.append(buffer);
+
+                SendTextEdit(hChatBox, buffer);
+
                 SetWindowTextW(hChatInputBox, _T(""));
 
                 if (mysocket.Status() != SocketStatus::notConnected) 
@@ -554,7 +558,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     wcscpy(msg.buf, buffer);
 
                     if (SOCKET_ERROR == mysocket.Send((char*)&msg, BUFSIZE))
-                        SendTextEdit(_T("[System] 메세지 보내기 실패"));
+                        SendTextEdit(hChatBox, _T("[System] 메세지 보내기 실패"));
                 }
             }
             SetFocus(hChatInputBox);
@@ -711,22 +715,20 @@ void WinDrawBoard()
     }
 }
 
-void AppendText(HWND hEdit, LPCWSTR pText) {
-    //SendMessage(hEdit, EM_SETSEL, 0, -1);
+void SendTextEdit(HWND hEdit, LPCWSTR pText) {
+    
 	if (GetWindowTextLength(hChatBox) > 100)
 	{
 		WCHAR buffer[50];
-		GetWindowText(hEdit, buffer, 20);
-		cout << wcschr(buffer, _T('\n')) - buffer + 1;
+		GetWindowText(hEdit, buffer, 30);
 		SendMessage(hEdit, EM_SETSEL, 0, (LPARAM)(wcschr(buffer, _T('\n')) - buffer + 1) );
 		SendMessage(hEdit, EM_REPLACESEL, 0, (LPARAM)_T(""));
 		// todo
 	}
+	wstring newText = pText;
+	newText.append(_T("\r\n"));
+	SendMessage(hEdit, EM_SETSEL, 0, -1);
     SendMessage(hEdit, EM_SETSEL, -1, -1);
-    SendMessage(hEdit, EM_REPLACESEL, 0, (LPARAM)pText); // append!
-}
+    SendMessage(hEdit, EM_REPLACESEL, 0, (LPARAM)newText.c_str()); // append!
 
-void SendTextEdit(LPCWSTR pText) {
-    AppendText(hChatBox, pText);
-    AppendText(hChatBox, _T("\r\n"));
 }
