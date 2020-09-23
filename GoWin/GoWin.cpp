@@ -14,6 +14,7 @@ WCHAR szWindowClass[MAX_LOADSTRING];            // 기본 창 클래스 이름�
 HBITMAP hbmMem, hbmMemOld;
 
 HDCManager bitmaps(5);
+bitmaps[]
 HDC hdc_BlackStone, hdc_WhiteStone, hdc_BackGround, hdc_Board;
 HDC hdc, hdcMem; //MemDC
 HWND hWindow;

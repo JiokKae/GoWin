@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="소스 파일\Managers">
+      <UniqueIdentifier>{9c9cbe22-a85c-4907-9dfe-ae09b7ae8b60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Managers">
+      <UniqueIdentifier>{d2049124-b1e3-4a63-9bf6-8c8c5cb0de43}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -63,6 +69,9 @@
     <ClInclude Include="MySocket.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="HDCManager.h">
+      <Filter>헤더 파일\Managers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BoardGraphic.cpp">
@@ -95,6 +104,9 @@
     <ClCompile Include="MySocket.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="HDCManager.cpp">
+      <Filter>소스 파일\Managers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="GoWin.ico">
@@ -119,6 +131,9 @@
       <Filter>리소스 파일</Filter>
     </Image>
     <Image Include="Resource\icon.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="Resource\120x140.bmp">
       <Filter>리소스 파일</Filter>
     </Image>
   </ItemGroup>
