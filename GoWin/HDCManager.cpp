@@ -7,4 +7,5 @@ HDCManager::HDCManager(int num)
 
 HDCManager::~HDCManager()
 {
+	delete[] hdcs;
 }
