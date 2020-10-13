@@ -13,7 +13,7 @@ WCHAR szTitle[MAX_LOADSTRING];                  // 제목 표시줄 텍스트입
 WCHAR szWindowClass[MAX_LOADSTRING];            // 기본 창 클래스 이름입니다.
 HBITMAP hbmMem, hbmMemOld;
 HDC hdc_BlackStone, hdc_WhiteStone, hdc_BackGround, hdc_Board;
-HDC hdc, MemDC, hdcMem;
+HDC hdc, hdcMem;
 HWND hWindow;
 HWND hChatInputBox, hChatBox;
 HWND hWCS, hBCS;
@@ -71,9 +71,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_GOWIN));
 
-    MSG msg;
-    
     // 기본 메시지 루프입니다:
+	MSG msg;
     while (GetMessageW(&msg, nullptr, 0, 0))
     {
         if (msg.message == WM_KEYDOWN && msg.hwnd != hWindow)
@@ -154,29 +153,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //  WM_DESTROY  - 종료 메시지를 게시하고 반환합니다.
 //
 //
-char* Read(UINT message, char* buffer) {
-    switch (message)
-    {
-    case WM_CREATE:
-        strcpy(buffer, "WM_CREATE"); break;        
-    case WM_MOUSEMOVE:
-        strcpy(buffer, "WM_MOUSEMOVE"); break;
-    case WM_COMMAND:
-        strcpy(buffer, "WM_COMMAND"); break;
-    case WM_LBUTTONDOWN:
-        strcpy(buffer, "WM_LBUTTONDOWN"); break;
-    case WM_PAINT:
-        strcpy(buffer, "WM_PAINT"); break;
-    case WM_SETCURSOR:
-        strcpy(buffer, "WM_SETCURSOR"); break;
-    case WM_KEYDOWN:
-        strcpy(buffer, "WM_KEYDOWN"); break;
-    default:
-        itoa(message, buffer, 10);
-    }
-    return buffer;
-}
-
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     
@@ -247,16 +223,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         return 0;
 
     case WM_MOUSEMOVE:
-        mouse.x = LOWORD(lParam);
-        mouse.y = HIWORD(lParam);
-
+		GetMouseCoord(mouse, lParam);
         InvalidateRect(hWnd, NULL, FALSE);
 
         break;
 
     case WM_LBUTTONDOWN:
-        mouse.x = LOWORD(lParam);
-        mouse.y = HIWORD(lParam);
+		GetMouseCoord(mouse, lParam);
         //cout << "마우스 좌표 x" << mouse.x << endl;
         //cout << "마우스 좌표 y" << mouse.y << endl;
         if (boardInfo.IsMouseInBoard(mouse))
@@ -360,7 +333,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 DeleteDC(hdc_BackGround);
                 DeleteDC(hdc_Board);
                 DeleteDC(hdc);
-                DeleteDC(MemDC);
                 DeleteDC(hdcMem);
 
                 // PostQuitMessage(0);
@@ -565,8 +537,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             PAINTSTRUCT ps;
             hdc = BeginPaint(hWnd, &ps);
             // TODO: 여기에 hdc를 사용하는 그리기 코드를 추가합니다...
-
-            MemDC = CreateCompatibleDC(hdc);
 
             hdcMem = CreateCompatibleDC(hdc); //2
             hbmMem = CreateCompatibleBitmap(hdc, 1200, 820);//3

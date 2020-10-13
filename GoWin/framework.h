@@ -7,7 +7,7 @@
 #include "MySocket.h"
 #include "Go.h"
 #include "MyString.h"
-#include "Mywmkey.h"
+#include "MyWinLibrary.h"
 #include "GiboNGF.h"
 #include "GiboSGF.h"
 #include "BoardGraphic.h"

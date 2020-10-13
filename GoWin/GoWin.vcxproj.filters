@@ -48,9 +48,6 @@
     <ClInclude Include="mydatastructure.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Mywmkey.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="stdgo.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -61,6 +58,9 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="MySocket.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="MyWinLibrary.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
@@ -93,6 +93,9 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="MySocket.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="MyWinLibrary.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
