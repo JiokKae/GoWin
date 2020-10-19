@@ -155,6 +155,7 @@
     <ClInclude Include="GiboSGF.h" />
     <ClInclude Include="Go.h" />
     <ClInclude Include="GoWin.h" />
+    <ClInclude Include="GoWinManager.h" />
     <ClInclude Include="HDCManager.h" />
     <ClInclude Include="LinkedListStack.h" />
     <ClInclude Include="mydatastructure.h" />
@@ -172,6 +173,7 @@
     <ClCompile Include="GiboNGF.cpp" />
     <ClCompile Include="Go.cpp" />
     <ClCompile Include="GoWin.cpp" />
+    <ClCompile Include="GoWinManager.cpp" />
     <ClCompile Include="HDCManager.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MySocket.cpp" />

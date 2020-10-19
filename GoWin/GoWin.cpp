@@ -7,6 +7,14 @@
 #define MAX_LOADSTRING 100
 #define SPACE_SIZE 42
 
+const wchar_t* errorMSG_wchar[5] = {
+	_T(""),
+	_T("바둑판 안에 착수해주세요"),
+	_T("이미 바둑 돌이 있습니다"),
+	_T("착수 금지점입니다"),
+	_T("패 입니다"),
+};
+
 enum EBitmapName
 {
 	BlackStone,
@@ -21,22 +29,13 @@ WCHAR szTitle[MAX_LOADSTRING];                  // 제목 표시줄 텍스트입
 WCHAR szWindowClass[MAX_LOADSTRING];            // 기본 창 클래스 이름입니다.
 HBITMAP hbmMem, hbmMemOld;
 
+GoWinManager manager;
 HDCManager bitmaps(5);
-HDC hdc_BlackStone, hdc_WhiteStone, hdc_BackGround, hdc_Board;
-
-HDC hdc, hdcMem; //MemDC
+HDC hdc, hdcMem;
 HWND hWindow;
 HWND hChatInputBox, hChatBox;
 HWND hWCS, hBCS;
 HFONT hFont;
-
-const wchar_t* errorMSG_wchar[5] = {
-    _T(""),
-    _T("바둑판 안에 착수해주세요"),
-    _T("이미 바둑 돌이 있습니다"),
-    _T("착수 금지점입니다"),
-    _T("패 입니다"),
-};
 
 // 이 코드 모듈에 포함된 함수의 선언을 전달합니다:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -51,11 +50,9 @@ void SendTextEdit(HWND edit, LPCWSTR pText);
 
 Coord2d         mouse;
 BoardGraphic    boardInfo({ 0, 0 }, 806, 806, SPACE_SIZE, 6);
-Go              Game;
 MySocket        mysocket;
 
 //static int drop_file_count = 0;
-static bool Print_Sequance_Switch;
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -188,9 +185,6 @@ char* Read(UINT message, char* buffer) {
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    
-    FILE* fp = NULL;
-
     /*char buffer[64] = "";
     if(message == WM_PAINT)
        printf("hWnd : %p\t msg : %-15s wParam : %d\t lParam : %d\n", hWnd, Read(message, buffer), wParam, lParam);
@@ -200,49 +194,26 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_CREATE:
         // 콘솔창 열기
         AllocConsole();
+		FILE* fp;
         _wfreopen_s(&fp, _T("CONOUT$"), _T("wt"), stdout);
         //
-		HBITMAP bitBlackStone, bitWhiteStone, bitBackGround, bitBoard;
 
+		HBITMAP bitBlackStone, bitWhiteStone, bitBackGround, bitBoard;
 		bitBlackStone = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_BLACKSTONE));
 		bitWhiteStone = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_WHITESTONE));
 		bitBackGround = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_BACKGROUND));
 		bitBoard = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_BOARD));
 
-		bitmaps.AddBitmap(&hWnd, EBitmapName::BlackStone, &bitBlackStone);
-		bitmaps.AddBitmap(&hWnd, EBitmapName::WhiteStone, &bitWhiteStone);
-		bitmaps.AddBitmap(&hWnd, EBitmapName::BackGround, &bitBackGround);
-		bitmaps.AddBitmap(&hWnd, EBitmapName::Board, &bitBoard);
-		/*
+		bitmaps.AddBitmap(hdc, hWnd, EBitmapName::BlackStone, bitBlackStone);
+		bitmaps.AddBitmap(hdc, hWnd, EBitmapName::WhiteStone, bitWhiteStone);
+		bitmaps.AddBitmap(hdc, hWnd, EBitmapName::BackGround, bitBackGround);
+		bitmaps.AddBitmap(hdc, hWnd, EBitmapName::Board, bitBoard);
 
-        hdc = GetDC(hWnd);
-		//HDC hdc_BlackStone, hdc_WhiteStone, hdc_BackGround, hdc_Board;
-        hdc_BlackStone = CreateCompatibleDC(hdc);
-        hdc_WhiteStone = CreateCompatibleDC(hdc);
-        hdc_BackGround = CreateCompatibleDC(hdc);
-        hdc_Board = CreateCompatibleDC(hdc);
+		hdc = GetDC(hWnd);
+
 		hdcMem = CreateCompatibleDC(hdc);
 
         ReleaseDC(hWnd, hdc);
-
-        HBITMAP bitBlackStone, bitWhiteStone, bitBackGround, bitBoard;
-
-        bitBlackStone = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_BLACKSTONE));
-        bitWhiteStone = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_WHITESTONE));
-        bitBackGround = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_BACKGROUND));
-        bitBoard = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_BOARD));
-
-		
-        SelectObject(hdc_BlackStone, bitBlackStone);
-        SelectObject(hdc_WhiteStone, bitWhiteStone);
-        SelectObject(hdc_BackGround, bitBackGround);
-        SelectObject(hdc_Board, bitBoard);
-
-        DeleteObject(bitBlackStone);
-        DeleteObject(bitWhiteStone);
-        DeleteObject(bitBackGround);
-        DeleteObject(bitBoard);
-		*/
 
         hBCS = CreateWindow(_T("EDIT"), _T("0"), WS_CHILD | WS_VISIBLE | ES_RIGHT | ES_READONLY ,
             840, 200, 50, 30, hWnd, (HMENU)1, hInst, NULL);
@@ -353,22 +324,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             // 메뉴 - 파일 - 저장
             case IDM_FILE_SAVE:
             {
-                tagOFNW SFN;
-                WCHAR lpstrFile[MAX_PATH] = _T("");
-                memset(&SFN, 0, sizeof(tagOFNW));
-                SFN.lStructSize = sizeof(tagOFNW);
-                SFN.hwndOwner = hWnd;
-                SFN.lpstrFilter = _T("기보 파일(*.ngf)\0*.ngf\0기보 파일(*.sgf)\0*.sgf\0모든 파일(*.*)\0*.*\0");
-                SFN.lpstrDefExt = _T("ngf");
-                SFN.lpstrFile = lpstrFile;
-                SFN.nMaxFile = 256;
-                SFN.Flags = OFN_OVERWRITEPROMPT;
-                if (GetSaveFileName(&SFN) != 0)
-                {
-                    wstring extension = lpstrFile;		//확장자 추출하기
-                    extension = extension.substr(extension.length() - 3, 3);
-                    Game.Save(lpstrFile, extension);
-                }
+				manager.FileSave();
 
                 break;
             }
@@ -378,15 +334,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 // 콘솔 닫기
                 FreeConsole();
                 //
-				/*
-                DeleteDC(hdc_BlackStone);
-                DeleteDC(hdc_WhiteStone);
-                DeleteDC(hdc_BackGround);
-                DeleteDC(hdc_Board);
-				*/
+			
                 DeleteDC(hdc);
 				
-                //DeleteDC(MemDC);
                 DeleteDC(hdcMem);
 
                 // PostQuitMessage(0);
@@ -394,6 +344,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
                 DestroyWindow(hWnd);
                 break;
+
             case IDM_SERVER_CREATE:
                 if (mysocket.Create(hWnd) != INVALID_SOCKET) {
                     SendTextEdit(hChatBox, _T("[System] 서버 생성"));
@@ -467,7 +418,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 break;
 
             case 3:	// 수순 표시
-                Print_Sequance_Switch = !Print_Sequance_Switch;
+                manager.SetPrintSequenceSwitch(!manager.GetPrintSequenceSwitch());
                 InvalidateRect(hWnd, NULL, FALSE);
                 SetFocus(hWnd);
                 break;
@@ -595,18 +546,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
       
     case WM_PAINT:
         {
-			
             PAINTSTRUCT ps;
             hdc = BeginPaint(hWnd, &ps);
             // TODO: 여기에 hdc를 사용하는 그리기 코드를 추가합니다...
-
-            //MemDC = CreateCompatibleDC(hdc); ;;;;;;
 
             //hdcMem = CreateCompatibleDC(hdc); //2 프로그램 초기화때로 이동
             hbmMem = CreateCompatibleBitmap(hdc, 1200, 820);//3
             hbmMemOld = (HBITMAP)SelectObject(hdcMem, hbmMem);//4
 
-            BitBlt(hdcMem, 0, 0, 1200, 820, *bitmaps[EBitmapName::BackGround], 0, 0, SRCCOPY);
+            //BitBlt(hdcMem, 0, 0, 1200, 820, hdc_BackGround, 0, 0, SRCCOPY);
+			BitBlt(hdcMem, 0, 0, 1200, 820, bitmaps[EBitmapName::BackGround], 0, 0, SRCCOPY);
 
             WinDrawBoard();
 
@@ -693,19 +642,19 @@ void DrawStone(Stone stone)
 
     if (color == Color::Black)
     {
-        BitBlt(hdcMem, SPACE_SIZE * (x - 1) + 6, SPACE_SIZE * (y - 1) + 6, 39, 39, *bitmaps[BlackStone], 0, 0, SRCCOPY);
+        BitBlt(hdcMem, SPACE_SIZE * (x - 1) + 6, SPACE_SIZE * (y - 1) + 6, 39, 39, bitmaps[BlackStone], 0, 0, SRCCOPY);
         SetTextColor(hdcMem, RGB(255, 255, 255));
     }
     else if (color == Color::White)
     {
-        BitBlt(hdcMem, SPACE_SIZE * (x - 1) + 6, SPACE_SIZE * (y - 1) + 6, 39, 39, *bitmaps[WhiteStone], 0, 0, SRCCOPY);
+        BitBlt(hdcMem, SPACE_SIZE * (x - 1) + 6, SPACE_SIZE * (y - 1) + 6, 39, 39, bitmaps[WhiteStone], 0, 0, SRCCOPY);
         SetTextColor(hdcMem, RGB(0, 0, 0));
     }
 }
 
 void WinDrawBoard()
 {
-    BitBlt(hdcMem, 0, 0, 806, 806, *bitmaps[Board], 0, 0, SRCCOPY);
+    BitBlt(hdcMem, 0, 0, 806, 806, bitmaps[Board], 0, 0, SRCCOPY);
 
     SetTextAlign(hdcMem, TA_CENTER);
     SetBkMode(hdcMem, TRANSPARENT);
@@ -716,7 +665,7 @@ void WinDrawBoard()
             DrawStone(Game.Read({ x, y }));
 
             int sqc = Game.Read({ x, y }).sequence();
-            if (sqc != 0 && Print_Sequance_Switch == true) 
+            if (sqc != 0 && manager.GetPrintSequenceSwitch() == true) 
             {
                 TextOut(hdcMem, SPACE_SIZE * (x - 1) + 25, SPACE_SIZE * (y - 1) + 18, std::to_wstring(sqc).c_str(), (int)std::to_wstring(sqc).length());
             }
@@ -735,9 +684,9 @@ void WinDrawBoard()
             bf.SourceConstantAlpha = 180;
 
             if (Stone::Sqnce2color(Game.info().sequence()) == Color::Black)
-                GdiAlphaBlend(hdcMem, SPACE_SIZE * (board_point.x - 1) + 6, SPACE_SIZE * (board_point.y - 1) + 6, 39, 39, *bitmaps[BlackStone], 0, 0, 39, 39, bf);
+                GdiAlphaBlend(hdcMem, SPACE_SIZE * (board_point.x - 1) + 6, SPACE_SIZE * (board_point.y - 1) + 6, 39, 39, bitmaps[BlackStone], 0, 0, 39, 39, bf);
             else
-                GdiAlphaBlend(hdcMem, SPACE_SIZE * (board_point.x - 1) + 6, SPACE_SIZE * (board_point.y - 1) + 6, 39, 39, *bitmaps[WhiteStone], 0, 0, 39, 39, bf);
+                GdiAlphaBlend(hdcMem, SPACE_SIZE * (board_point.x - 1) + 6, SPACE_SIZE * (board_point.y - 1) + 6, 39, 39, bitmaps[WhiteStone], 0, 0, 39, 39, bf);
         }
     }
 }

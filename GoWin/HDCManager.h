@@ -8,19 +8,19 @@ class HDCManager {
 public:
 	HDCManager(int num);
 	~HDCManager();
-	HDC* operator[](int index) {
-		return &hdcs[index];
+	HDC operator[](int index) {
+		return hdcs[index];
 	}
 
-	void AddBitmap(HWND* hWnd, int index, HBITMAP* bitmap)
+	void AddBitmap(HDC hdc, HWND hWnd, int index, HBITMAP bitmap)
 	{
-		HDC hdc = GetDC(*hWnd);
+		hdc = GetDC(hWnd);
 
 		//HDC hdc_BlackStone, hdc_WhiteStone, hdc_BackGround, hdc_Board;
 		
 		hdcs[index] = CreateCompatibleDC(hdc);
 
-		ReleaseDC(*hWnd, hdc);
+		ReleaseDC(hWnd, hdc);
 
 		SelectObject(hdcs[index], bitmap);
 
