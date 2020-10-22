@@ -1,7 +1,14 @@
 #include "GoWinManager.h"
 #include "resource.h"
 
-HRESULT GoWinManager::Init()
+#define SPACE_SIZE 42
+
+
+INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+INT_PTR CALLBACK    Netbox(HWND, UINT, WPARAM, LPARAM);
+void SendTextEdit(HWND edit, LPCWSTR pText);
+
+HRESULT GoWinManager::Init(HINSTANCE hInstance, HWND hWnd)
 {
 	bitmaps = HDCManager(5);
 	// 콘솔창 열기
@@ -11,10 +18,10 @@ HRESULT GoWinManager::Init()
 	//
 
 	HBITMAP bitBlackStone, bitWhiteStone, bitBackGround, bitBoard;
-	bitBlackStone = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_BLACKSTONE));
-	bitWhiteStone = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_WHITESTONE));
-	bitBackGround = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_BACKGROUND));
-	bitBoard = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_BOARD));
+	bitBlackStone = LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_BLACKSTONE));
+	bitWhiteStone = LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_WHITESTONE));
+	bitBackGround = LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_BACKGROUND));
+	bitBoard = LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_BOARD));
 
 	bitmaps.AddBitmap(hdc, hWnd, EBitmapName::BlackStone, bitBlackStone);
 	bitmaps.AddBitmap(hdc, hWnd, EBitmapName::WhiteStone, bitWhiteStone);
@@ -28,9 +35,9 @@ HRESULT GoWinManager::Init()
 	ReleaseDC(hWnd, hdc);
 
 	hBCS = CreateWindow(_T("EDIT"), _T("0"), WS_CHILD | WS_VISIBLE | ES_RIGHT | ES_READONLY,
-		840, 200, 50, 30, hWnd, (HMENU)1, hInst, NULL);
+		840, 200, 50, 30, hWnd, (HMENU)1, g_hInstance, NULL);
 	hWCS = CreateWindow(_T("EDIT"), _T("0"), WS_CHILD | WS_VISIBLE | ES_RIGHT | ES_READONLY,
-		1010, 200, 50, 30, hWnd, (HMENU)2, hInst, NULL);
+		1010, 200, 50, 30, hWnd, (HMENU)2, g_hInstance, NULL);
 
 	hFont = CreateFont(30, 0, 0, 0, 0, 0, 0, 0, HANGEUL_CHARSET, 3, 2, 1,
 		VARIABLE_PITCH | FF_ROMAN, _T("궁서"));
@@ -38,18 +45,18 @@ HRESULT GoWinManager::Init()
 	SendMessage(hWCS, WM_SETFONT, (WPARAM)hFont, (LPARAM)FALSE);
 
 	CreateWindow(_T("button"), _T("무르기(Z)"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-		840, 300, 150, 30, hWnd, (HMENU)IDA_BACKSIES, hInst, NULL);
+		840, 300, 150, 30, hWnd, (HMENU)IDA_BACKSIES, hInstance, NULL);
 	CreateWindow(_T("button"), _T("초기화(I)"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-		1010, 300, 150, 30, hWnd, (HMENU)IDA_INIT, hInst, NULL);
+		1010, 300, 150, 30, hWnd, (HMENU)IDA_INIT, hInstance, NULL);
 	CreateWindow(_T("button"), _T("한수쉼(P)"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-		840, 340, 150, 30, hWnd, (HMENU)IDA_PASS, hInst, NULL);
+		840, 340, 150, 30, hWnd, (HMENU)IDA_PASS, hInstance, NULL);
 	CreateWindow(_T("button"), _T("수순 표시"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-		1010, 340, 150, 30, hWnd, (HMENU)3, hInst, NULL);
+		1010, 340, 150, 30, hWnd, (HMENU)3, hInstance, NULL);
 
 	hChatBox = CreateWindow(_T("EDIT"), _T(""), WS_CHILD | WS_VISIBLE | ES_LEFT | ES_READONLY | ES_AUTOVSCROLL | WS_VSCROLL | ES_MULTILINE,
-		840, 400, 320, 120, hWnd, (HMENU)4, hInst, NULL);
+		840, 400, 320, 120, hWnd, (HMENU)4, hInstance, NULL);
 	hChatInputBox = CreateWindow(_T("EDIT"), _T(""), WS_CHILD | WS_VISIBLE | ES_LEFT | ES_AUTOHSCROLL | ES_WANTRETURN,
-		840, 530, 320, 30, hWnd, (HMENU)5, hInst, NULL);
+		840, 530, 320, 30, hWnd, (HMENU)5, hInstance, NULL);
 	return S_OK;
 }
 
@@ -60,12 +67,12 @@ Go& GoWinManager::GetGame()
 
 bool GoWinManager::GetPrintSequenceSwitch()
 {
-	return printSequanceSwitch;
+	return printSequenceSwitch;
 }
 
 void GoWinManager::SetPrintSequenceSwitch(bool b)
 {
-	printSequanceSwitch = b;
+	printSequenceSwitch = b;
 }
 
 void GoWinManager::FileOpen()
@@ -172,6 +179,10 @@ void GoWinManager::DrawBoard(HDC hdc)
 				GdiAlphaBlend(hdc, SPACE_SIZE * (board_point.x - 1) + 6, SPACE_SIZE * (board_point.y - 1) + 6, 39, 39, bitmaps[WhiteStone], 0, 0, 39, 39, bf);
 		}
 	}
+}
+
+void GoWinManager::SendTextEdit(HWND hEdit, LPCWSTR pText)
+{
 }
 
 LRESULT GoWinManager::MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
@@ -489,4 +500,76 @@ LRESULT GoWinManager::MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM l
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
+}
+
+// 정보 대화 상자의 메시지 처리기입니다.
+INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	UNREFERENCED_PARAMETER(lParam);
+	switch (message)
+	{
+	case WM_INITDIALOG:
+		return (INT_PTR)TRUE;
+
+	case WM_COMMAND:
+		if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
+		{
+			EndDialog(hDlg, LOWORD(wParam));
+			return (INT_PTR)TRUE;
+		}
+		break;
+	}
+	return (INT_PTR)FALSE;
+}
+
+HWND hIpInputBox;
+// 멀티 대화 상자의 메시지 처리기입니다.
+INT_PTR CALLBACK Netbox(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	UNREFERENCED_PARAMETER(lParam);
+	switch (message)
+	{
+	case WM_INITDIALOG:
+		hIpInputBox = GetDlgItem(hDlg, IDC_IP_INPUT);
+		return (INT_PTR)TRUE;
+
+	case WM_COMMAND:
+		switch (LOWORD(wParam))
+		{
+		case IDC_CONNECT:
+		{
+			WCHAR buffer[64];
+			GetWindowText(hIpInputBox, buffer, 64);
+			mysocket.Enter(g_hWnd, WCharToChar(buffer));
+			EndDialog(hDlg, LOWORD(wParam));
+			return (INT_PTR)TRUE;
+		}
+
+		case IDCANCEL:
+			EndDialog(hDlg, LOWORD(wParam));
+			return (INT_PTR)TRUE;
+
+		default:
+			break;
+		}
+	}
+	return (INT_PTR)FALSE;
+}
+
+void SendTextEdit(HWND hEdit, LPCWSTR pText) {
+
+	if (GetWindowTextLength(hEdit) > 100)
+	{
+		WCHAR buffer[50];
+		GetWindowText(hEdit, buffer, 30);
+		SendMessage(hEdit, EM_SETSEL, 0, (LPARAM)(wcschr(buffer, _T('\n')) - buffer + 1));
+		SendMessage(hEdit, EM_REPLACESEL, 0, (LPARAM)_T(""));
+		// todo
+	}
+	wstring newText = pText;
+	newText.append(_T("\r\n"));
+	SendMessage(hEdit, EM_SETSEL, 0, -1);
+	SendMessage(hEdit, EM_SETSEL, -1, -1);
+	SendMessage(hEdit, EM_REPLACESEL, 0, (LPARAM)newText.c_str()); // append!
+
 }

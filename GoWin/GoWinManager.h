@@ -18,11 +18,14 @@ class GoWinManager
 	HWND hChatInputBox, hChatBox;
 	HWND hWCS, hBCS;
 	HFONT hFont;
+	POINT         mouse;
+	BoardGraphic    boardInfo({ 0, 0 }, 806, 806, SPACE_SIZE, 6);
+	MySocket        mysocket;
 
 	bool printSequenceSwitch;
 public:
 
-	HRESULT Init();
+	HRESULT Init(HINSTANCE hInstance, HWND hWnd);
 
 	Go& GetGame();
 	bool GetPrintSequenceSwitch();

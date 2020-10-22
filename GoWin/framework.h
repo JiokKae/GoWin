@@ -25,3 +25,4 @@
 // C 런타임 헤더 파일입니다.
 
 extern HWND g_hWnd;
+extern HINSTANCE g_hInstance;
