@@ -1,5 +1,5 @@
 #pragma once
-#include "stdgo.h"
+#include "framework.h"
 
 class BoardGraphic {
 	Coord2d m_left_top_point;

@@ -3,26 +3,49 @@
 //
 #pragma once
 
+// // SDKDDKVer.h를 포함하면 최고 수준의 가용성을 가진 Windows 플랫폼이 정의됩니다.
+// 이전 Windows 플랫폼용 애플리케이션을 빌드하려는 경우에는 SDKDDKVer.h를 포함하기 전에
+// WinSDKVer.h를 포함하고 _WIN32_WINNT를 지원하려는 플랫폼으로 설정합니다.
+#include <SDKDDKVer.h>
 #include <stdlib.h>
 #include <malloc.h>
 #include <memory.h>
 #include <tchar.h>
+#include <iostream>
+using namespace std;
 
-#include "targetver.h"
 #include "MySocket.h"
-#include "Go.h"
 #include "MyString.h"
 #include "Mywmkey.h"
-#include "GiboNGF.h"
 #include "GiboSGF.h"
-#include "BoardGraphic.h"
 #include "HDCManager.h"
 #include "GoWinManager.h"
 
-//#define WIN32_LEAN_AND_MEAN             // 거의 사용되지 않는 내용을 Windows 헤더에서 제외합니다.
-// Windows 헤더 파일
-//#include <windows.h>
-// C 런타임 헤더 파일입니다.
+typedef POINT Coord2d;
+
+enum class Color {
+	Null,
+	Black,
+	White,
+	Wall,
+	Temp,
+};
 
 extern HWND g_hWnd;
 extern HINSTANCE g_hInstance;
+
+const wchar_t* errorMSG_wchar[5] = {
+	_T(""),
+	_T("바둑판 안에 착수해주세요"),
+	_T("이미 바둑 돌이 있습니다"),
+	_T("착수 금지점입니다"),
+	_T("패 입니다"),
+};
+
+inline wstring int2str_ngf(int index)
+{
+	wchar_t first = ++index / 26 + 65;
+	wchar_t second = index % 26 + 65;
+
+	return wstring({ first,second });
+}

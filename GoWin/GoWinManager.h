@@ -9,9 +9,12 @@ enum EBitmapName
 	Board,
 };
 
+class Go;
+class Stone;
+class BoardGraphic;
 class GoWinManager
 {
-	Go game;
+	Go* game;
 	HDCManager bitmaps;
 	HDC hdc, hdcMem;
 	HBITMAP hbmMem, hbmMemOld;
@@ -19,7 +22,7 @@ class GoWinManager
 	HWND hWCS, hBCS;
 	HFONT hFont;
 	POINT         mouse;
-	BoardGraphic    boardInfo({ 0, 0 }, 806, 806, SPACE_SIZE, 6);
+	BoardGraphic*    boardInfo; // ({ 0, 0 }, 806, 806, SPACE_SIZE, 6);
 	MySocket        mysocket;
 
 	bool printSequenceSwitch;

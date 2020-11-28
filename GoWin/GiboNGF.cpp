@@ -1,7 +1,7 @@
 #include "GIboNGF.h"
 #include "Mystring.h"
 
-Coord2d GiboNGF::getPlacement(int sequence)
+Coord2d GiboNGF::get_placement(int sequence)
 {
 	Coord2d placement;
 	wstring placement_str;

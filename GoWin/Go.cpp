@@ -1,9 +1,6 @@
 #include "Go.h"
-//#include <tchar.h>
-
+#include "Player.h"
 using namespace std;
-
-
 
 // ¹«¸£±â
 bool Go::Backsies() {
@@ -227,4 +224,37 @@ bool Go::Save(LPWSTR address, wstring extension) {
 
 Stone Go::Read(Coord2d coord_read) {
 	return m_board.getStone(coord_read.x, coord_read.y);
+}
+
+void GoInformation::add_captured_stone(Color color, int captured_stone)
+{
+	if (color == Color::Black)
+		m_black_player->add_captured_stone(captured_stone);
+	else if (color == Color::White)
+		m_white_player->add_captured_stone(captured_stone);
+}
+
+LRESULT GoInformation::init()
+{
+	if (m_white_player == nullptr)
+		m_white_player = new Player();
+	m_white_player->init();
+
+	if (m_white_player == nullptr)
+		m_black_player = new Player();
+	m_black_player->init();
+
+	clear_placement();
+	m_sequence = 1;
+
+	return S_OK;
+}
+
+void GoInformation::release()
+{
+	m_white_player->release();
+	delete m_white_player;
+
+	m_black_player->release();
+	delete m_black_player;
 }

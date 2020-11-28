@@ -6,15 +6,6 @@
 
 #define MAX_LOADSTRING 100
 
-
-const wchar_t* errorMSG_wchar[5] = {
-	_T(""),
-	_T("바둑판 안에 착수해주세요"),
-	_T("이미 바둑 돌이 있습니다"),
-	_T("착수 금지점입니다"),
-	_T("패 입니다"),
-};
-
 // 전역 변수:
 HINSTANCE g_hInstance;                                // 현재 인스턴스입니다.
 WCHAR szTitle[MAX_LOADSTRING];                  // 제목 표시줄 텍스트입니다.

@@ -1,6 +1,6 @@
 #pragma once
+#include "framework.h"
 #include <iostream>
-#include "stdgo.h"
 using namespace std;
 
 class Node;
@@ -22,14 +22,14 @@ public:
 	void clear();
 };
 
+class PlacementInfo;
 class Node {
-	PlacementInfo m_data;
+	PlacementInfo* m_data;
 	Node* m_link;
 	NodeLinkManager m_child;
 public:
-	Node(PlacementInfo data) { m_data = data; m_link = nullptr; }
+	Node(PlacementInfo* data) : m_link(nullptr) { this->m_data = data; }
 	~Node() { 
-		m_data = { 0, Color::Null, {0,0} }; 
 		if (m_link != nullptr)
 		{
 			m_link->~Node();
@@ -37,17 +37,18 @@ public:
 		}
 		m_child.~NodeLinkManager();
 	}
+	LRESULT init();
+	void release();
 
-	PlacementInfo data() { return m_data; }
-	Node* link() { return m_link; }
-	Node* next() { return m_child.head(); }
-	NodeLinkManager& child() { return m_child; }
+	PlacementInfo* data()		{ return m_data; }
+	Node* link()				{ return m_link; }
+	Node* next()				{ return m_child.head(); }
+	NodeLinkManager& child()	{ return m_child; }
 
-	void set_data(PlacementInfo data) { m_data = data; }
-	void set_link(Node* link) { m_link = link; }
-	void print() {
-		print_data(m_data);
-	}
+	void set_data(PlacementInfo* data)	{ this->m_data = data; }
+	void set_link(Node* link)			{ this->m_link = link; }
+
+	void print(); 
 };
 
 inline void NodeLinkManager::insert_node(Node* node)
@@ -81,18 +82,7 @@ inline void  NodeLinkManager::pick(int index)
 	}
 }
 
-inline void  NodeLinkManager::print()
-{
-	Node* np = m_head;
 
-	while (np != nullptr)
-	{
-		print_data(np->data());
-		cout << "-->";
-		np = np->link();
-	}
-	cout << endl;
-}
 
 inline void NodeLinkManager::clear()
 {

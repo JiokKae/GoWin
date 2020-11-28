@@ -1,9 +1,7 @@
 #pragma once
 #include <vector>
 #include "BoardManager.h"
-#include "stdgo.h"
 #include "mydatastructure.h"
-#include "GiboNGF.h"
 #include <windows.h>
 
 #define ERR_NOTBOARDIN		1
@@ -11,9 +9,10 @@
 #define ERR_ILLEGALPOINT	3 
 #define ERR_KO				4
 
+class Player;
 class GoInformation {
-	Player m_white_player;
-	Player m_black_player;
+	Player* m_white_player;
+	Player* m_black_player;
 	LinkedList m_placement;
 	wstring m_game_type;		// 레이팅, 친선
 	int m_board_size;		// 바둑판 크기(9, 13, 19 ...)
@@ -27,7 +26,7 @@ class GoInformation {
 	int m_sequence;			// 수
 
 public:
-	GoInformation() { 
+	GoInformation() : m_white_player(nullptr), m_black_player(nullptr) {
 		m_game_type = _T("친선대국"); 
 		m_board_size = 19;
 		m_compensation = 6;
@@ -37,8 +36,8 @@ public:
 	}
 
 	// getter
-	Player white_player()	{ return m_white_player; }
-	Player black_player()	{ return m_black_player; }
+	Player* white_player()	{ return m_white_player; }
+	Player* black_player()	{ return m_black_player; }
 	wstring game_type()		{ return m_game_type; }
 	int board_size()		{ return m_board_size; }
 	wstring link()			{ return m_link; }
@@ -53,8 +52,8 @@ public:
 	LinkedList placement()	{ return m_placement; }
 
 	// setter
-	void set_white_player(Player white_player)	{ m_white_player = white_player; }
-	void set_black_player(Player black_player)	{ m_black_player = black_player; }
+	void set_white_player(Player* white_player)	{ m_white_player = white_player; }
+	void set_black_player(Player* black_player)	{ m_black_player = black_player; }
 	void set_game_type(wstring game_type)		{ m_game_type = game_type; }
 	void set_board_size(int board_size)			{ m_board_size = board_size; }
 	void set_link(wstring link)					{ m_link = link; }
@@ -67,22 +66,13 @@ public:
 	void set_sequence(int sequence)				{ m_sequence = sequence; }
 
 	void add_sequence(int num)					{ m_sequence += num; }
-	void add_captured_stone(Color color, int captured_stone) {
-		if (color == Color::Black)
-			m_black_player.add_captured_stone(captured_stone);
-		else if (color == Color::White)
-			m_white_player.add_captured_stone(captured_stone);
-	}
+	void add_captured_stone(Color color, int captured_stone);
 
-	void Init()	{
-		m_white_player.set_captured_stone(0);
-		m_black_player.set_captured_stone(0);
-		clear_placement();
-		m_sequence = 1;
-	}
+	LRESULT init();
+	void release();
 
 	// function
-	void add_placement(PlacementInfo placement) { m_placement.push_back(new Node(placement)); }
+	void add_placement(Node* placement_info) { m_placement.push_back(placement_info); }
 	void delete_placement() { m_placement.delete_back(); }
 	void clear_placement() {
 		while (m_placement.size() != 0)
@@ -112,7 +102,7 @@ public:
 	GoInformation info()	{ return m_info; }		// 정보 
 	string mode()			{ return m_mode; }		// 모드 반환
 	Stone Read(Coord2d coord_read);				// 읽기
-	PlacementInfo getLastPlacementInfo() { return m_info.placement().getLastNode().data(); }
+	PlacementInfo* getLastPlacementInfo() { return m_info.placement().getLastNode().data(); }
 
 	// function
 	bool Backsies();				// 무르기

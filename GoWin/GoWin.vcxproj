@@ -162,10 +162,10 @@
     <ClInclude Include="MySocket.h" />
     <ClInclude Include="MyString.h" />
     <ClInclude Include="Mywmkey.h" />
+    <ClInclude Include="PlacementInfo.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="stdgo.h" />
     <ClInclude Include="Stone.h" />
-    <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BoardGraphic.cpp" />
@@ -176,9 +176,11 @@
     <ClCompile Include="GoWinManager.cpp" />
     <ClCompile Include="HDCManager.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="mydatastructure.cpp" />
     <ClCompile Include="MySocket.cpp" />
     <ClCompile Include="MyString.cpp" />
-    <ClCompile Include="stdgo.cpp" />
+    <ClCompile Include="PlacementInfo.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="Stone.cpp" />
   </ItemGroup>
   <ItemGroup>

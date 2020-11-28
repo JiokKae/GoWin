@@ -3,14 +3,6 @@
 #include <string>
 using namespace std;
 
-enum class Color {
-	Null, 
-	Black,
-	White,
-	Wall,
-	Temp,
-};
-
 class Stone {
 	int m_x;
 	int m_y;
@@ -48,5 +40,5 @@ public:
 		else
 			return color;
 	}
-	static char Color2Char(Color color) { return (color == Color::White) ? 'W' : 'B'; }
+	static char color2char(Color color) { return (color == Color::White) ? 'W' : 'B'; }
 };
