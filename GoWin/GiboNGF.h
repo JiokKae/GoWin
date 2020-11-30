@@ -20,8 +20,8 @@ class GiboNGF {
 	wstring* m_placement;	// Âø¼ö ³»¿ª
 
 public:
-	GiboNGF(wchar_t* address) { loadGibo(address); };
-	~GiboNGF() { delete[] m_placement; };
+	HRESULT init(LPTSTR address);
+	void release();
 
 	wstring battle_type()	{ return m_battle_type; }
 	int board_size()		{ return m_board_size; }
@@ -44,7 +44,9 @@ public:
 	bool set_compensation(wstring compensation);
 	bool set_sequence(wstring sequence);
 
-	bool loadGibo(wchar_t* address);
+	bool loadGibo(LPTSTR address);
 	//bool SaveGibo(char* address);
 
+	GiboNGF() {}
+	~GiboNGF() {}
 };

@@ -2,8 +2,14 @@
 
 HRESULT Stone::init()
 {
+	m_sequence = 0;
+	m_color = Color::Null;
+	m_backStone = nullptr;
+	m_nextStone = nullptr;
+	m_killer = false;
+
 	image[int(Color::White)] = ImageManager::GetSingleton()->FindImage("WhiteStone");
-	image[int(Color::Black)] = ImageManager::GetSingleton()->FindImage("WhiteStone");
+	image[int(Color::Black)] = ImageManager::GetSingleton()->FindImage("BlackStone");
 
 	return S_OK;
 }

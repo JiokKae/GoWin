@@ -14,9 +14,12 @@ HRESULT BoardManager::init()
 		{
 			if (x == 0 || x == 20 || y == 0 || y == 20)
 				board[x][y] = new Stone("Wall");
-			else
+			else 
+			{
 				board[x][y] = new Stone();
-			board[x][y]->init();
+				board[x][y]->init();
+			}
+				
 		}
 	}
 
@@ -80,22 +83,23 @@ int BoardManager::setBoard(int x, int y, int sequence) {
 
 	for (int i = 0; i < 4; i++)
 	{
-		if (color == getStoneColor(getAstone(x, y, i)))
+		if (color == getAstone(x, y, i)->color())
 		{
 			cout << i << " " << direction_char[i] << " : 일치" << endl;
-			linkGS(board[x][y], getAstone(x, y, i)->getRef());
+			linkGS(board[x][y], getAstone(x, y, i));
 		}
-		else if (color == Stone::Reverse(getStoneColor(getAstone(x, y, i))))
+		else if (color == Stone::Reverse(getAstone(x, y, i)->color()))
 		{
 			cout << i << " " << direction_char[i] << " : 불일치" << endl;
-			if (isDeadGS(getAstone(x, y, i)->getRef()))
+
+			if (isDeadGS(getAstone(x, y, i)))
 			{
-				ret = captureGS(getAstone(x, y, i)->getRef());
+				ret = captureGS(getAstone(x, y, i));
 				board[x][y]->set_killer(true);
 				cout << i << " " << direction_char[i] << " : 삭제" << endl;
 			}
 		}
-		else if (getStoneColor(getAstone(x, y, i)) == Color::Wall)
+		else if (getAstone(x, y, i)->color() == Color::Wall)
 			cout << i << " " << direction_char[i] << " : 장외" << endl;
 		else
 			cout << i << " " << direction_char[i] << " : 비었음" << endl;
@@ -107,13 +111,12 @@ int BoardManager::setBoard(int x, int y, int sequence) {
 void BoardManager::setBoardtmp(int x, int y, int sequence) {
 	if (isEmpty(board[x][y]))
 		board[x][y]->place_temp(x, y, sequence, true);
+	else
+		board[x][y]->init();
 }
 
 Color BoardManager::getStoneColor(int x, int y) {
 	return board[x][y]->color();
-}
-Color BoardManager::getStoneColor(Stone* s) {
-	return s->color();
 }
 
 Stone* BoardManager::getStone(int x, int y) {
@@ -185,7 +188,7 @@ int BoardManager::captureGS(Stone* capturedStone) {
 	pStoneTemp = pStone->nextStone();
 	while (pStone != nullptr) 
 	{
-		*pStone = Stone();
+		pStone->init();
 		count++;
 		pStone = pStoneTemp;
 		if (pStoneTemp != nullptr)
@@ -236,7 +239,7 @@ bool BoardManager::isDeadGS(Stone* s1) {
 	sptmp = sp->nextStone();
 	while (sp != nullptr) {
 		for (int i = 0; i < 4; i++) {
-			if ( getStoneColor( getAstone(sp, i) ) == Color::Null )
+			if ( getAstone(sp, i)->color() == Color::Null )
 				return false;
 		}
 		sp = sptmp;

@@ -22,7 +22,6 @@ HRESULT GoWinManager::init(HINSTANCE hInstance, HWND hWnd)
 		boardInfo = new BoardGraphic();
 	boardInfo->init({ 0, 0 }, 806, 806, SPACE_SIZE, 6);
 
-
 	// 콘솔창 열기
 	AllocConsole();
 	FILE* fp;
@@ -79,6 +78,48 @@ void GoWinManager::release()
 	ImageManager::GetSingleton()->Release();
 }
 
+void GoWinManager::render(HDC hdc)
+{
+	board->Render(hdc);
+
+	SetTextAlign(hdc, TA_CENTER);
+	SetBkMode(hdc, TRANSPARENT);
+	for (int x = 1; x < 20; x++)
+	{
+		for (int y = 1; y < 20; y++)
+		{
+			Stone* stone = m_game->Read({ x, y });
+
+			stone->render(hdc);
+			int sqc = stone->sequence();
+			if (sqc != 0 && printSequenceSwitch == true)
+			{
+				TextOut(hdc, SPACE_SIZE * (x - 1) + 25, SPACE_SIZE * (y - 1) + 18, std::to_wstring(sqc).c_str(), (int)std::to_wstring(sqc).length());
+			}
+		}
+	}
+
+	if (boardInfo->IsMouseInBoard(mouse))
+	{
+		Coord2d board_point = boardInfo->MouseToBoard(mouse.x, mouse.y);
+		if (m_game->Read(board_point)->color() == Color::Null)
+		{
+			BLENDFUNCTION bf;
+			bf.AlphaFormat = AC_SRC_ALPHA;
+			bf.BlendFlags = 0;
+			bf.BlendOp = 0;
+			bf.SourceConstantAlpha = 180;
+
+			if (Stone::Sqnce2color(m_game->info()->sequence()) == Color::Black)
+				ImageManager::GetSingleton()->FindImage("BlackStone")->Render(hdc, SPACE_SIZE * (board_point.x - 1) + 6, SPACE_SIZE * (board_point.y - 1) + 6);
+			//GdiAlphaBlend(hdc, SPACE_SIZE * (board_point.x - 1) + 6, SPACE_SIZE * (board_point.y - 1) + 6, 39, 39, (*bitmaps)[BlackStone], 0, 0, 39, 39, bf);
+			else
+				ImageManager::GetSingleton()->FindImage("WhiteStone")->Render(hdc, SPACE_SIZE * (board_point.x - 1) + 6, SPACE_SIZE * (board_point.y - 1) + 6);
+			//GdiAlphaBlend(hdc, SPACE_SIZE * (board_point.x - 1) + 6, SPACE_SIZE * (board_point.y - 1) + 6, 39, 39, (*bitmaps)[WhiteStone], 0, 0, 39, 39, bf);
+		}
+	}
+}
+
 bool GoWinManager::GetPrintSequenceSwitch()
 {
 	return printSequenceSwitch;
@@ -109,9 +150,13 @@ void GoWinManager::FileOpen()
 		extension = extension.substr(extension.length() - 3, 3);
 		if (extension == _T("NGF") || extension == _T("ngf")) //확장자 NGF
 		{
-			GiboNGF gibo(lpstrFile);
+			GiboNGF* gibo = new GiboNGF();
+			gibo->init(lpstrFile);
+
 			m_game->Load(gibo);
 
+			gibo->release();
+			delete gibo;
 			InvalidateRect(g_hWnd, NULL, FALSE);
 		}
 		else
@@ -136,48 +181,6 @@ void GoWinManager::FileSave()
 		wstring extension = lpstrFile;		//확장자 추출하기
 		extension = extension.substr(extension.length() - 3, 3);
 		m_game->Save(lpstrFile, extension);
-	}
-}
-
-void GoWinManager::DrawBoard(HDC hdc)
-{
-	board->Render(hdc);
-
-	SetTextAlign(hdc, TA_CENTER);
-	SetBkMode(hdc, TRANSPARENT);
-	for (int x = 1; x < 20; x++)
-	{
-		for (int y = 1; y < 20; y++)
-		{
-			Stone* stone = m_game->Read({ x, y });
-
-			stone->render(hdc);
-			int sqc = stone->sequence();
-			if (sqc != 0 && printSequenceSwitch == true)
-			{
-				TextOut(hdc, SPACE_SIZE * (x - 1) + 25, SPACE_SIZE * (y - 1) + 18, std::to_wstring(sqc).c_str(), (int)std::to_wstring(sqc).length());
-			}
-		}
-	}
-
-	if (boardInfo->IsMouseInBoard(mouse))
-	{
-		Coord2d board_point = boardInfo->MouseToBoard(mouse.x, mouse.y);;
-		if (m_game->Read(board_point)->color() == Color::Null)
-		{
-			BLENDFUNCTION bf;
-			bf.AlphaFormat = AC_SRC_ALPHA;
-			bf.BlendFlags = 0;
-			bf.BlendOp = 0;
-			bf.SourceConstantAlpha = 180;
-
-			if (Stone::Sqnce2color(m_game->info()->sequence()) == Color::Black)
-				ImageManager::GetSingleton()->FindImage("BlackStone")->Render(hdc, SPACE_SIZE * (board_point.x - 1), SPACE_SIZE * (board_point.y - 1) + 6);
-				//GdiAlphaBlend(hdc, SPACE_SIZE * (board_point.x - 1) + 6, SPACE_SIZE * (board_point.y - 1) + 6, 39, 39, (*bitmaps)[BlackStone], 0, 0, 39, 39, bf);
-			else
-				ImageManager::GetSingleton()->FindImage("WhiteStone")->Render(hdc, SPACE_SIZE * (board_point.x - 1), SPACE_SIZE * (board_point.y - 1) + 6);
-				//GdiAlphaBlend(hdc, SPACE_SIZE * (board_point.x - 1) + 6, SPACE_SIZE * (board_point.y - 1) + 6, 39, 39, (*bitmaps)[WhiteStone], 0, 0, 39, 39, bf);
-		}
 	}
 }
 
@@ -304,7 +307,7 @@ LRESULT GoWinManager::MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM l
 			break;
 
 		case IDA_INIT:	//초기화 버튼
-			if (m_game->init())
+			if (SUCCEEDED(m_game->init()))
 			{
 				if (mysocket.Status() != SocketStatus::notConnected)
 				{
@@ -479,9 +482,8 @@ LRESULT GoWinManager::MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM l
 		hbmMemOld = (HBITMAP)SelectObject(hdcMem, hbmMem);//4
 
 		background->Render(hdcMem);
-		//BitBlt(hdcMem, 0, 0, 1200, 820, (*bitmaps)[EBitmapName::BackGround], 0, 0, SRCCOPY);
 
-		DrawBoard(hdcMem);
+		render(hdcMem);
 
 		BitBlt(hdc, 0, 0, 1200, 820, hdcMem, 0, 0, SRCCOPY);
 

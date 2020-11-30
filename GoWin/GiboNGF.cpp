@@ -3,6 +3,29 @@
 #include "Mystring.h"
 #include <fstream>
 
+HRESULT GiboNGF::init(LPTSTR address)
+{
+	if (m_white == nullptr)
+		m_white = new Player();
+	m_white->init();
+
+	if (m_black == nullptr)
+		m_black = new Player();
+	m_black->init();
+
+	loadGibo(address);
+
+	return S_OK;
+}
+
+void GiboNGF::release()
+{
+	SAFE_RELEASE(m_white);
+	SAFE_RELEASE(m_black);
+
+	delete[] m_placement;
+}
+
 Coord2d GiboNGF::get_placement(int sequence)
 {
 	Coord2d placement;
@@ -50,7 +73,7 @@ bool GiboNGF::set_sequence(wstring sequence) {
 	return true;
 }
 
-bool GiboNGF::loadGibo(wchar_t* address) {
+bool GiboNGF::loadGibo(LPTSTR address) {
 	wifstream gibofile(address);
 	if (!gibofile)
 		return false;
@@ -95,7 +118,6 @@ bool GiboNGF::loadGibo(wchar_t* address) {
 		wcout << m_placement[i] << endl;
 	}
 		
-
 	gibofile.close();
 
 	return true;

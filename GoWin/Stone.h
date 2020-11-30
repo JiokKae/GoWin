@@ -24,7 +24,6 @@ public:
 
 	int x() const { return m_x; }
 	int y() const { return m_y; }
-	Stone* getRef() { return this; }
 	Color color() const { return m_color; }
 	int sequence() const { return m_sequence; }
 	
@@ -36,8 +35,6 @@ public:
 	Stone* nextStone() { return m_nextStone; }
 	void set_killer(bool killer) { m_killer = killer; }
 	bool is_killer() { return m_killer; }
-
-
 
 	static Color Sqnce2color(int sequence)	{ return (sequence % 2) ? Color::Black : Color::White; }
 	static Color Reverse(Color color) { 

@@ -33,9 +33,6 @@
     <ClInclude Include="BoardGraphic.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="BoardManager.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="GiboNGF.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -81,12 +78,12 @@
     <ClInclude Include="Stone.h">
       <Filter>Stone</Filter>
     </ClInclude>
+    <ClInclude Include="BoardManager.h">
+      <Filter>Manager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BoardGraphic.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="BoardManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="GiboNGF.cpp">
@@ -127,6 +124,9 @@
     </ClCompile>
     <ClCompile Include="Stone.cpp">
       <Filter>Stone</Filter>
+    </ClCompile>
+    <ClCompile Include="BoardManager.cpp">
+      <Filter>Manager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

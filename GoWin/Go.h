@@ -111,7 +111,7 @@ public:
 	bool Pass();					// 한수쉼
 	int Placement(Coord2d board);	// 착수
 
-	bool Load(GiboNGF& gibo);		// 불러오기
+	bool Load(GiboNGF* gibo);		// 불러오기
 	bool Save(LPWSTR address, wstring extension);	// 저장하기
 
 };

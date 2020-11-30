@@ -67,7 +67,7 @@ int Go::Placement(Coord2d coord_placement) {
 		m_board->setBoardtmp(x, y, sequence);
 		for (i = 0; i < 4; i++)
 		{
-			if (m_board->isDeadGS(m_board->getAstone(x, y, i)->getRef()) == true && color != m_board->getAstone(x, y, i)->color())
+			if (m_board->isDeadGS(m_board->getAstone(x, y, i)) == true && color != m_board->getAstone(x, y, i)->color())
 				break;
 			if (i == 3)
 			{
@@ -106,27 +106,27 @@ int Go::Placement(Coord2d coord_placement) {
 	return 0;
 }
 
-bool Go::Load(GiboNGF& gibo)
+bool Go::Load(GiboNGF* gibo)
 {
 	Player m_white_player;
 	Player m_black_player;
 	LinkedList m_placement;
-	m_info->set_game_type(gibo.battle_type());
-	m_info->set_board_size(gibo.board_size());
-	m_info->set_link(gibo.link());
-	m_info->set_go_type(gibo.go_type());
-	m_info->set_gongje(gibo.gongje());
-	m_info->set_compensation(gibo.compensation());
-	m_info->set_date(gibo.date());
-	m_info->set_base_time(gibo.base_time());
-	m_info->set_game_result(gibo.game_result());
+	m_info->set_game_type(gibo->battle_type());
+	m_info->set_board_size(gibo->board_size());
+	m_info->set_link(gibo->link());
+	m_info->set_go_type(gibo->go_type());
+	m_info->set_gongje(gibo->gongje());
+	m_info->set_compensation(gibo->compensation());
+	m_info->set_date(gibo->date());
+	m_info->set_base_time(gibo->base_time());
+	m_info->set_game_result(gibo->game_result());
 
 	init();
 	Handicap(m_info->go_type());
-	for (int i = 0; i < gibo.sequence(); i++)
+	for (int i = 0; i < gibo->sequence(); i++)
 	{
 		cout << i << endl;
-		int errorMSG = Placement(gibo.get_placement(i));
+		int errorMSG = Placement(gibo->get_placement(i));
 		if (0 != errorMSG)
 		{
 			init();

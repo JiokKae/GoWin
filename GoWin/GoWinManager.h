@@ -27,6 +27,7 @@ class GoWinManager
 public:
 	HRESULT init(HINSTANCE hInstance, HWND hWnd);
 	void release();
+	void render(HDC hdc);
 
 	Go* game() { return m_game; }
 	bool GetPrintSequenceSwitch();
@@ -35,8 +36,6 @@ public:
 
 	void FileOpen();
 	void FileSave();
-
-	void DrawBoard(HDC hdc);
 	
 	LRESULT MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 	
