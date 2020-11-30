@@ -1,6 +1,6 @@
 #include "Player.h"
 
-LRESULT Player::init()
+HRESULT Player::init()
 {
 	m_captured_stone = 0;
 

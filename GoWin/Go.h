@@ -1,8 +1,6 @@
 #pragma once
+#include "framework.h"
 #include <vector>
-#include "BoardManager.h"
-#include "mydatastructure.h"
-#include <windows.h>
 
 #define ERR_NOTBOARDIN		1
 #define ERR_NOTEMPTY		2
@@ -72,7 +70,7 @@ public:
 	void release();
 
 	// function
-	void add_placement(Node* placement_info) { m_placement.push_back(placement_info); }
+	void add_placement(PlacementInfo* placement_info) { m_placement.push_back(new Node(placement_info)); }
 	void delete_placement() { m_placement.delete_back(); }
 	void clear_placement() {
 		while (m_placement.size() != 0)
@@ -83,31 +81,33 @@ public:
 	}
 };
 
+class Stone;
+class GiboNGF;
+class BoardManager;
 class Go {
-	vector<BoardManager> boardLog;
-	vector<BoardManager> giboLog;
-	BoardManager m_board;			// 보드
-	GoInformation m_info;			// 정보
+	vector<BoardManager*> boardLog;
+	vector<BoardManager*> giboLog;
+	BoardManager* m_board;			// 보드
+	GoInformation* m_info;			// 정보
 	string m_mode;					// 모드 : Single, Gibo
 
 public:
-	Go() { 
-		m_info.set_sequence(1);
-		m_board.init();
-		m_mode = "Single";
-	}
+	Go();
 	~Go() {}
 
+	HRESULT init();
+	void release();
+
 	// getter
-	GoInformation info()	{ return m_info; }		// 정보 
+	GoInformation* info()	{ return m_info; }		// 정보 
 	string mode()			{ return m_mode; }		// 모드 반환
-	Stone Read(Coord2d coord_read);				// 읽기
-	PlacementInfo* getLastPlacementInfo() { return m_info.placement().getLastNode().data(); }
+	Stone* Read(Coord2d coord_read);				// 읽기
+	PlacementInfo* getLastPlacementInfo() { return m_info->placement().getLastNode().data(); }
 
 	// function
 	bool Backsies();				// 무르기
 	bool Handicap(int num);			// 핸디캡 적용
-	bool Init();					// 초기화
+	
 	bool Pass();					// 한수쉼
 	int Placement(Coord2d board);	// 착수
 

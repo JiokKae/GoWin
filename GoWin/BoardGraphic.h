@@ -7,15 +7,10 @@ class BoardGraphic {
 	int m_height;
 	int m_space_size;
 	int m_border_size;
+
 public:
-	BoardGraphic(Coord2d left_top_point, int width, int height, int space_size, int border_size)
-	{
-		m_left_top_point = left_top_point;
-		m_width = width;
-		m_height = height; 
-		m_space_size = space_size;
-		m_border_size = border_size;
-	}
+	HRESULT init(Coord2d left_top_point, int width, int height, int space_size, int border_size);
+	void release();
 
 	// ¼³Á¤ÀÚ
 	void SetWidth(int width)						{ m_width = width; }
@@ -45,4 +40,6 @@ public:
 
 		return board;
 	}
+
+	BoardGraphic() {}
 };

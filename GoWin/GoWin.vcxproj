@@ -154,9 +154,9 @@
     <ClInclude Include="GiboNGF.h" />
     <ClInclude Include="GiboSGF.h" />
     <ClInclude Include="Go.h" />
-    <ClInclude Include="GoWin.h" />
     <ClInclude Include="GoWinManager.h" />
-    <ClInclude Include="HDCManager.h" />
+    <ClInclude Include="Image.h" />
+    <ClInclude Include="ImageManager.h" />
     <ClInclude Include="LinkedListStack.h" />
     <ClInclude Include="mydatastructure.h" />
     <ClInclude Include="MySocket.h" />
@@ -165,6 +165,7 @@
     <ClInclude Include="PlacementInfo.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="Singleton.h" />
     <ClInclude Include="Stone.h" />
   </ItemGroup>
   <ItemGroup>
@@ -174,7 +175,8 @@
     <ClCompile Include="Go.cpp" />
     <ClCompile Include="GoWin.cpp" />
     <ClCompile Include="GoWinManager.cpp" />
-    <ClCompile Include="HDCManager.cpp" />
+    <ClCompile Include="Image.cpp" />
+    <ClCompile Include="ImageManager.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="mydatastructure.cpp" />
     <ClCompile Include="MySocket.cpp" />

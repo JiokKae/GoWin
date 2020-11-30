@@ -4,17 +4,17 @@
 void PlacementInfo::print()
 {
 	cout << "[Âø¼ö Á¤º¸]-----" << endl;
-	cout << "¼ö : " << sequence << endl;
+	cout << "¼ö : " << m_sequence << endl;
 	cout << "ÇÃ·¹ÀÌ¾î : " << Stone::color2char(m_player) << endl;
-	cout << "ÁÂÇ¥ : (" << placment.x << ", " << placment.y << ")" << endl;
+	cout << "ÁÂÇ¥ : (" << m_coord.x << ", " << m_coord.y << ")" << endl;
 	cout << "----------------" << endl;
 }
 
 wstring PlacementInfo::to_wstr_sgf()
 {
 	wchar_t player = Stone::color2char(m_player);
-	wchar_t x = (placment.x + 19) % 20 + 97;
-	wchar_t y = (placment.y + 19) % 20 + 97;
+	wchar_t x = (m_coord.x + 19) % 20 + 97;
+	wchar_t y = (m_coord.y + 19) % 20 + 97;
 
 	return wstring({ ';', player, '[', x, y, ']' });
 }
@@ -22,8 +22,8 @@ wstring PlacementInfo::to_wstr_sgf()
 wstring PlacementInfo::to_wstr_ngf()
 {
 	wchar_t player = Stone::color2char(m_player);
-	wchar_t x = placment.x + 65;
-	wchar_t y = placment.y + 65;
+	wchar_t x = m_coord.x + 65;
+	wchar_t y = m_coord.y + 65;
 
 	return wstring({ player, x, y, y, x });
 }

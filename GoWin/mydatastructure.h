@@ -1,6 +1,5 @@
 #pragma once
 #include "framework.h"
-#include <iostream>
 using namespace std;
 
 class Node;

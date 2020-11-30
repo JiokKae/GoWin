@@ -1,32 +1,41 @@
 #include "GoWinManager.h"
-#include "resource.h"
+#include "PlacementInfo.h"
+#include "BoardGraphic.h"
+#include "GiboNGF.h"
+#include "Player.h"
+#include "Stone.h"
+#include "Go.h"
 
-#define SPACE_SIZE 42
-
-
-INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    Netbox(HWND, UINT, WPARAM, LPARAM);
+INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 void SendTextEdit(HWND edit, LPCWSTR pText);
 
-HRESULT GoWinManager::Init(HINSTANCE hInstance, HWND hWnd)
+HRESULT GoWinManager::init(HINSTANCE hInstance, HWND hWnd)
 {
-	bitmaps = HDCManager(5);
+	ImageManager::GetSingleton()->Init();
+
+	if (m_game == nullptr) 
+		m_game = new Go();
+	m_game->init();
+
+	if(boardInfo == nullptr)
+		boardInfo = new BoardGraphic();
+	boardInfo->init({ 0, 0 }, 806, 806, SPACE_SIZE, 6);
+
+
 	// 콘솔창 열기
 	AllocConsole();
 	FILE* fp;
 	_wfreopen_s(&fp, _T("CONOUT$"), _T("wt"), stdout);
 	//
 
-	HBITMAP bitBlackStone, bitWhiteStone, bitBackGround, bitBoard;
-	bitBlackStone = LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_BLACKSTONE));
-	bitWhiteStone = LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_WHITESTONE));
-	bitBackGround = LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_BACKGROUND));
-	bitBoard = LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_BOARD));
+	ImageManager::GetSingleton()->AddImage("BlackStone", IDB_BLACKSTONE, 39, 39);
+	ImageManager::GetSingleton()->AddImage("WhiteStone", IDB_WHITESTONE, 39, 39);
+	ImageManager::GetSingleton()->AddImage("BackGround", IDB_BACKGROUND, 1200, 820);
+	ImageManager::GetSingleton()->AddImage("Board", IDB_BOARD, 806, 806);
 
-	bitmaps.AddBitmap(hdc, hWnd, EBitmapName::BlackStone, bitBlackStone);
-	bitmaps.AddBitmap(hdc, hWnd, EBitmapName::WhiteStone, bitWhiteStone);
-	bitmaps.AddBitmap(hdc, hWnd, EBitmapName::BackGround, bitBackGround);
-	bitmaps.AddBitmap(hdc, hWnd, EBitmapName::Board, bitBoard);
+	board = ImageManager::GetSingleton()->FindImage("Board");
+	background = ImageManager::GetSingleton()->FindImage("BackGround");
 
 	hdc = GetDC(hWnd);
 
@@ -57,18 +66,24 @@ HRESULT GoWinManager::Init(HINSTANCE hInstance, HWND hWnd)
 		840, 400, 320, 120, hWnd, (HMENU)4, hInstance, NULL);
 	hChatInputBox = CreateWindow(_T("EDIT"), _T(""), WS_CHILD | WS_VISIBLE | ES_LEFT | ES_AUTOHSCROLL | ES_WANTRETURN,
 		840, 530, 320, 30, hWnd, (HMENU)5, hInstance, NULL);
+
+	is_init = true;
 	return S_OK;
 }
 
-Go& GoWinManager::GetGame()
+void GoWinManager::release()
 {
-	return game;
+	SAFE_RELEASE(m_game);
+	SAFE_RELEASE(boardInfo);
+
+	ImageManager::GetSingleton()->Release();
 }
 
 bool GoWinManager::GetPrintSequenceSwitch()
 {
 	return printSequenceSwitch;
 }
+
 
 void GoWinManager::SetPrintSequenceSwitch(bool b)
 {
@@ -95,7 +110,7 @@ void GoWinManager::FileOpen()
 		if (extension == _T("NGF") || extension == _T("ngf")) //확장자 NGF
 		{
 			GiboNGF gibo(lpstrFile);
-			game.Load(gibo);
+			m_game->Load(gibo);
 
 			InvalidateRect(g_hWnd, NULL, FALSE);
 		}
@@ -120,31 +135,13 @@ void GoWinManager::FileSave()
 	{
 		wstring extension = lpstrFile;		//확장자 추출하기
 		extension = extension.substr(extension.length() - 3, 3);
-		game.Save(lpstrFile, extension);
-	}
-}
-
-void GoWinManager::DrawStone(HDC hdc, Stone stone)
-{
-	int x = stone.x();
-	int y = stone.y();
-	Color color = stone.color();
-
-	if (color == Color::Black)
-	{
-		BitBlt(hdc, SPACE_SIZE * (x - 1) + 6, SPACE_SIZE * (y - 1) + 6, 39, 39, bitmaps[BlackStone], 0, 0, SRCCOPY);
-		SetTextColor(hdc, RGB(255, 255, 255));
-	}
-	else if (color == Color::White)
-	{
-		BitBlt(hdc, SPACE_SIZE * (x - 1) + 6, SPACE_SIZE * (y - 1) + 6, 39, 39, bitmaps[WhiteStone], 0, 0, SRCCOPY);
-		SetTextColor(hdc, RGB(0, 0, 0));
+		m_game->Save(lpstrFile, extension);
 	}
 }
 
 void GoWinManager::DrawBoard(HDC hdc)
 {
-	BitBlt(hdc, 0, 0, 806, 806, bitmaps[Board], 0, 0, SRCCOPY);
+	board->Render(hdc);
 
 	SetTextAlign(hdc, TA_CENTER);
 	SetBkMode(hdc, TRANSPARENT);
@@ -152,9 +149,10 @@ void GoWinManager::DrawBoard(HDC hdc)
 	{
 		for (int y = 1; y < 20; y++)
 		{
-			DrawStone(hdc, game.Read({ x, y }));
+			Stone* stone = m_game->Read({ x, y });
 
-			int sqc = game.Read({ x, y }).sequence();
+			stone->render(hdc);
+			int sqc = stone->sequence();
 			if (sqc != 0 && printSequenceSwitch == true)
 			{
 				TextOut(hdc, SPACE_SIZE * (x - 1) + 25, SPACE_SIZE * (y - 1) + 18, std::to_wstring(sqc).c_str(), (int)std::to_wstring(sqc).length());
@@ -162,10 +160,10 @@ void GoWinManager::DrawBoard(HDC hdc)
 		}
 	}
 
-	if (boardInfo.IsMouseInBoard(mouse))
+	if (boardInfo->IsMouseInBoard(mouse))
 	{
-		Coord2d board_point = boardInfo.MouseToBoard(mouse.x, mouse.y);;
-		if (game.Read(board_point).color() == Color::Null)
+		Coord2d board_point = boardInfo->MouseToBoard(mouse.x, mouse.y);;
+		if (m_game->Read(board_point)->color() == Color::Null)
 		{
 			BLENDFUNCTION bf;
 			bf.AlphaFormat = AC_SRC_ALPHA;
@@ -173,16 +171,14 @@ void GoWinManager::DrawBoard(HDC hdc)
 			bf.BlendOp = 0;
 			bf.SourceConstantAlpha = 180;
 
-			if (Stone::Sqnce2color(game.info().sequence()) == Color::Black)
-				GdiAlphaBlend(hdc, SPACE_SIZE * (board_point.x - 1) + 6, SPACE_SIZE * (board_point.y - 1) + 6, 39, 39, bitmaps[BlackStone], 0, 0, 39, 39, bf);
+			if (Stone::Sqnce2color(m_game->info()->sequence()) == Color::Black)
+				ImageManager::GetSingleton()->FindImage("BlackStone")->Render(hdc, SPACE_SIZE * (board_point.x - 1), SPACE_SIZE * (board_point.y - 1) + 6);
+				//GdiAlphaBlend(hdc, SPACE_SIZE * (board_point.x - 1) + 6, SPACE_SIZE * (board_point.y - 1) + 6, 39, 39, (*bitmaps)[BlackStone], 0, 0, 39, 39, bf);
 			else
-				GdiAlphaBlend(hdc, SPACE_SIZE * (board_point.x - 1) + 6, SPACE_SIZE * (board_point.y - 1) + 6, 39, 39, bitmaps[WhiteStone], 0, 0, 39, 39, bf);
+				ImageManager::GetSingleton()->FindImage("WhiteStone")->Render(hdc, SPACE_SIZE * (board_point.x - 1), SPACE_SIZE * (board_point.y - 1) + 6);
+				//GdiAlphaBlend(hdc, SPACE_SIZE * (board_point.x - 1) + 6, SPACE_SIZE * (board_point.y - 1) + 6, 39, 39, (*bitmaps)[WhiteStone], 0, 0, 39, 39, bf);
 		}
 	}
-}
-
-void GoWinManager::SendTextEdit(HWND hEdit, LPCWSTR pText)
-{
 }
 
 LRESULT GoWinManager::MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
@@ -191,10 +187,10 @@ LRESULT GoWinManager::MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM l
 	if(message == WM_PAINT)
 	   printf("hWnd : %p\t msg : %-15s wParam : %d\t lParam : %d\n", hWnd, Read(message, buffer), wParam, lParam);
 	*/
-	switch (message)
+	switch (iMessage)
 	{
 	case WM_CREATE:
-		manager.Init();
+		init(g_hInstance, hWnd);
 		return 0;
 
 	case WM_MOUSEMOVE:
@@ -210,25 +206,25 @@ LRESULT GoWinManager::MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM l
 		mouse.y = HIWORD(lParam);
 		//cout << "마우스 좌표 x" << mouse.x << endl;
 		//cout << "마우스 좌표 y" << mouse.y << endl;
-		if (boardInfo.IsMouseInBoard(mouse))
+		if (boardInfo->IsMouseInBoard(mouse))
 		{
 			//cout << "보드 안에 있음" << endl;
-			Coord2d placement_point = boardInfo.MouseToBoard(mouse.x, mouse.y);
+			Coord2d placement_point = boardInfo->MouseToBoard(mouse.x, mouse.y);
 
-			int errorMSG = manager.GetGame().Placement(placement_point);
+			int errorMSG = m_game->Placement(placement_point);
 
 			if (errorMSG == 0) {
-				SetWindowText(hBCS, to_wstring(manager.GetGame().info().black_player().captured_stone()).c_str());
-				SetWindowText(hWCS, to_wstring(manager.GetGame().info().white_player().captured_stone()).c_str());
+				SetWindowText(hBCS, to_wstring(m_game->info()->black_player()->captured_stone()).c_str());
+				SetWindowText(hWCS, to_wstring(m_game->info()->white_player()->captured_stone()).c_str());
 				InvalidateRect(hWnd, NULL, FALSE);
 				if (mysocket.Status() != SocketStatus::notConnected)
 				{
-					PlacementInfo placementInfo = manager.GetGame().getLastPlacementInfo();
+					PlacementInfo* placementInfo = m_game->getLastPlacementInfo();
 					Placement_MSG msg;
 					msg.type = PLACEMENT;
-					msg.sequence = placementInfo.sequence;
-					msg.x = placementInfo.placment.x;
-					msg.y = placementInfo.placment.y;
+					msg.sequence = placementInfo->sequence();
+					msg.x = placementInfo->coord().x;
+					msg.y = placementInfo->coord().y;
 
 					mysocket.Send((char*)&msg, BUFSIZE);
 				}
@@ -249,12 +245,12 @@ LRESULT GoWinManager::MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM l
 		switch (wmId)
 		{
 		case IDM_FILE_OPEN:
-			manager.FileOpen();
+			FileOpen();
 			break;
 
 			// 메뉴 - 파일 - 저장
 		case IDM_FILE_SAVE:
-			manager.FileSave();
+			FileSave();
 			break;
 
 		case IDM_FILE_EXIT:
@@ -292,7 +288,7 @@ LRESULT GoWinManager::MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM l
 			break;
 
 		case IDA_BACKSIES:	//무르기 버튼
-			if (manager.GetGame().Backsies())
+			if (m_game->Backsies())
 			{
 				if (mysocket.Status() != SocketStatus::notConnected)
 				{
@@ -308,7 +304,7 @@ LRESULT GoWinManager::MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM l
 			break;
 
 		case IDA_INIT:	//초기화 버튼
-			if (manager.GetGame().Init())
+			if (m_game->init())
 			{
 				if (mysocket.Status() != SocketStatus::notConnected)
 				{
@@ -318,8 +314,8 @@ LRESULT GoWinManager::MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM l
 
 					mysocket.Send((char*)&msg, BUFSIZE);
 				}
-				SetWindowText(hBCS, to_wstring(manager.GetGame().info().black_player().captured_stone()).c_str());
-				SetWindowText(hWCS, to_wstring(manager.GetGame().info().white_player().captured_stone()).c_str());
+				SetWindowText(hBCS, to_wstring(m_game->info()->black_player()->captured_stone()).c_str());
+				SetWindowText(hWCS, to_wstring(m_game->info()->white_player()->captured_stone()).c_str());
 				InvalidateRect(hWnd, NULL, FALSE);
 				SendTextEdit(hChatBox, _T("[System] 초기화 했습니다."));
 				//MessageBox(hWnd, _T("초기화 했습니다."), _T("알림"), MB_OK);
@@ -328,7 +324,7 @@ LRESULT GoWinManager::MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM l
 			break;
 
 		case IDA_PASS:	//한수쉼 버튼
-			if (manager.GetGame().Pass())
+			if (m_game->Pass())
 			{
 				if (mysocket.Status() != SocketStatus::notConnected)
 				{
@@ -345,13 +341,13 @@ LRESULT GoWinManager::MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM l
 			break;
 
 		case 3:	// 수순 표시
-			manager.SetPrintSequenceSwitch(!manager.GetPrintSequenceSwitch());
+			SetPrintSequenceSwitch(!GetPrintSequenceSwitch());
 			InvalidateRect(hWnd, NULL, FALSE);
 			SetFocus(hWnd);
 			break;
 
 		default:
-			return DefWindowProc(hWnd, message, wParam, lParam);
+			return DefWindowProc(hWnd, iMessage, wParam, lParam);
 		}
 	}
 	break;
@@ -394,7 +390,7 @@ LRESULT GoWinManager::MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM l
 				//PlacementInfo info = { placement_msg->sequence, Color::Black , { placement_msg->x, placement_msg->y } };
 				//print_data(info);
 				Coord2d point = { placement_msg->x, placement_msg->y };
-				manager.GetGame().Placement(point);
+				m_game->Placement(point);
 				InvalidateRect(hWnd, NULL, FALSE);
 				break;
 			}
@@ -404,17 +400,17 @@ LRESULT GoWinManager::MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM l
 				switch (commandMsg->command)
 				{
 				case BACKSIES:
-					manager.GetGame().Backsies();
+					m_game->Backsies();
 					InvalidateRect(hWnd, NULL, FALSE);
 					break;
 
 				case INIT:
-					manager.GetGame().Init();
+					m_game->init();
 					InvalidateRect(hWnd, NULL, FALSE);
 					break;
 
 				case PASS:
-					manager.GetGame().Pass();
+					m_game->Pass();
 					InvalidateRect(hWnd, NULL, FALSE);
 					break;
 
@@ -473,15 +469,19 @@ LRESULT GoWinManager::MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM l
 
 	case WM_PAINT:
 	{
+		if (!is_init)
+			break;
+
 		PAINTSTRUCT ps;
 		hdc = BeginPaint(hWnd, &ps);
 
 		hbmMem = CreateCompatibleBitmap(hdc, 1200, 820);//3
 		hbmMemOld = (HBITMAP)SelectObject(hdcMem, hbmMem);//4
 
-		BitBlt(hdcMem, 0, 0, 1200, 820, bitmaps[EBitmapName::BackGround], 0, 0, SRCCOPY);
+		background->Render(hdcMem);
+		//BitBlt(hdcMem, 0, 0, 1200, 820, (*bitmaps)[EBitmapName::BackGround], 0, 0, SRCCOPY);
 
-		manager.DrawBoard(hdcMem);
+		DrawBoard(hdcMem);
 
 		BitBlt(hdc, 0, 0, 1200, 820, hdcMem, 0, 0, SRCCOPY);
 
@@ -496,10 +496,16 @@ LRESULT GoWinManager::MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM l
 		DeleteDC(hdcMem);
 		PostQuitMessage(0);
 		break;
-
-	default:
-		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
+	return DefWindowProc(hWnd, iMessage, wParam, lParam);
+}
+
+GoWinManager::GoWinManager() : m_game(nullptr), is_init(false)
+{
+}
+
+GoWinManager::~GoWinManager()
+{
 }
 
 // 정보 대화 상자의 메시지 처리기입니다.
@@ -540,7 +546,7 @@ INT_PTR CALLBACK Netbox(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 			WCHAR buffer[64];
 			GetWindowText(hIpInputBox, buffer, 64);
-			mysocket.Enter(g_hWnd, WCharToChar(buffer));
+			MySocket::GetSingleton()->Enter(g_hWnd, WCharToChar(buffer));
 			EndDialog(hDlg, LOWORD(wParam));
 			return (INT_PTR)TRUE;
 		}

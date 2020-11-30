@@ -1,4 +1,5 @@
 #include "mydatastructure.h"
+#include "PlacementInfo.h"
 
 LRESULT Node::init()
 {
@@ -12,7 +13,7 @@ void Node::release()
 
 void Node::print()
 {
-	print_data(m_data);
+	m_data->print();
 }
 
 void NodeLinkManager::print()
@@ -21,7 +22,7 @@ void NodeLinkManager::print()
 
 	while (np != nullptr)
 	{
-		print_data(np->data());
+		np->data()->print();
 		cout << "-->";
 		np = np->link();
 	}

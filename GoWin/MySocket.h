@@ -1,5 +1,6 @@
 #pragma once
-#include <WinSock2.h>
+#include "framework.h"
+#include "Singleton.h"
 #include <process.h>
 #include <stdio.h>
 
@@ -17,8 +18,6 @@
 
 #define WM_ASYNC			(WM_USER+1) // 비동기 메시지 정의
 #define MAXCLIENT			2
-
-
 
 struct COMM_MSG
 {
@@ -50,7 +49,8 @@ enum class SocketStatus {
 	Client,
 };
 
-class MySocket {
+class MySocket :public Singleton<MySocket>
+{
 	char server_ip[18] = "";
 	WSADATA wsa; 
 	int current_accept_index = 0;
@@ -77,8 +77,6 @@ public:
 	bool Enter(HWND hWnd, char* server_ip);
 	int Send(char* buf, int size);
 
-	
 	int CurrentAcceptIndex() { return current_accept_index; }
 	SocketStatus Status() { return status; }
 };
-

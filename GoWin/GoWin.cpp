@@ -1,7 +1,8 @@
 ﻿// GoWin.cpp : 애플리케이션에 대한 진입점을 정의합니다.
 //
 #include "framework.h"
-#include "GoWin.h"
+#include "GoWinManager.h"
+
 #pragma warning(disable:4996)
 
 #define MAX_LOADSTRING 100
@@ -14,6 +15,13 @@ WCHAR szWindowClass[MAX_LOADSTRING];            // 기본 창 클래스 이름�
 GoWinManager manager;
 HWND g_hWnd;
 
+const wchar_t* errorMSG_wchar[5] = {
+    _T(""),
+    _T("바둑판 안에 착수해주세요"),
+    _T("이미 바둑 돌이 있습니다"),
+    _T("착수 금지점입니다"),
+    _T("패 입니다"),
+};
 
 // 이 코드 모듈에 포함된 함수의 선언을 전달합니다:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -40,6 +48,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_GOWIN));
 
+    manager.init(hInstance, g_hWnd);
+
     // 기본 메시지 루프입니다:
 	MSG msg;
     while (GetMessageW(&msg, nullptr, 0, 0))
@@ -54,6 +64,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
             DispatchMessageW(&msg);
         }
     }
+
+    manager.release();
 
     return (int) msg.wParam;
 }

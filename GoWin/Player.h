@@ -11,7 +11,7 @@ public:
 	Player() { m_name = _T("player"); m_kyu = _T("18Бо"); m_captured_stone = 0; }
 	~Player() { }
 
-	LRESULT init();
+	HRESULT init();
 	void release();
 
 	void set_name(wstring name) { m_name = name; }

@@ -13,11 +13,14 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="소스 파일\Managers">
+    <Filter Include="Image">
+      <UniqueIdentifier>{1f3758c1-1ee2-4b7d-b68e-b7bdf51236b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Manager">
       <UniqueIdentifier>{9c9cbe22-a85c-4907-9dfe-ae09b7ae8b60}</UniqueIdentifier>
     </Filter>
-    <Filter Include="헤더 파일\Managers">
-      <UniqueIdentifier>{d2049124-b1e3-4a63-9bf6-8c8c5cb0de43}</UniqueIdentifier>
+    <Filter Include="Stone">
+      <UniqueIdentifier>{57786be5-775d-43f9-a82d-8c801d931c6b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -25,9 +28,6 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Resource.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="GoWin.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="BoardGraphic.h">
@@ -54,26 +54,32 @@
     <ClInclude Include="Mywmkey.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Stone.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="MyString.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="MySocket.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="HDCManager.h">
-      <Filter>헤더 파일\Managers</Filter>
-    </ClInclude>
-    <ClInclude Include="GoWinManager.h">
-      <Filter>헤더 파일\Managers</Filter>
-    </ClInclude>
     <ClInclude Include="Player.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="PlacementInfo.h">
       <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="GoWinManager.h">
+      <Filter>Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="Image.h">
+      <Filter>Image</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageManager.h">
+      <Filter>Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="Singleton.h">
+      <Filter>Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="Stone.h">
+      <Filter>Stone</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -89,9 +95,6 @@
     <ClCompile Include="Go.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Stone.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="GoWin.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -104,11 +107,8 @@
     <ClCompile Include="MySocket.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="HDCManager.cpp">
-      <Filter>소스 파일\Managers</Filter>
-    </ClCompile>
     <ClCompile Include="GoWinManager.cpp">
-      <Filter>소스 파일\Managers</Filter>
+      <Filter>Manager</Filter>
     </ClCompile>
     <ClCompile Include="mydatastructure.cpp">
       <Filter>소스 파일</Filter>
@@ -118,6 +118,15 @@
     </ClCompile>
     <ClCompile Include="PlacementInfo.cpp">
       <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Image.cpp">
+      <Filter>Image</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageManager.cpp">
+      <Filter>Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="Stone.cpp">
+      <Filter>Stone</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

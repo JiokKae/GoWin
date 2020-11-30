@@ -1,4 +1,5 @@
 #pragma once
+#include "framework.h"
 
 class GiboSGF {
 	string m_aplication;

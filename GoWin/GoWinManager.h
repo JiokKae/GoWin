@@ -1,36 +1,34 @@
 #pragma once
 #include "framework.h"
 
-enum EBitmapName
-{
-	BlackStone,
-	WhiteStone,
-	BackGround,
-	Board,
-};
-
 class Go;
 class Stone;
+class HDCManager;
 class BoardGraphic;
 class GoWinManager
 {
-	Go* game;
-	HDCManager bitmaps;
+	Go* m_game;
+
 	HDC hdc, hdcMem;
 	HBITMAP hbmMem, hbmMemOld;
 	HWND hChatInputBox, hChatBox;
 	HWND hWCS, hBCS;
 	HFONT hFont;
-	POINT         mouse;
-	BoardGraphic*    boardInfo; // ({ 0, 0 }, 806, 806, SPACE_SIZE, 6);
-	MySocket        mysocket;
+	POINT mouse;
+	BoardGraphic* boardInfo;
+	MySocket mysocket;
+
+	Image* board;
+	Image* background;
 
 	bool printSequenceSwitch;
+	bool is_init;
+
 public:
+	HRESULT init(HINSTANCE hInstance, HWND hWnd);
+	void release();
 
-	HRESULT Init(HINSTANCE hInstance, HWND hWnd);
-
-	Go& GetGame();
+	Go* game() { return m_game; }
 	bool GetPrintSequenceSwitch();
 
 	void SetPrintSequenceSwitch(bool b);
@@ -38,11 +36,10 @@ public:
 	void FileOpen();
 	void FileSave();
 
-	void DrawStone(HDC hdc, Stone stone);
 	void DrawBoard(HDC hdc);
 	
 	LRESULT MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 	
-
+	GoWinManager();
+	~GoWinManager();
 };
-

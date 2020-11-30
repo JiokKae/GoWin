@@ -1,5 +1,7 @@
 #include "GIboNGF.h"
+#include "Player.h"
 #include "Mystring.h"
+#include <fstream>
 
 Coord2d GiboNGF::get_placement(int sequence)
 {
@@ -59,10 +61,10 @@ bool GiboNGF::loadGibo(wchar_t* address) {
 	if (!set_board_size(temp)) return false;
 
 	getline(gibofile, temp);
-	if (!m_white.setPlayer(temp)) return false;
+	if (!m_white->setPlayer(temp)) return false;
 
 	getline(gibofile, temp);
-	if (!m_black.setPlayer(temp)) return false;
+	if (!m_black->setPlayer(temp)) return false;
 
 	getline(gibofile, m_link);
 
