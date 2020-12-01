@@ -10,6 +10,29 @@ INT_PTR CALLBACK    Netbox(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 void SendTextEdit(HWND edit, LPCWSTR pText);
 
+char* Read(UINT message, char* buffer) {
+	switch (message)
+	{
+	case WM_CREATE:
+		strcpy(buffer, "WM_CREATE"); break;
+	case WM_MOUSEMOVE:
+		strcpy(buffer, "WM_MOUSEMOVE"); break;
+	case WM_COMMAND:
+		strcpy(buffer, "WM_COMMAND"); break;
+	case WM_LBUTTONDOWN:
+		strcpy(buffer, "WM_LBUTTONDOWN"); break;
+	case WM_PAINT:
+		strcpy(buffer, "WM_PAINT"); break;
+	case WM_SETCURSOR:
+		strcpy(buffer, "WM_SETCURSOR"); break;
+	case WM_KEYDOWN:
+		strcpy(buffer, "WM_KEYDOWN"); break;
+	default:
+		itoa(message, buffer, 10);
+	}
+	return buffer;
+}
+
 HRESULT GoWinManager::init(HINSTANCE hInstance, HWND hWnd)
 {
 	ImageManager::GetSingleton()->Init();
@@ -192,6 +215,8 @@ LRESULT GoWinManager::MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM l
 	if(message == WM_PAINT)
 	   printf("hWnd : %p\t msg : %-15s wParam : %d\t lParam : %d\n", hWnd, Read(message, buffer), wParam, lParam);
 	*/
+	char buffer[64] = "";
+	printf("hWnd : %p\t msg : %-15s wParam : %d\t lParam : %d\n", hWnd, Read(iMessage, buffer), wParam, lParam);
 	switch (iMessage)
 	{
 	case WM_CREATE:
@@ -209,11 +234,8 @@ LRESULT GoWinManager::MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM l
 	case WM_LBUTTONDOWN:
 		mouse.x = LOWORD(lParam);
 		mouse.y = HIWORD(lParam);
-		//cout << "마우스 좌표 x" << mouse.x << endl;
-		//cout << "마우스 좌표 y" << mouse.y << endl;
 		if (boardInfo->IsMouseInBoard(mouse))
 		{
-			//cout << "보드 안에 있음" << endl;
 			Coord2d placement_point = boardInfo->MouseToBoard(mouse.x, mouse.y);
 
 			int errorMSG = m_game->Placement(placement_point);
