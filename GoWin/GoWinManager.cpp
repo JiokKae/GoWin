@@ -66,6 +66,8 @@ HRESULT GoWinManager::init(HINSTANCE hInstance, HWND hWnd)
 	hChatInputBox = CreateWindow(_T("EDIT"), _T(""), WS_CHILD | WS_VISIBLE | ES_LEFT | ES_AUTOHSCROLL | ES_WANTRETURN,
 		840, 530, 320, 30, hWnd, (HMENU)5, hInstance, NULL);
 
+	mysocket = MySocket::GetSingleton();
+
 	is_init = true;
 	return S_OK;
 }
@@ -220,7 +222,7 @@ LRESULT GoWinManager::MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM l
 				SetWindowText(hBCS, to_wstring(m_game->info()->black_player()->captured_stone()).c_str());
 				SetWindowText(hWCS, to_wstring(m_game->info()->white_player()->captured_stone()).c_str());
 				InvalidateRect(hWnd, NULL, FALSE);
-				if (mysocket.Status() != SocketStatus::notConnected)
+				if (mysocket->Status() != SocketStatus::notConnected)
 				{
 					PlacementInfo* placementInfo = m_game->getLastPlacementInfo();
 					Placement_MSG msg;
@@ -229,7 +231,7 @@ LRESULT GoWinManager::MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM l
 					msg.x = placementInfo->coord().x;
 					msg.y = placementInfo->coord().y;
 
-					mysocket.Send((char*)&msg, BUFSIZE);
+					mysocket->Send((char*)&msg, BUFSIZE);
 				}
 			}
 			else if (errorMSG != ERR_NOTEMPTY)
@@ -271,7 +273,7 @@ LRESULT GoWinManager::MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM l
 			break;
 
 		case IDM_SERVER_CREATE:
-			if (mysocket.Create(hWnd) != INVALID_SOCKET)
+			if (mysocket->Create(hWnd) != INVALID_SOCKET)
 			{
 				SendTextEdit(hChatBox, _T("[System] 서버 생성"));
 				// 서버 생성 비활성화
@@ -293,13 +295,13 @@ LRESULT GoWinManager::MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM l
 		case IDA_BACKSIES:	//무르기 버튼
 			if (m_game->Backsies())
 			{
-				if (mysocket.Status() != SocketStatus::notConnected)
+				if (mysocket->Status() != SocketStatus::notConnected)
 				{
 					Command_MSG msg;
 					msg.type = COMMAND;
 					msg.command = BACKSIES;
 
-					mysocket.Send((char*)&msg, BUFSIZE);
+					mysocket->Send((char*)&msg, BUFSIZE);
 				}
 				InvalidateRect(hWnd, NULL, FALSE);
 			}
@@ -309,13 +311,13 @@ LRESULT GoWinManager::MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM l
 		case IDA_INIT:	//초기화 버튼
 			if (SUCCEEDED(m_game->init()))
 			{
-				if (mysocket.Status() != SocketStatus::notConnected)
+				if (mysocket->Status() != SocketStatus::notConnected)
 				{
 					Command_MSG msg;
 					msg.type = COMMAND;
 					msg.command = INIT;
 
-					mysocket.Send((char*)&msg, BUFSIZE);
+					mysocket->Send((char*)&msg, BUFSIZE);
 				}
 				SetWindowText(hBCS, to_wstring(m_game->info()->black_player()->captured_stone()).c_str());
 				SetWindowText(hWCS, to_wstring(m_game->info()->white_player()->captured_stone()).c_str());
@@ -329,13 +331,13 @@ LRESULT GoWinManager::MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM l
 		case IDA_PASS:	//한수쉼 버튼
 			if (m_game->Pass())
 			{
-				if (mysocket.Status() != SocketStatus::notConnected)
+				if (mysocket->Status() != SocketStatus::notConnected)
 				{
 					Command_MSG msg;
 					msg.type = COMMAND;
 					msg.command = PASS;
 
-					mysocket.Send((char*)&msg, BUFSIZE);
+					mysocket->Send((char*)&msg, BUFSIZE);
 				}
 				InvalidateRect(hWnd, NULL, FALSE);
 				SendTextEdit(hChatBox, _T("[System] 한수 쉬었습니다."));
@@ -361,7 +363,7 @@ LRESULT GoWinManager::MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM l
 			//
 			// 클라이언트의 접속요청이 있을때
 		case FD_ACCEPT:
-			if (mysocket.FD_Accept()) {
+			if (mysocket->FD_Accept()) {
 				SendTextEdit(hChatBox, _T("클라이언트 접속 !!"));
 			}
 			else
@@ -375,7 +377,7 @@ LRESULT GoWinManager::MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM l
 		case FD_READ:
 		{
 			COMM_MSG msg;
-			mysocket.FD_Read((SOCKET)wParam, &msg);
+			mysocket->FD_Read((SOCKET)wParam, &msg);
 			switch (msg.type)
 			{
 			case CHATTING:
@@ -432,7 +434,7 @@ LRESULT GoWinManager::MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM l
 		//
 		// 클라이언트가 접속을 해제했을때
 		case FD_CLOSE:
-			mysocket.FD_Close((SOCKET)wParam);
+			mysocket->FD_Close((SOCKET)wParam);
 			SendTextEdit(hChatBox, _T("클라이언트 연결 해제"));
 			break;
 		}
@@ -455,13 +457,13 @@ LRESULT GoWinManager::MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM l
 
 				SetWindowTextW(hChatInputBox, _T(""));
 
-				if (mysocket.Status() != SocketStatus::notConnected)
+				if (mysocket->Status() != SocketStatus::notConnected)
 				{
 					CHAT_MSG msg;
 					msg.type = CHATTING;
 					wcscpy(msg.buf, buffer);
 
-					if (SOCKET_ERROR == mysocket.Send((char*)&msg, BUFSIZE))
+					if (SOCKET_ERROR == mysocket->Send((char*)&msg, BUFSIZE))
 						SendTextEdit(hChatBox, _T("[System] 메세지 보내기 실패"));
 				}
 			}

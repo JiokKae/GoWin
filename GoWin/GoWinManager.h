@@ -16,7 +16,7 @@ class GoWinManager
 	HFONT hFont;
 	POINT mouse;
 	BoardGraphic* boardInfo;
-	MySocket mysocket;
+	MySocket* mysocket;
 
 	Image* board;
 	Image* background;

@@ -118,7 +118,7 @@ void MySocket::FD_Read(SOCKET sock, COMM_MSG* pMsg) {
 //--------------------------------------------------------------------------------------
 void MySocket::OnClose(SOCKET* sockArray, SOCKET sock)
 {
-	int			i, j;
+	int	i, j;
 
 	for (i = 0; i < MAXCLIENT; i++)
 	{
