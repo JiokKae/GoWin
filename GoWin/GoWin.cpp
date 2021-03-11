@@ -155,7 +155,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    
     FILE* fp = NULL;
 
     //char buffer[64] = "";
@@ -272,11 +271,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             {
             case IDM_FILE_OPEN:
             {
-                tagOFNW OFN;
+		OPENFILENAME OFN;
                 WCHAR lpstrFile[MAX_PATH] = _T("");
                 WCHAR str[256];
-                memset(&OFN, 0, sizeof(tagOFNW));
-                OFN.lStructSize = sizeof(tagOFNW);
+                memset(&OFN, 0, sizeof(OPENFILENAME));
+                OFN.lStructSize = sizeof(OPENFILENAME);
                 OFN.hwndOwner = hWnd;
                 OFN.lpstrFilter = _T("기보 파일(*.ngf)\0*.ngf\0모든 파일(*.*)\0*.*\0");
                 OFN.lpstrFile = lpstrFile;
@@ -302,10 +301,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             // 메뉴 - 파일 - 저장
             case IDM_FILE_SAVE:
             {
-                tagOFNW SFN;
+		OPENFILENAME SFN;
                 WCHAR lpstrFile[MAX_PATH] = _T("");
-                memset(&SFN, 0, sizeof(tagOFNW));
-                SFN.lStructSize = sizeof(tagOFNW);
+                memset(&SFN, 0, sizeof(OPENFILENAME));
+                SFN.lStructSize = sizeof(OPENFILENAME);
                 SFN.hwndOwner = hWnd;
                 SFN.lpstrFilter = _T("기보 파일(*.ngf)\0*.ngf\0기보 파일(*.sgf)\0*.sgf\0모든 파일(*.*)\0*.*\0");
                 SFN.lpstrDefExt = _T("ngf");
@@ -495,8 +494,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
             break;
 
-            //
-            // 클라이언트가 접속을 해제했을때
+	// 클라이언트가 접속을 해제했을때
         case FD_CLOSE:
             mysocket.FD_Close((SOCKET)wParam);
             SendTextEdit(_T("클라이언트 연결 해제"));
@@ -536,7 +534,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             PAINTSTRUCT ps;
             hdc = BeginPaint(hWnd, &ps);
-            // TODO: 여기에 hdc를 사용하는 그리기 코드를 추가합니다...
 
             hdcMem = CreateCompatibleDC(hdc); //2
             hbmMem = CreateCompatibleBitmap(hdc, 1200, 820);//3

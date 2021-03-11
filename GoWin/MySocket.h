@@ -5,20 +5,18 @@
 
 #pragma comment(lib, "ws2_32.lib")
 
-#define BUFSIZE				512
-#define MSGSIZE				(BUFSIZE - sizeof(int))
-#define CHATTING			1000
-#define PLACEMENT			1001
-#define COMMAND				1002
+#define BUFSIZE		512
+#define MSGSIZE		(BUFSIZE - sizeof(int))
+#define CHATTING	1000
+#define PLACEMENT	1001
+#define COMMAND		1002
 
-#define BACKSIES			10021
-#define INIT				10022
-#define PASS				10023
+#define BACKSIES	10021
+#define INIT		10022
+#define PASS		10023
 
-#define WM_ASYNC			(WM_USER+1) // 비동기 메시지 정의
-#define MAXCLIENT			2
-
-
+#define WM_ASYNC	(WM_USER+1) // 비동기 메시지 정의
+#define MAXCLIENT	2
 
 struct COMM_MSG
 {

@@ -9,8 +9,6 @@
 
 using namespace std;
 
-
-
 // ¹«¸£±â
 bool Go::Backsies() {
 	if (boardLog.empty())
