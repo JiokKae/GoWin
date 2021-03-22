@@ -63,9 +63,9 @@ SOCKET MySocket::Create(HWND hWnd) {
 //--------------------------------------------------------------------------------------
 SOCKET MySocket::OnAccept(HWND hWnd, SOCKET sockServ)
 {
-	SOCKET			sock;
-	SOCKADDR_IN		Addr;
-	int				iLen;
+	SOCKET		sock;
+	SOCKADDR_IN	Addr;
+	int		iLen;
 
 	//
 	// 접속을 수락한다
@@ -110,11 +110,11 @@ void MySocket::FD_Read(SOCKET sock, COMM_MSG* pMsg) {
 
 
 //--------------------------------------------------------------------------------------
-// Name:  OnClose
-// Desc:  FD_CLOSE 핸들러. 클라이언트의 소켓을 해제하고 배열을 재정리한다
-// Param: sockArray -> 클라이언트의 소켓배열
-//		  sock		-> FD_CLOSE 메시지를 발생시킨 소켓
-// Ret:   void
+// Name:	OnClose
+// Desc:	FD_CLOSE 핸들러. 클라이언트의 소켓을 해제하고 배열을 재정리한다
+// Param:	sockArray	-> 클라이언트의 소켓배열
+//		sock		-> FD_CLOSE 메시지를 발생시킨 소켓
+// Retern:	void
 //--------------------------------------------------------------------------------------
 void MySocket::OnClose(SOCKET* sockArray, SOCKET sock)
 {
