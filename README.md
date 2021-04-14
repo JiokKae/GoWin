@@ -3,6 +3,6 @@
 
 ---
 
-![메인](Image/GoWin MainImage.gif)
+![메인](Image/MainImage.gif)
 
 ---
