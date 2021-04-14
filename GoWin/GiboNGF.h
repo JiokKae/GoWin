@@ -1,23 +1,40 @@
-#pragma once
+ï»¿#pragma once
 #include <string>
 #include <fstream>
 #include "stdgo.h"
 using namespace std;
 
+static wstring int2str_ngf(int index)
+{
+	wchar_t first = ++index / 26 + 65;
+	wchar_t second = index % 26 + 65;
+
+	return wstring({ first,second });
+}
+
+static wstring data2str_ngf(PlacementInfo data)
+{
+	wchar_t player = Stone::Color2Char(data.player);
+	wchar_t x = data.placment.x + 65;
+	wchar_t y = data.placment.y + 65;
+
+	return wstring({ player, x, y, y, x });
+}
+
 class GiboNGF {
-	wstring m_battle_type;	// ·¹ÀÌÆÃ, Ä£¼±
-	int m_board_size;	// ¹ÙµÏÆÇ ÁÙ°³¼ö
+	wstring m_battle_type;	// ë ˆì´íŒ…, ì¹œì„ 
+	int m_board_size;	// ë°”ë‘‘íŒ ì¤„ê°œìˆ˜
 	Player m_white;
 	Player m_black;
-	wstring m_link;		// ÀÎÅÍ³İ ÁÖ¼Ò
-	int m_go_type;		// 0.È£¼± 1.Á¤¼± 2~9.Á¡ Á¢¹ÙµÏ
-	int m_gongje;		// 0.Èæ°øÁ¦ else.¹é°øÁ¦
-	int m_compensation;	// ´ı
-	wstring m_date;		// ³¯Â¥ ¹× ½Ã°£
-	wstring m_base_time;	// ±âº» ½Ã°£
-	wstring m_game_result;	// °ÔÀÓ °á°ú
-	int m_sequence;		// ¼ö
-	wstring* m_placement;	// Âø¼ö ³»¿ª
+	wstring m_link;		// ì¸í„°ë„· ì£¼ì†Œ
+	int m_go_type;		// 0.í˜¸ì„  1.ì •ì„  2~9.ì  ì ‘ë°”ë‘‘
+	int m_gongje;		// 0.í‘ê³µì œ else.ë°±ê³µì œ
+	int m_compensation;	// ë¤
+	wstring m_date;		// ë‚ ì§œ ë° ì‹œê°„
+	wstring m_base_time;	// ê¸°ë³¸ ì‹œê°„
+	wstring m_game_result;	// ê²Œì„ ê²°ê³¼
+	int m_sequence;		// ìˆ˜
+	wstring* m_placement;	// ì°©ìˆ˜ ë‚´ì—­
 
 public:
 	GiboNGF(wchar_t* address) { loadGibo(address); };

@@ -35,24 +35,6 @@ static wstring data2str_sgf(PlacementInfo data)
 	return wstring({ ';', player, '[', x, y, ']' });
 }
 
-
-static wstring data2str_ngf(PlacementInfo data)
-{
-	wchar_t player = Stone::Color2Char(data.player);
-	wchar_t x = data.placment.x + 65;
-	wchar_t y = data.placment.y + 65;
-
-	return wstring({ player, x, y, y, x });
-}
-
-static wstring int2str_ngf(int index)
-{
-	wchar_t first = ++index / 26 + 65;
-	wchar_t second = index % 26 + 65;
-
-	return wstring({ first,second });
-}
-
 class Player {
 	wstring m_name;	// 이름
 	wstring m_kyu;	// 급수

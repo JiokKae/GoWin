@@ -1,4 +1,4 @@
-#include "GIboNGF.h"
+ï»¿#include "GIboNGF.h"
 #include "Mystring.h"
 
 Coord2d GiboNGF::getPlacement(int sequence)
@@ -15,7 +15,7 @@ Coord2d GiboNGF::getPlacement(int sequence)
 bool GiboNGF::set_board_size(wstring lineNum) {
 	if (!isWstoi(lineNum))
 		return false;
-	printf("ÀĞÀº ¹®ÀÚ¿­ : %s\n", WCharToChar(lineNum.c_str()));
+	printf("ì½ì€ ë¬¸ìì—´ : %s\n", WCharToChar(lineNum.c_str()));
 	m_board_size = stoi(lineNum);
 	return true;
 }
