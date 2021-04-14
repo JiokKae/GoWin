@@ -21,3 +21,8 @@
 #include <malloc.h>
 #include <memory.h>
 #include <tchar.h>
+
+#include "resource.h"
+
+extern Coord2d	g_mouse;
+extern Go	g_Game;

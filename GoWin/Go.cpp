@@ -1,11 +1,5 @@
 #include "Go.h"
 #include <tchar.h>
-#include <crtdbg.h>
-#include <crtdbg.h> // _CrtDumpMemoryLeaks() 사용하기위해 
-#if _DEBUG 
-#define new new(_NORMAL_BLOCK, __FILE__, __LINE__) 
-#define malloc(s) _malloc_dbg(s, _NORMAL_BLOCK, __FILE__, __LINE__) 
-#endif // 몇행에서 메모리 누수가 나는지 알려줌.
 
 using namespace std;
 
@@ -56,14 +50,16 @@ bool Go::Pass() {
 	return true;
 }
 
-//	errormessage 착수(x, y)
+// function:	착수
+// out:		errorMessage 
+// in:		x, y 좌표
 int Go::Placement(Coord2d coord_placement) {
 	int x = coord_placement.x;
 	int y = coord_placement.y;
 	int sequence = m_info.sequence();
 	Color color = Stone::Sqnce2color(sequence);
 
-	// 0, 0 착점은 넘기기
+	// 0, 0 착점은 차례 넘기기
 	if (x == 0 && y == 0) {
 		Pass();
 		return 0;

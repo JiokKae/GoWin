@@ -1,7 +1,7 @@
 #pragma once
 #include "Stone.h"
 
-class BoardManager {
+class Board {
 	Stone board[21][21];
 public:
 	void init();										// OverLoad

@@ -1,6 +1,6 @@
 #pragma once
 #include <vector>
-#include "BoardManager.h"
+#include "Board.h"
 #include "stdgo.h"
 #include "mydatastructure.h"
 #include "GiboNGF.h"
@@ -88,9 +88,9 @@ public:
 	};
 
 private:
-	vector<BoardManager> boardLog;	// 보드의 상태를 저장하는 벡터
-	vector<BoardManager> giboLog;
-	BoardManager m_board;		// 보드
+	vector<Board> boardLog;	// 보드의 상태를 저장하는 벡터
+	vector<Board> giboLog;
+	Board m_board;		// 보드
 	Information m_info;		// 바둑의 정보
 	string m_mode;			// 모드 : Single, Gibo
 

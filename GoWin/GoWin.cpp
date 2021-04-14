@@ -1,19 +1,18 @@
 ﻿// GoWin.cpp : 애플리케이션에 대한 진입점을 정의합니다.
 //
 #include "framework.h"
-#include "GoWin.h"
 #pragma warning(disable:4996)
 
 #define MAX_LOADSTRING 100
 #define SPACE_SIZE 42
 
 // 전역 변수:
-HINSTANCE hInst;                                // 현재 인스턴스입니다.
-WCHAR szTitle[MAX_LOADSTRING];                  // 제목 표시줄 텍스트입니다.
-WCHAR szWindowClass[MAX_LOADSTRING];            // 기본 창 클래스 이름입니다.
-HBITMAP hbmMem, hbmMemOld;
-HDC hdc_BlackStone, hdc_WhiteStone, hdc_BackGround, hdc_Board;
+HINSTANCE hInst;			// 현재 인스턴스입니다.
+WCHAR szTitle[MAX_LOADSTRING];		// 제목 표시줄 텍스트입니다.
+WCHAR szWindowClass[MAX_LOADSTRING];	// 기본 창 클래스 이름입니다.
+HBITMAP hBitmapMem, hBitmapMemOld;
 HDC hdc, hdcMem;
+HDC hdc_BackGround;
 HWND hWindow;
 HWND hChatInputBox, hChatBox;
 HWND hWCS, hBCS;
@@ -34,18 +33,16 @@ LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    Netbox(HWND, UINT, WPARAM, LPARAM);
 
-void DrawStone(Stone);
-void WinDrawBoard();
 void AppendText(HWND edit, LPCWSTR pText);
 void SendTextEdit(LPCWSTR pText);
 
-Coord2d         mouse;
-BoardGraphic    boardInfo({ 0, 0 }, 806, 806, SPACE_SIZE, 6);
-Go              Game;
+Coord2d         g_mouse;
+BoardGraphic    boardGraphic;
+Go              g_Game;
 MySocket        mysocket;
+PAINTSTRUCT	ps;
 
 //static int drop_file_count = 0;
-static bool Print_Sequance_Switch;
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
@@ -54,9 +51,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 {
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
-
-	// TODO: 여기에 코드를 입력합니다.
-
 
 	// 전역 문자열을 초기화합니다.
 	LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -148,11 +142,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 //  용도: 주 창의 메시지를 처리합니다.
 //
-//  WM_COMMAND  - 애플리케이션 메뉴를 처리합니다.
-//  WM_PAINT    - 주 창을 그립니다.
-//  WM_DESTROY  - 종료 메시지를 게시하고 반환합니다.
-//
-//
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	FILE* fp = NULL;
@@ -168,32 +157,24 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		AllocConsole();
 		_wfreopen_s(&fp, _T("CONOUT$"), _T("wt"), stdout);
 		//
-
 		hdc = GetDC(hWnd);
 
-		hdc_BlackStone = CreateCompatibleDC(hdc);
-		hdc_WhiteStone = CreateCompatibleDC(hdc);
+		boardGraphic.SetWidth(806);
+		boardGraphic.SetHeight(806);
+		boardGraphic.SetLeftTopPoint({ 0, 0 });
+		boardGraphic.SetSpaceSize(SPACE_SIZE);
+		boardGraphic.SetBorderSize(6);
+		boardGraphic.Init(hdc, hInst);
+
 		hdc_BackGround = CreateCompatibleDC(hdc);
-		hdc_Board = CreateCompatibleDC(hdc);
-
-		ReleaseDC(hWnd, hdc);
-
-		HBITMAP bitBlackStone, bitWhiteStone, bitBackGround, bitBoard;
-
-		bitBlackStone = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_BLACKSTONE));
-		bitWhiteStone = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_WHITESTONE));
+		HBITMAP bitBackGround;
 		bitBackGround = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_BACKGROUND));
-		bitBoard = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_BOARD));
-
-		SelectObject(hdc_BlackStone, bitBlackStone);
-		SelectObject(hdc_WhiteStone, bitWhiteStone);
 		SelectObject(hdc_BackGround, bitBackGround);
-		SelectObject(hdc_Board, bitBoard);
-
-		DeleteObject(bitBlackStone);
-		DeleteObject(bitWhiteStone);
 		DeleteObject(bitBackGround);
-		DeleteObject(bitBoard);
+
+		hdcMem = CreateCompatibleDC(hdc); //2
+		hBitmapMem = CreateCompatibleBitmap(hdc, 1200, 820);//3
+		hBitmapMemOld = (HBITMAP)SelectObject(hdcMem, hBitmapMem);//4
 
 		hBCS = CreateWindow(_T("EDIT"), _T("0"), WS_CHILD | WS_VISIBLE | ES_RIGHT | ES_READONLY,
 			840, 200, 50, 30, hWnd, (HMENU)1, hInst, NULL);
@@ -222,29 +203,29 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		return 0;
 
 	case WM_MOUSEMOVE:
-		GetMouseCoord(mouse, lParam);
+		GetMouseCoord(g_mouse, lParam);
 		InvalidateRect(hWnd, NULL, FALSE);
 
 		break;
 
 	case WM_LBUTTONDOWN:
-		GetMouseCoord(mouse, lParam);
+		GetMouseCoord(g_mouse, lParam);
 		//cout << "마우스 좌표 x" << mouse.x << endl;
 		//cout << "마우스 좌표 y" << mouse.y << endl;
-		if (boardInfo.IsMouseInBoard(mouse))
+		if (boardGraphic.IsMouseInBoard(g_mouse))
 		{
 			//cout << "보드 안에 있음" << endl;
-			Coord2d placement_point = boardInfo.MouseToBoard(mouse.x, mouse.y);
+			Coord2d placement_point = boardGraphic.MouseToBoard(g_mouse.x, g_mouse.y);
 
-			int errorMSG = Game.Placement(placement_point);
+			int errorMSG = g_Game.Placement(placement_point);
 
 			if (errorMSG == 0) {
-				SetWindowText(hBCS, to_wstring(Game.info().black_player().captured_stone()).c_str());
-				SetWindowText(hWCS, to_wstring(Game.info().white_player().captured_stone()).c_str());
+				SetWindowText(hBCS, to_wstring(g_Game.info().black_player().captured_stone()).c_str());
+				SetWindowText(hWCS, to_wstring(g_Game.info().white_player().captured_stone()).c_str());
 				InvalidateRect(hWnd, NULL, FALSE);
 				if (mysocket.IsConnected())
 				{
-					PlacementInfo placementInfo = Game.getLastPlacementInfo();
+					PlacementInfo placementInfo = g_Game.getLastPlacementInfo();
 					Placement_MSG msg;
 					msg.type = PLACEMENT;
 					msg.sequence = placementInfo.sequence;
@@ -289,7 +270,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				if (extension == _T("NGF") || extension == _T("ngf")) //확장자 NGF
 				{
 					GiboNGF gibo(lpstrFile);
-					Game.Load(gibo);
+					g_Game.Load(gibo);
 
 					InvalidateRect(hWnd, NULL, FALSE);
 				}
@@ -315,7 +296,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			{
 				wstring extension = lpstrFile;		//확장자 추출하기
 				extension = extension.substr(extension.length() - 3, 3);
-				Game.Save(lpstrFile, extension);
+				g_Game.Save(lpstrFile, extension);
 			}
 
 			break;
@@ -327,10 +308,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			FreeConsole();
 			//
 
-			DeleteDC(hdc_BlackStone);
-			DeleteDC(hdc_WhiteStone);
-			DeleteDC(hdc_BackGround);
-			DeleteDC(hdc_Board);
 			DeleteDC(hdc);
 			DeleteDC(hdcMem);
 
@@ -359,7 +336,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case IDA_BACKSIES:	//무르기 버튼
-			if (Game.Backsies())
+			if (g_Game.Backsies())
 			{
 				if (mysocket.IsConnected())
 				{
@@ -375,7 +352,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case IDA_INIT:	//초기화 버튼
-			if (Game.Init())
+			if (g_Game.Init())
 			{
 				if (mysocket.IsConnected())
 				{
@@ -393,7 +370,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case IDA_PASS:	//한수쉼 버튼
-			if (Game.Pass())
+			if (g_Game.Pass())
 			{
 				if (mysocket.IsConnected())
 				{
@@ -410,7 +387,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case 3:	// 수순 표시
-			Print_Sequance_Switch = !Print_Sequance_Switch;
+			boardGraphic.TogglePrintSequence();
 			InvalidateRect(hWnd, NULL, FALSE);
 			SetFocus(hWnd);
 			break;
@@ -458,7 +435,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				//PlacementInfo info = { placement_msg->sequence, Color::Black , { placement_msg->x, placement_msg->y } };
 				//print_data(info);
 				Coord2d point = { placement_msg->x, placement_msg->y };
-				Game.Placement(point);
+				g_Game.Placement(point);
 				InvalidateRect(hWnd, NULL, FALSE);
 				break;
 			}
@@ -468,17 +445,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				switch (commandMsg->command)
 				{
 				case BACKSIES:
-					Game.Backsies();
+					g_Game.Backsies();
 					InvalidateRect(hWnd, NULL, FALSE);
 					break;
 
 				case INIT:
-					Game.Init();
+					g_Game.Init();
 					InvalidateRect(hWnd, NULL, FALSE);
 					break;
 
 				case PASS:
-					Game.Pass();
+					g_Game.Pass();
 					InvalidateRect(hWnd, NULL, FALSE);
 					break;
 
@@ -532,29 +509,29 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 	case WM_PAINT:
 	{
-		PAINTSTRUCT ps;
 		hdc = BeginPaint(hWnd, &ps);
 
-		hdcMem = CreateCompatibleDC(hdc); //2
-		hbmMem = CreateCompatibleBitmap(hdc, 1200, 820);//3
-		hbmMemOld = (HBITMAP)SelectObject(hdcMem, hbmMem);//4
-
 		BitBlt(hdcMem, 0, 0, 1200, 820, hdc_BackGround, 0, 0, SRCCOPY);
-
-		WinDrawBoard();
+		boardGraphic.Draw(hdcMem);
 
 		BitBlt(hdc, 0, 0, 1200, 820, hdcMem, 0, 0, SRCCOPY);
-
-		SelectObject(hdcMem, hbmMemOld); //-4
-		DeleteObject(hbmMem); //-3
-		DeleteDC(hdcMem); //-2
 
 		EndPaint(hWnd, &ps);
 	}
 	break;
 
 	case WM_DESTROY:
+		SelectObject(hdcMem, hBitmapMemOld); //-4
+		DeleteObject(hBitmapMem); //-3
+		DeleteDC(hdcMem); //-2
+
+		DeleteDC(hdc_BackGround);
+		boardGraphic.Release();
+
+		ReleaseDC(hWnd, hdc);
+
 		PostQuitMessage(0);
+
 		break;
 
 	default:
@@ -615,63 +592,6 @@ INT_PTR CALLBACK Netbox(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		}
 	}
 	return (INT_PTR)FALSE;
-}
-
-void DrawStone(Stone stone)
-{
-	int x = stone.x();
-	int y = stone.y();
-	Color color = stone.color();
-
-	if (color == Color::Black)
-	{
-		BitBlt(hdcMem, SPACE_SIZE * (x - 1) + 6, SPACE_SIZE * (y - 1) + 6, 39, 39, hdc_BlackStone, 0, 0, SRCCOPY);
-		SetTextColor(hdcMem, RGB(255, 255, 255));
-	}
-	else if (color == Color::White)
-	{
-		BitBlt(hdcMem, SPACE_SIZE * (x - 1) + 6, SPACE_SIZE * (y - 1) + 6, 39, 39, hdc_WhiteStone, 0, 0, SRCCOPY);
-		SetTextColor(hdcMem, RGB(0, 0, 0));
-	}
-}
-
-void WinDrawBoard()
-{
-	BitBlt(hdcMem, 0, 0, 806, 806, hdc_Board, 0, 0, SRCCOPY);
-
-	SetTextAlign(hdcMem, TA_CENTER);
-	SetBkMode(hdcMem, TRANSPARENT);
-	for (int x = 1; x < 20; x++)
-	{
-		for (int y = 1; y < 20; y++)
-		{
-			DrawStone(Game.Read({ x, y }));
-
-			int sqc = Game.Read({ x, y }).sequence();
-			if (sqc != 0 && Print_Sequance_Switch == true)
-			{
-				TextOut(hdcMem, SPACE_SIZE * (x - 1) + 25, SPACE_SIZE * (y - 1) + 18, std::to_wstring(sqc).c_str(), std::to_wstring(sqc).length());
-			}
-		}
-	}
-
-	if (boardInfo.IsMouseInBoard(mouse))
-	{
-		Coord2d board_point = boardInfo.MouseToBoard(mouse.x, mouse.y);;
-		if (Game.Read(board_point).color() == Color::Null)
-		{
-			BLENDFUNCTION bf;
-			bf.AlphaFormat = AC_SRC_ALPHA;
-			bf.BlendFlags = 0;
-			bf.BlendOp = 0;
-			bf.SourceConstantAlpha = 180;
-
-			if (Stone::Sqnce2color(Game.info().sequence()) == Color::Black)
-				GdiAlphaBlend(hdcMem, SPACE_SIZE * (board_point.x - 1) + 6, SPACE_SIZE * (board_point.y - 1) + 6, 39, 39, hdc_BlackStone, 0, 0, 39, 39, bf);
-			else
-				GdiAlphaBlend(hdcMem, SPACE_SIZE * (board_point.x - 1) + 6, SPACE_SIZE * (board_point.y - 1) + 6, 39, 39, hdc_WhiteStone, 0, 0, 39, 39, bf);
-		}
-	}
 }
 
 void AppendText(HWND hEdit, LPCWSTR pText) {

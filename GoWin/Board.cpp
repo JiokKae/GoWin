@@ -1,10 +1,10 @@
-#include "BoardManager.h" 
+#include "Board.h" 
 #define LEFT	0
 #define RIGHT	1
-#define UP		2
+#define UP	2
 #define DOWN	3
 
-void BoardManager::init() {
+void Board::init() {
 	for (int x = 0; x < 21; x++)
 	{
 		for (int y = 0; y < 21; y++)
@@ -17,7 +17,7 @@ void BoardManager::init() {
 	}
 }
 
-void BoardManager::setHandicap(int num) {
+void Board::setHandicap(int num) {
 	if (num == 8) {
 		board[16][10] = Stone(16, 10, 1);
 		board[4][10] = Stone(4, 10, 1);
@@ -56,7 +56,7 @@ void BoardManager::setHandicap(int num) {
 //        sequence	-> 돌의 수순
 // Ret:   잡아낸 돌의 숫자
 //--------------------------------------------------------------------------------------
-int BoardManager::setBoard(int x, int y, int sequence) {
+int Board::setBoard(int x, int y, int sequence) {
 	int ret = 0;
 	board[x][y] = Stone(x, y, sequence);
 	Color color = board[x][y].color();
@@ -87,25 +87,25 @@ int BoardManager::setBoard(int x, int y, int sequence) {
 	return ret;
 }
 
-void BoardManager::setBoardtmp(int x, int y, int sequence) {
+void Board::setBoardtmp(int x, int y, int sequence) {
 	if (isEmpty(board[x][y]))
 		board[x][y] = Stone(x, y, sequence, "temp");
 	else
 		board[x][y] = Stone();
 }
 
-Color BoardManager::getStoneColor(int x, int y) {
+Color Board::getStoneColor(int x, int y) {
 	return board[x][y].color();
 }
-Color BoardManager::getStoneColor(Stone s) {
+Color Board::getStoneColor(Stone s) {
 	return s.color();
 }
 
-Stone& BoardManager::getStone(int x, int y) {
+Stone& Board::getStone(int x, int y) {
 	return board[x][y];
 }
 
-Stone& BoardManager::getAstone(Stone s, int index) {
+Stone& Board::getAstone(Stone s, int index) {
 	if (index == LEFT) 
 		return getStone(s.x() - 1, s.y());
 	else if(index == RIGHT)
@@ -118,7 +118,7 @@ Stone& BoardManager::getAstone(Stone s, int index) {
 		return getStone(0, 0);
 }
 
-Stone& BoardManager::getAstone(int x, int y, int index) {
+Stone& Board::getAstone(int x, int y, int index) {
 	if (index == LEFT)
 		return getStone(x - 1, y);
 	else if (index == RIGHT)
@@ -132,7 +132,7 @@ Stone& BoardManager::getAstone(int x, int y, int index) {
 }
 
 //s1과 s2를 연결
-void BoardManager::linkGS(Stone* s1, Stone* s2) {
+void Board::linkGS(Stone* s1, Stone* s2) {
 	Stone* s1last;
 	Stone* s2first;
 
@@ -159,7 +159,7 @@ void BoardManager::linkGS(Stone* s1, Stone* s2) {
 // Param: capturedStone	-> 따낼 돌의 포인터
 // Ret:   잡아낸 돌의 숫자
 //--------------------------------------------------------------------------------------
-int BoardManager::captureGS(Stone* capturedStone) {
+int Board::captureGS(Stone* capturedStone) {
 	Stone* pStone = capturedStone;
 	Stone* pStoneTemp;
 	int count = 0;
@@ -179,19 +179,19 @@ int BoardManager::captureGS(Stone* capturedStone) {
 	return count;
 }
 
-bool BoardManager::isBoardin(int x, int y) {
+bool Board::isBoardin(int x, int y) {
 	return ((x < 20 && x >= 1) && (y < 20 && y >= 1));}
-bool BoardManager::isBoardin(Stone s) {
+bool Board::isBoardin(Stone s) {
 	return ((s.x() < 20 && s.x() >= 1) && (s.y() < 20 && s.y() >= 1));
 }
 
-bool BoardManager::isEmpty(int x, int y) {
+bool Board::isEmpty(int x, int y) {
 	return (board[x][y].sequence() == 0);}
-bool BoardManager::isEmpty(Stone s) {
+bool Board::isEmpty(Stone s) {
 	return (s.sequence() == 0);
 }
 
-bool BoardManager::isIllegalpoint(int x, int y, int sqnce) {
+bool Board::isIllegalpoint(int x, int y, int sqnce) {
 	Color Stone = Stone::Sqnce2color(sqnce);
 	Color AroundStone;
 
@@ -204,7 +204,7 @@ bool BoardManager::isIllegalpoint(int x, int y, int sqnce) {
 	return true;
 }
 
-bool BoardManager::isDeadGS(Stone* s1) {
+bool Board::isDeadGS(Stone* s1) {
 	Stone* sp = s1;
 	Stone* sptmp;
 	if (s1->color() == Color::Wall)
@@ -227,7 +227,7 @@ bool BoardManager::isDeadGS(Stone* s1) {
 	return true;
 }
 
-bool BoardManager::isSolo(int x, int y)
+bool Board::isSolo(int x, int y)
 {
 	for (int i = 0; i < 4; i++)
 	{
@@ -238,7 +238,7 @@ bool BoardManager::isSolo(int x, int y)
 		return true;
 	return false;
 }
-bool BoardManager::isSolo(Stone s)
+bool Board::isSolo(Stone s)
 {
 	for (int i = 0; i < 4; i++)
 	{

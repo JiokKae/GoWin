@@ -3,7 +3,7 @@
 
 class ListNode {
 public:
-	BoardManager data;
+	Board data;
 	ListNode *link;
 };
 
@@ -46,7 +46,7 @@ void free_list(ListNode** phead)
 }
 
 // 노드 생성 함수
-ListNode *create_node(BoardManager data, ListNode *link)
+ListNode *create_node(Board data, ListNode *link)
 {
 	ListNode *new_node;
 	new_node = (ListNode*)malloc(sizeof(ListNode));

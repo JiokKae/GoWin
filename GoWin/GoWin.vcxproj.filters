@@ -24,13 +24,10 @@
     <ClInclude Include="Resource.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="GoWin.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="BoardGraphic.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="BoardManager.h">
+    <ClInclude Include="Board.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="GiboNGF.h">
@@ -68,7 +65,7 @@
     <ClCompile Include="BoardGraphic.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="BoardManager.cpp">
+    <ClCompile Include="Board.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="GiboNGF.cpp">
@@ -81,9 +78,6 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="GoWin.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Main.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="stdgo.cpp">
@@ -100,9 +94,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="GoWin.ico">
-      <Filter>리소스 파일</Filter>
-    </Image>
     <Image Include="Resource\Go_b.bmp">
       <Filter>리소스 파일</Filter>
     </Image>
@@ -113,12 +104,6 @@
       <Filter>리소스 파일</Filter>
     </Image>
     <Image Include="Resource\Go_w.bmp">
-      <Filter>리소스 파일</Filter>
-    </Image>
-    <Image Include="Resource\GoWin.ico">
-      <Filter>리소스 파일</Filter>
-    </Image>
-    <Image Include="Resource\small.ico">
       <Filter>리소스 파일</Filter>
     </Image>
     <Image Include="Resource\icon.ico">
