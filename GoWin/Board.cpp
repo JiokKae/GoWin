@@ -1,4 +1,4 @@
-#include "Board.h" 
+ï»¿#include "Board.h" 
 #define LEFT	0
 #define RIGHT	1
 #define UP	2
@@ -50,11 +50,11 @@ void Board::setHandicap(int num) {
 
 //--------------------------------------------------------------------------------------
 // Name:  setBoard
-// Desc:  º¸µå¿¡ µ¹À» ¼³Á¤ÇÑ´Ù.
-// Param: x			-> µ¹ÀÇ x ÁÂÇ¥
-//        y			-> µ¹ÀÇ y ÁÂÇ¥
-//        sequence	-> µ¹ÀÇ ¼ö¼ø
-// Ret:   Àâ¾Æ³½ µ¹ÀÇ ¼ıÀÚ
+// Desc:  ë³´ë“œì— ëŒì„ ì„¤ì •í•œë‹¤.
+// Param: x		-> ëŒì˜ x ì¢Œí‘œ
+//        y		-> ëŒì˜ y ì¢Œí‘œ
+//        sequence	-> ëŒì˜ ìˆ˜ìˆœ
+// Ret:   ì¡ì•„ë‚¸ ëŒì˜ ìˆ«ì
 //--------------------------------------------------------------------------------------
 int Board::setBoard(int x, int y, int sequence) {
 	int ret = 0;
@@ -65,23 +65,23 @@ int Board::setBoard(int x, int y, int sequence) {
 	{
 		if (color == getStoneColor(getAstone(x, y, i)))
 		{
-			cout << i << " " << direction_char[i] << " : ÀÏÄ¡" << endl;
+			cout << i << " " << direction_char[i] << " : ì¼ì¹˜" << endl;
 			linkGS(&board[x][y], getAstone(x, y, i).getRef());
 		}
 		else if (color == Stone::Reverse(getStoneColor(getAstone(x, y, i))))
 		{
-			cout << i << " " << direction_char[i] << " : ºÒÀÏÄ¡" << endl;
+			cout << i << " " << direction_char[i] << " : ë¶ˆì¼ì¹˜" << endl;
 			if (isDeadGS(getAstone(x, y, i).getRef()))
 			{
 				ret = captureGS(getAstone(x, y, i).getRef());
 				board[x][y].set_killer(true);
-				cout << i << " " << direction_char[i] << " : »èÁ¦" << endl;
+				cout << i << " " << direction_char[i] << " : ì‚­ì œ" << endl;
 			}
 		}
 		else if (getStoneColor(getAstone(x, y, i)) == Color::Wall)
-			cout << i << " " << direction_char[i] << " : Àå¿Ü" << endl;
+			cout << i << " " << direction_char[i] << " : ì¥ì™¸" << endl;
 		else
-			cout << i << " " << direction_char[i] << " : ºñ¾úÀ½" << endl;
+			cout << i << " " << direction_char[i] << " : ë¹„ì—ˆìŒ" << endl;
 	}
 
 	return ret;
@@ -131,7 +131,7 @@ Stone& Board::getAstone(int x, int y, int index) {
 		return getStone(0, 0);
 }
 
-//s1°ú s2¸¦ ¿¬°á
+//s1ê³¼ s2ë¥¼ ì—°ê²°
 void Board::linkGS(Stone* s1, Stone* s2) {
 	Stone* s1last;
 	Stone* s2first;
@@ -155,9 +155,9 @@ void Board::linkGS(Stone* s1, Stone* s2) {
 
 //--------------------------------------------------------------------------------------
 // Name:  captureGS
-// Desc:  µ¹À» µû³½´Ù.
-// Param: capturedStone	-> µû³¾ µ¹ÀÇ Æ÷ÀÎÅÍ
-// Ret:   Àâ¾Æ³½ µ¹ÀÇ ¼ıÀÚ
+// Desc:  ëŒì„ ë”°ë‚¸ë‹¤.
+// Param: capturedStone	-> ë”°ë‚¼ ëŒì˜ í¬ì¸í„°
+// Ret:   ì¡ì•„ë‚¸ ëŒì˜ ìˆ«ì
 //--------------------------------------------------------------------------------------
 int Board::captureGS(Stone* capturedStone) {
 	Stone* pStone = capturedStone;
@@ -195,7 +195,7 @@ bool Board::isIllegalpoint(int x, int y, int sqnce) {
 	Color Stone = Stone::Sqnce2color(sqnce);
 	Color AroundStone;
 
-	for (int i = 0; i < 4; i++) //µ¹ ÁÖÀ§¿¡ ºó°÷ÀÌ ÀÖ´Ù¸é Âø¼ö±İÁöÁ¡ ¾Æ´Ô
+	for (int i = 0; i < 4; i++) //ëŒ ì£¼ìœ„ì— ë¹ˆê³³ì´ ìˆë‹¤ë©´ ì°©ìˆ˜ê¸ˆì§€ì  ì•„ë‹˜
 	{
 		AroundStone = getAstone(x, y, i).color();
 		if (AroundStone == Color::Null || AroundStone == Stone)
