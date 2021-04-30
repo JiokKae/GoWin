@@ -1,4 +1,5 @@
 ﻿#include "GIboNGF.h"
+#include "Player.h"
 #include "Mystring.h"
 
 Coord2d GiboNGF::getPlacement(int sequence)
@@ -52,28 +53,34 @@ bool GiboNGF::loadGibo(wchar_t* address) {
 	wifstream gibofile(address);
 	if (!gibofile)
 		return false;
-	wstring temp;
+	wstring buffer;
 	getline(gibofile, m_battle_type);
 
-	getline(gibofile, temp);
-	if (!set_board_size(temp)) return false;
+	getline(gibofile, buffer);
+	if (!set_board_size(buffer)) return false;
 
-	getline(gibofile, temp);
-	if (!m_white.setPlayer(temp)) return false;
+	getline(gibofile, buffer);
+	wstring name = buffer.substr(0, 11);
+	wstring kyu = buffer.substr(11, 5);
+	m_white->set_name(name);
+	m_white->set_kyu(kyu);
 
-	getline(gibofile, temp);
-	if (!m_black.setPlayer(temp)) return false;
+	getline(gibofile, buffer);
+	name = buffer.substr(0, 11);
+	kyu = buffer.substr(11, 5);
+	m_black->set_name(name);
+	m_black->set_kyu(kyu);
 
 	getline(gibofile, m_link);
 
-	getline(gibofile, temp);
-	if (!set_go_type(temp)) return false;
+	getline(gibofile, buffer);
+	if (!set_go_type(buffer)) return false;
 
-	getline(gibofile, temp);
-	if (!set_gongje(temp)) return false;
+	getline(gibofile, buffer);
+	if (!set_gongje(buffer)) return false;
 
-	getline(gibofile, temp);
-	if (!set_compensation(temp)) return false;
+	getline(gibofile, buffer);
+	if (!set_compensation(buffer)) return false;
 
 	getline(gibofile, m_date);
 
@@ -81,8 +88,8 @@ bool GiboNGF::loadGibo(wchar_t* address) {
 
 	getline(gibofile, m_game_result);
 
-	getline(gibofile, temp);
-	if (!set_sequence(temp))
+	getline(gibofile, buffer);
+	if (!set_sequence(buffer))
 		return false;
 	if (m_placement != nullptr)
 		delete[] m_placement;

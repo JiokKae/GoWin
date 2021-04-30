@@ -23,7 +23,7 @@
     <ProjectGuid>{7B905EA4-4AF4-4F1C-900A-7FDC57BB3E04}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>GoWin</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -159,6 +159,7 @@
     <ClInclude Include="MySocket.h" />
     <ClInclude Include="MyString.h" />
     <ClInclude Include="MyWinLibrary.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdgo.h" />
     <ClInclude Include="Stone.h" />
@@ -173,6 +174,7 @@
     <ClCompile Include="MySocket.cpp" />
     <ClCompile Include="MyString.cpp" />
     <ClCompile Include="MyWinLibrary.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="stdgo.cpp" />
     <ClCompile Include="Stone.cpp" />
   </ItemGroup>

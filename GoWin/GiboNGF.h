@@ -21,11 +21,12 @@ static wstring data2str_ngf(PlacementInfo data)
 	return wstring({ player, x, y, y, x });
 }
 
+class Player;
 class GiboNGF {
 	wstring m_battle_type;	// 레이팅, 친선
 	int m_board_size;	// 바둑판 줄개수
-	Player m_white;
-	Player m_black;
+	Player* m_white;
+	Player* m_black;
 	wstring m_link;		// 인터넷 주소
 	int m_go_type;		// 0.호선 1.정선 2~9.점 접바둑
 	int m_gongje;		// 0.흑공제 else.백공제
@@ -42,8 +43,8 @@ public:
 
 	wstring battle_type()	{ return m_battle_type; }
 	int board_size()	{ return m_board_size; }
-	Player white()		{ return m_white; }
-	Player black()		{ return m_black; }
+	Player* white()		{ return m_white; }
+	Player* black()		{ return m_black; }
 	wstring link()		{ return m_link; }
 	int go_type()		{ return m_go_type; }
 	int gongje()		{ return m_gongje; }

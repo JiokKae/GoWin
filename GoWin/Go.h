@@ -11,11 +11,12 @@
 #define ERR_ILLEGALPOINT	3 
 #define ERR_KO			4
 
+class Player;
 class Go {
 public:
 	class Information {
-		Player m_white_player;	// 백 플레이어
-		Player m_black_player;	// 흑 플레이어
+		Player* m_white_player;	// 백 플레이어
+		Player* m_black_player;	// 흑 플레이어
 		LinkedList m_placement;	// 착수
 		wstring m_game_type;	// 레이팅, 친선
 		int m_board_size;	// 바둑판 크기(9, 13, 19 ...)
@@ -37,9 +38,11 @@ public:
 			m_game_result = _T("결과 없음");
 		}
 
+		bool Init();
+
 		// getter
-		Player white_player()	{ return m_white_player; }
-		Player black_player()	{ return m_black_player; }
+		Player* white_player()	{ return m_white_player; }
+		Player* black_player()	{ return m_black_player; }
 		wstring game_type()	{ return m_game_type; }
 		int board_size()	{ return m_board_size; }
 		wstring link()		{ return m_link; }
@@ -54,8 +57,6 @@ public:
 		LinkedList placement() { return m_placement; }
 
 		// setter
-		void set_white_player(Player white_player)	{ m_white_player = white_player; }
-		void set_black_player(Player black_player)	{ m_black_player = black_player; }
 		void set_game_type(wstring game_type)		{ m_game_type = game_type; }
 		void set_board_size(int board_size)		{ m_board_size = board_size; }
 		void set_link(wstring link)			{ m_link = link; }
@@ -68,12 +69,7 @@ public:
 		void set_sequence(int sequence)			{ m_sequence = sequence; }
 
 		void add_sequence(int num)			{ m_sequence += num; }
-		void add_captured_stone(Color color, int captured_stone) {
-			if (color == Color::Black)
-				m_black_player.add_captured_stone(captured_stone);
-			else if (color == Color::White)
-				m_white_player.add_captured_stone(captured_stone);
-		}
+		void add_captured_stone(Color color, int captured_stone);
 
 		// function
 		void add_placement(PlacementInfo placement) { m_placement.push_back(new Node(placement)); }
@@ -91,8 +87,8 @@ private:
 	vector<Board> boardLog;	// 보드의 상태를 저장하는 벡터
 	vector<Board> giboLog;
 	Board m_board;		// 보드
-	Information m_info;		// 바둑의 정보
-	string m_mode;			// 모드 : Single, Gibo
+	Information m_info;	// 바둑의 정보
+	string m_mode;		// 모드 : Single, Gibo
 
 public:
 	Go() { 

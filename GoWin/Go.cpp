@@ -32,9 +32,8 @@ bool Go::Init() {
 		return false;
 	boardLog.clear();
 	m_board.init();
-	m_info.clear_placement();
+	m_info.Init();
 
-	m_info.set_sequence(1);
 	return true;
 }
 
@@ -227,4 +226,32 @@ bool Go::Save(LPWSTR address, wstring extension) {
 
 Stone Go::Read(Coord2d coord_read) {
 	return m_board.getStone(coord_read.x, coord_read.y);
+}
+
+bool Go::Information::Init()
+{
+	clear_placement();
+	set_sequence(1);
+	m_white_player.init();
+	m_black_player.init();
+
+	return true;
+}
+
+void Go::Information::add_captured_stone(Color color, int captured_stone)
+{
+	switch (color)
+	{
+	case Color::Black:
+		m_black_player.add_captured_stone(captured_stone);
+		break;
+
+	case Color::White:
+		m_white_player.add_captured_stone(captured_stone);
+		break;
+
+	default:
+		break;
+	}
+
 }
