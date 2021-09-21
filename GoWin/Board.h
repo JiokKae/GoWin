@@ -1,4 +1,5 @@
 #pragma once
+#include "framework.h"
 #include "Stone/Stone.h"
 
 class Board {

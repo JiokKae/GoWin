@@ -1,5 +1,5 @@
-#pragma once
-#include <iostream>
+ï»¿#pragma once
+#include <ostream>
 #include <string>
 #include <tchar.h>
 #include "Stone/Stone.h"
@@ -29,22 +29,7 @@ struct PlacementInfo
 	int sequence;
 	Color player;
 	Coord2d placment;
+
+	void print( std::wostream& wos );
+	std::wstring to_sgf();
 };
-
-static void print_data(PlacementInfo data)
-{
-	std::cout << "[Âø¼ö Á¤º¸]-----" << std::endl;
-	std::cout << "¼ö : " << data.sequence << std::endl;
-	std::cout << "ÇÃ·¹ÀÌ¾î : " << Color2Char(data.player) << std::endl;
-	std::cout << "ÁÂÇ¥ : (" << data.placment.x << ", " << data.placment.y << ")" << std::endl;
-	std::cout << "----------------" << std::endl;
-}
-
-static std::wstring data2str_sgf(PlacementInfo data)
-{
-	wchar_t player = Color2Char(data.player);
-	wchar_t x = (data.placment.x + 19) % 20 + 97;
-	wchar_t y = (data.placment.y + 19) % 20 + 97;
-
-	return std::wstring({ ';', player, '[', x, y, ']' });
-}
