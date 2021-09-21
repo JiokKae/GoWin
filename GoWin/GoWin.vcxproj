@@ -159,7 +159,7 @@
     <ClInclude Include="MySocket.h" />
     <ClInclude Include="MyString.h" />
     <ClInclude Include="MyWinLibrary.h" />
-    <ClInclude Include="Player.h" />
+    <ClInclude Include="Player\Player.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdgo.h" />
     <ClInclude Include="Stone.h" />
@@ -174,7 +174,7 @@
     <ClCompile Include="MySocket.cpp" />
     <ClCompile Include="MyString.cpp" />
     <ClCompile Include="MyWinLibrary.cpp" />
-    <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Player\Player.cpp" />
     <ClCompile Include="stdgo.cpp" />
     <ClCompile Include="Stone.cpp" />
   </ItemGroup>

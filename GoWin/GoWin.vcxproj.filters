@@ -63,7 +63,7 @@
     <ClInclude Include="MyWinLibrary.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Player.h">
+    <ClInclude Include="Player\Player.h">
       <Filter>Player</Filter>
     </ClInclude>
   </ItemGroup>
@@ -98,7 +98,7 @@
     <ClCompile Include="MyWinLibrary.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Player.cpp">
+    <ClCompile Include="Player\Player.cpp">
       <Filter>Player</Filter>
     </ClCompile>
   </ItemGroup>

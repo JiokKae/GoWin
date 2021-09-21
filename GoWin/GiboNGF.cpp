@@ -1,5 +1,5 @@
 ﻿#include "GIboNGF.h"
-#include "Player.h"
+#include "Player/Player.h"
 #include "Mystring.h"
 
 Coord2d GiboNGF::getPlacement(int sequence)
