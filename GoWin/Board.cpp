@@ -17,34 +17,37 @@ void Board::init() {
 	}
 }
 
-void Board::setHandicap(int num) {
-	if (num == 8) {
-		board[16][10] = Stone(16, 10, 1);
-		board[4][10] = Stone(4, 10, 1);
+void Board::setHandicap( int num )
+{
+	if (num == 8) 
+	{
+		board[16][10] = Stone( 16, 10, 1, Color::Black );
+		board[4][10] = Stone( 4, 10, 1, Color::Black );
 		num = 6;
 	}
-	if (num == 6) {
-		board[10][16] = Stone(10, 16, 1);
-		board[10][4] = Stone(10, 4, 1);
+	if (num == 6) 
+	{
+		board[10][16] = Stone( 10, 16, 1, Color::Black );
+		board[10][4] = Stone( 10, 4, 1, Color::Black );
 		num = 4;
 	}
 	switch (num)
 	{
 	case 9:
-		board[16][10] = Stone(16, 10, 1);
-		board[4][10] = Stone(4, 10, 1);
+		board[16][10] = Stone( 16, 10, 1, Color::Black );
+		board[4][10] = Stone( 4, 10, 1, Color::Black );
 	case 7:
-		board[10][16] = Stone(10, 16, 1);
-		board[10][4] = Stone(10, 4, 1);
+		board[10][16] = Stone( 10, 16, 1, Color::Black );
+		board[10][4] = Stone( 10, 4, 1, Color::Black );
 	case 5:
-		board[10][10] = Stone(10, 10, 1);
+		board[10][10] = Stone( 10, 10, 1, Color::Black );
 	case 4:
-		board[16][16] = Stone(16, 16, 1);
+		board[16][16] = Stone( 16, 16, 1, Color::Black );
 	case 3:
-		board[4][4] = Stone(4, 4, 1);
+		board[4][4] = Stone( 4, 4, 1, Color::Black );
 	case 2:
-		board[4][16] = Stone(4, 16, 1);
-		board[16][4] = Stone(16, 4, 1);
+		board[4][16] = Stone( 4, 16, 1, Color::Black );
+		board[16][4] = Stone( 16, 4, 1, Color::Black );
 	}
 }
 
