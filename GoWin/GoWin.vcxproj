@@ -162,7 +162,7 @@
     <ClInclude Include="Player\Player.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdgo.h" />
-    <ClInclude Include="Stone.h" />
+    <ClInclude Include="Stone\Stone.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
@@ -176,7 +176,7 @@
     <ClCompile Include="MyWinLibrary.cpp" />
     <ClCompile Include="Player\Player.cpp" />
     <ClCompile Include="stdgo.cpp" />
-    <ClCompile Include="Stone.cpp" />
+    <ClCompile Include="Stone\Stone.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resource\Go_b.bmp" />

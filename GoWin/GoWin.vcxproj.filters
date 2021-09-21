@@ -16,6 +16,9 @@
     <Filter Include="Player">
       <UniqueIdentifier>{09265d3f-b6c1-469e-9536-4dc194a7a6f0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Stone">
+      <UniqueIdentifier>{be48f875-4f91-4c04-ab10-e3da98c14f3a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -51,9 +54,6 @@
     <ClInclude Include="stdgo.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Stone.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="MyString.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -65,6 +65,9 @@
     </ClInclude>
     <ClInclude Include="Player\Player.h">
       <Filter>Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Stone\Stone.h">
+      <Filter>Stone</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -78,9 +81,6 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Go.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Stone.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="GoWin.cpp">
@@ -100,6 +100,9 @@
     </ClCompile>
     <ClCompile Include="Player\Player.cpp">
       <Filter>Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Stone\Stone.cpp">
+      <Filter>Stone</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
