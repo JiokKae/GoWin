@@ -1,16 +1,40 @@
-#include "Player.h"
+ï»¿#include "Player.h"
+
+Player::Player()
+	: m_name( _T( "player" ) )
+	, m_kyu( _T( "18ê¸‰" ) )
+	, m_captured_stone( 0 )
+{
+}
+
 
 bool Player::init()
 {
+	m_name = _T( "player" );
+	m_kyu = _T( "18ê¸‰" ); 
 	m_captured_stone = 0;
+
 	return true;
 }
 
-void Player::c_print()
+std::wstring Player::to_wstring() const
 {
-	cout << "[ÇÃ·¹ÀÌ¾î Á¤º¸]---------" << endl;
-	wcout << "ÀÌ¸§ : " << m_name << endl;
-	wcout << "±Þ : " << m_kyu << endl;
-	cout << "µû³½ µ¹ : " << m_captured_stone << endl;
-	cout << "------------------------" << endl;
+	return _T( "ì´ë¦„ : " ) + m_name + _T( " ê¸‰ : " ) + m_kyu + _T( " ë”°ë‚¸ ëŒ : " ) + std::to_wstring( m_captured_stone );
+}
+
+std::wstring Player::to_ngf() const
+{
+	std::wstring name = _T("           ");
+	name.replace( 0, m_name.length(), m_name );
+
+	return name + m_kyu;
+}
+
+void Player::print( std::wostream& wos ) const
+{
+	wos << _T( "[í”Œë ˆì´ì–´ ì •ë³´]---------" ) << std::endl;
+	wos << _T( "ì´ë¦„ : " ) << m_name << std::endl;
+	wos << _T( "ê¸‰ : " ) << m_kyu << std::endl;
+	wos << _T( "ë”°ë‚¸ ëŒ : " ) << m_captured_stone << std::endl;
+	wos << _T( "------------------------" ) << std::endl;
 }

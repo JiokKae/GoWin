@@ -1,37 +1,29 @@
-#pragma once
-#include "framework.h"
+ï»¿#pragma once
+#include "../framework.h"
 
-class Player {
-	wstring m_name;	// ÀÌ¸§
-	wstring m_kyu;	// ±Ş¼ö
-	int m_captured_stone;	// µû³½ µ¹
-
+class Player 
+{
 public:
-
-	Player() { m_name = _T("player"); m_kyu = _T("18±Ş"); m_captured_stone = 0; }
+	Player();
 	~Player() { }
 
 	bool init();
 
-	void set_name(wstring name) { m_name = name; }
-	void set_kyu(wstring kyu) { m_kyu = kyu; }
-	void set_captured_stone(int captured_stone) { m_captured_stone = captured_stone; }
-	void add_captured_stone(int num) { m_captured_stone += num; }
+	void set_name( const std::wstring& name )	{ m_name = name; }
+	void set_kyu( const std::wstring& kyu )		{ m_kyu = kyu; }
+	void set_captured_stone( int captured_stone )	{ m_captured_stone = captured_stone; }
+	void add_captured_stone( int num )		{ m_captured_stone += num; }
 
-	wstring name() const { return m_name; }
-	wstring kyu() const { return m_kyu; }
-	int captured_stone() const { return m_captured_stone; }
+	std::wstring name() const	{ return m_name; }
+	std::wstring kyu() const	{ return m_kyu; }
+	int captured_stone() const	{ return m_captured_stone; }
 
-	wstring to_wstring() {
-		return _T("ÀÌ¸§ : ") + m_name + _T(" ±Ş : ") + m_kyu + _T(" µû³½ µ¹ : ") + std::to_wstring(m_captured_stone);
-	}
-
-	// ÄÜ¼Ö Ãâ·Â
-	void c_print(); 
-	wstring to_ngf() {
-		wstring name = _T("           ");
-		name.replace(0, m_name.length(), m_name);
-
-		return name + m_kyu;
-	}
+	std::wstring to_wstring() const;
+	std::wstring to_ngf() const;
+	void print( std::wostream& wos) const;
+	
+private:
+	std::wstring m_name;	// ì´ë¦„
+	std::wstring m_kyu;	// ê¸‰ìˆ˜
+	int m_captured_stone;	// ë”°ë‚¸ ëŒ
 };
