@@ -24,5 +24,7 @@
 
 #include "resource.h"
 
+#include <string>
+
 extern Coord2d	g_mouse;
 extern Go	g_Game;

@@ -1,14 +1,13 @@
 #pragma once
-#include <string>
+#include "../framework.h"
 
 class Stone 
 {
 public:
-	enum class Color 
+	enum class State 
 	{
 		Null,
-		Black,
-		White,
+		Normal,
 		Wall,
 		Temp,
 	};
@@ -32,23 +31,13 @@ public:
 	void set_nextStone( Stone* s )	{ m_nextStone = s; }
 	void set_killer( bool killer )	{ m_killer = killer; }
 
-	static Color Reverse( Color color )
-	{ 
-		if ( color == Color::White )
-			return Color::Black;
-		else if ( color == Color::Black )
-			return Color::White;
-		else
-			return Color::Null;
-	}
-	static char Color2Char( Color color ) { return ( color == Color::White ) ? 'W' : 'B'; }
-
 private:
 	int m_x;
 	int m_y;
 	int m_sequence;
 	Stone* m_backStone;
 	Stone* m_nextStone;
-	bool m_killer;
 	Color m_color;
+	State m_state;
+	bool m_killer;
 };

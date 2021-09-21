@@ -14,7 +14,7 @@ static wstring int2str_ngf(int index)
 
 static wstring data2str_ngf(PlacementInfo data)
 {
-	wchar_t player = Stone::Color2Char(data.player);
+	wchar_t player = Color2Char(data.player);
 	wchar_t x = data.placment.x + 65;
 	wchar_t y = data.placment.y + 65;
 

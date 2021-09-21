@@ -77,7 +77,7 @@ void BoardGraphic::Draw(HDC hdc)
 			bf.BlendOp = 0;
 			bf.SourceConstantAlpha = 180;
 
-			if (Stone::Sqnce2color(g_Game.info().sequence()) == Color::Black)
+			if (g_Game.info().sequence() % 2 == 1 )// Stone::Sqnce2color() == Color::Black)
 				GdiAlphaBlend(hdc, m_space_size * (board_point.x - 1) + 6, m_space_size * (board_point.y - 1) + 6, 39, 39, hdc_BlackStone, 0, 0, 39, 39, bf);
 			else
 				GdiAlphaBlend(hdc, m_space_size * (board_point.x - 1) + 6, m_space_size * (board_point.y - 1) + 6, 39, 39, hdc_WhiteStone, 0, 0, 39, 39, bf);

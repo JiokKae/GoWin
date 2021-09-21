@@ -4,10 +4,10 @@
 class Player 
 {
 public:
-	Player();
-	~Player() { }
+	Player( Color color );
+	~Player() {}
 
-	bool init();
+	bool init( Color color );
 
 	void set_name( const std::wstring& name )	{ m_name = name; }
 	void set_kyu( const std::wstring& kyu )		{ m_kyu = kyu; }
@@ -23,7 +23,8 @@ public:
 	void print( std::wostream& wos) const;
 	
 private:
-	std::wstring m_name;	// 이름
+	std::wstring m_name;
 	std::wstring m_kyu;	// 급수
+	Color m_color;
 	int m_captured_stone;	// 따낸 돌
 };

@@ -29,7 +29,7 @@ class Node {
 public:
 	Node(PlacementInfo data) { m_data = data; m_link = nullptr; }
 	~Node() { 
-		m_data = { 0, Color::Null, {0,0} }; 
+		m_data = { 0, Color::Null, {0,0} };
 		if (m_link != nullptr)
 		{
 			m_link->~Node();

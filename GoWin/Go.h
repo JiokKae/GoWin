@@ -41,7 +41,7 @@ public:
 		bool Init();
 
 		// getter
-		Player* white_player()	{ return m_white_player; }
+		const Player& white_player()	{ return *m_white_player; }
 		Player* black_player()	{ return m_black_player; }
 		wstring game_type()	{ return m_game_type; }
 		int board_size()	{ return m_board_size; }
@@ -69,7 +69,7 @@ public:
 		void set_sequence(int sequence)			{ m_sequence = sequence; }
 
 		void add_sequence(int num)			{ m_sequence += num; }
-		void add_captured_stone(Color color, int captured_stone);
+		void add_captured_stone( Color color, int captured_stone );
 
 		// function
 		void add_placement(PlacementInfo placement) { m_placement.push_back(new Node(placement)); }

@@ -1,4 +1,5 @@
 #include "Go.h"
+#include "Player/Player.h"
 #include <tchar.h>
 
 using namespace std;
@@ -165,7 +166,7 @@ bool Go::Save(LPWSTR address, wstring extension) {
 		gibofile << m_info.game_type() << endl;
 		gibofile << m_info.board_size() << endl;
 		gibofile << m_info.white_player().to_ngf() << endl;
-		gibofile << m_info.black_player().to_ngf() << endl;
+		gibofile << m_info.black_player()->to_ngf() << endl;
 		gibofile << "https://blog.naver.com/damas125" << endl;
 		gibofile << m_info.go_type() << endl;
 		gibofile << m_info.gongje() << endl;

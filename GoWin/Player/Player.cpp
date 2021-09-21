@@ -1,17 +1,19 @@
 ﻿#include "Player.h"
 
-Player::Player()
+Player::Player( Color color )
 	: m_name( _T( "player" ) )
 	, m_kyu( _T( "18급" ) )
+	, m_color( color )
 	, m_captured_stone( 0 )
 {
 }
 
 
-bool Player::init()
+bool Player::init( Color color )
 {
 	m_name = _T( "player" );
 	m_kyu = _T( "18급" ); 
+	m_color = color;
 	m_captured_stone = 0;
 
 	return true;

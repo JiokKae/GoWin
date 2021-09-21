@@ -1,10 +1,10 @@
 #pragma once
-#include "Stone.h"
+#include "Stone/Stone.h"
 
 class Board {
 	Stone board[21][21];
 public:
-	void init();										// OverLoad
+	void init();					// OverLoad
 	void setHandicap(int num);
 	int setBoard(int x, int y, int sequence);
 	void setBoardtmp(int x, int y, int sequence);
