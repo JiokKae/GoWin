@@ -19,16 +19,16 @@ bool BoardGraphic::IsMouseInBoard(const Coord2d& mouseCoord) const
 
 Coord2d BoardGraphic::MouseToBoard(int x, int y)
 {
-	Coord2d board;
-	board.x = (x - m_border_size) / m_space_size + 1;
-	board.y = (y - m_border_size) / m_space_size + 1;
+	Coord2d boardCoord;
+	boardCoord.x = (x - m_border_size) / m_space_size + 1;
+	boardCoord.y = (y - m_border_size) / m_space_size + 1;
 
-	if (board.x < 1)	board.x = 1;
-	if (board.x > 19)	board.x = 19;
-	if (board.y < 1)	board.y = 1;
-	if (board.y > 19)	board.y = 19;
+	if (boardCoord.x < 1)	boardCoord.x = 1;
+	if (boardCoord.x > 19)	boardCoord.x = 19;
+	if (boardCoord.y < 1)	boardCoord.y = 1;
+	if (boardCoord.y > 19)	boardCoord.y = 19;
 
-	return board;
+	return boardCoord;
 }
 
 void BoardGraphic::Init(HDC hdc, HINSTANCE hInst)
