@@ -1,12 +1,17 @@
 ﻿#include "Board.h" 
+
+
 #define LEFT	0
 #define RIGHT	1
 #define UP	2
 #define DOWN	3
 
-void Board::init() {
+void Board::init() 
+{
+	board.resize(21);
 	for (int x = 0; x < 21; x++)
 	{
+		board[x].resize(21);
 		for (int y = 0; y < 21; y++)
 		{
 			if (x == 0 || x == 20 || y == 0 || y == 20)
@@ -15,6 +20,7 @@ void Board::init() {
 				board[x][y] = Stone();
 		}
 	}
+
 }
 
 void Board::setHandicap( int num )
@@ -59,32 +65,32 @@ void Board::setHandicap( int num )
 //        sequence	-> 돌의 수순
 // Ret:   잡아낸 돌의 숫자
 //--------------------------------------------------------------------------------------
-int Board::setBoard(int x, int y, int sequence) {
+int Board::setBoard(int x, int y, int sequence, Color color) 
+{
 	int ret = 0;
-	board[x][y] = Stone(x, y, sequence);
-	Color color = board[x][y].color();
+	board[x][y] = Stone(x, y, sequence, color);
 
 	for (int i = 0; i < 4; i++)
 	{
 		if (color == getStoneColor(getAstone(x, y, i)))
 		{
-			cout << i << " " << direction_char[i] << " : 일치" << endl;
-			linkGS(&board[x][y], getAstone(x, y, i).getRef());
+			std::cout << i << " " << direction_char[i] << " : 일치" << std::endl;
+			linkGS( &board[x][y], &getAstone(x, y, i) );
 		}
-		else if (color == Stone::Reverse(getStoneColor(getAstone(x, y, i))))
+		else if ( color == Reverse( getStoneColor( getAstone( x, y, i ) ) ) )
 		{
-			cout << i << " " << direction_char[i] << " : 불일치" << endl;
-			if (isDeadGS(getAstone(x, y, i).getRef()))
+			std::cout << i << " " << direction_char[i] << " : 불일치" << std::endl;
+			if ( isDeadGS( &getAstone( x, y, i ) ) )
 			{
-				ret = captureGS(getAstone(x, y, i).getRef());
+				ret = captureGS( &getAstone( x, y, i ) );
 				board[x][y].set_killer(true);
-				cout << i << " " << direction_char[i] << " : 삭제" << endl;
+				std::cout << i << " " << direction_char[i] << " : 삭제" << std::endl;
 			}
 		}
-		else if (getStoneColor(getAstone(x, y, i)) == Color::Wall)
-			cout << i << " " << direction_char[i] << " : 장외" << endl;
+		else if ( getAstone( x, y, i ).state() == Stone::State::Wall )
+			std::cout << i << " " << direction_char[i] << " : 장외" << std::endl;
 		else
-			cout << i << " " << direction_char[i] << " : 비었음" << endl;
+			std::cout << i << " " << direction_char[i] << " : 비었음" << std::endl;
 	}
 
 	return ret;
@@ -104,47 +110,39 @@ Color Board::getStoneColor(Stone s) {
 	return s.color();
 }
 
-Stone& Board::getStone(int x, int y) {
+Stone& Board::getStone(int x, int y)
+{
 	return board[x][y];
 }
 
-Stone& Board::getAstone(Stone s, int index) {
-	if (index == LEFT) 
-		return getStone(s.x() - 1, s.y());
-	else if(index == RIGHT)
-		return getStone(s.x() + 1, s.y());
-	else if (index == UP)
-		return getStone(s.x(), s.y() - 1);
-	else if (index == DOWN)
-		return getStone(s.x(), s.y() + 1);
-	else
-		return getStone(0, 0);
+Stone& Board::getAstone( Stone s, int index ) 
+{
+	return getAstone( s.x(), s.y(), index );
 }
 
-Stone& Board::getAstone(int x, int y, int index) {
+Stone& Board::getAstone( int x, int y, int index ) 
+{
 	if (index == LEFT)
-		return getStone(x - 1, y);
+		return getStone( x - 1, y );
 	else if (index == RIGHT)
-		return getStone(x + 1, y);
+		return getStone( x + 1, y );
 	else if (index == UP)
-		return getStone(x, y - 1);
+		return getStone( x, y - 1 );
 	else if (index == DOWN)
-		return getStone(x, y + 1);
+		return getStone( x, y + 1 );
 	else
-		return getStone(0, 0);
+		return getStone( 0, 0 );
 }
 
 //s1과 s2를 연결
+// TODO: GS 객체 만들어서 관리하도록 수정
 void Board::linkGS(Stone* s1, Stone* s2) {
-	Stone* s1last;
-	Stone* s2first;
-
-	s1last = s1;
+	Stone* s1last = s1;
 
 	while (s1last->nextStone() != nullptr)
 		s1last = s1last->nextStone();
 
-	s2first = s2;
+	Stone* s2first = s2;
 
 	while (s2first->backStone() != nullptr)
 		s2first = s2first->backStone();
@@ -162,93 +160,118 @@ void Board::linkGS(Stone* s1, Stone* s2) {
 // Param: capturedStone	-> 따낼 돌의 포인터
 // Ret:   잡아낸 돌의 숫자
 //--------------------------------------------------------------------------------------
-int Board::captureGS(Stone* capturedStone) {
+int Board::captureGS(Stone* capturedStone) 
+{
 	Stone* pStone = capturedStone;
 	Stone* pStoneTemp;
-	int count = 0;
+	
 
 	while (pStone->backStone() != nullptr)
+	{
 		pStone = pStone->backStone();
+	}
 
 	pStoneTemp = pStone->nextStone();
+	int count = 0;
 	while (pStone != nullptr) 
 	{
+		board[ pStone->x() ][ pStone->y() ] = Stone();
+		
 		*pStone = Stone();
 		count++;
 		pStone = pStoneTemp;
-		if (pStoneTemp != nullptr)
+		if (pStoneTemp != nullptr) 
+		{
 			pStoneTemp = pStoneTemp->nextStone();
+		}
+			
 	}
 	return count;
 }
 
-bool Board::isBoardin(int x, int y) {
-	return ((x < 20 && x >= 1) && (y < 20 && y >= 1));}
-bool Board::isBoardin(Stone s) {
+bool Board::isBoardin(int x, int y) 
+{
+	return ((x < 20 && x >= 1) && (y < 20 && y >= 1));
+}
+bool Board::isBoardin(Stone s) 
+{
 	return ((s.x() < 20 && s.x() >= 1) && (s.y() < 20 && s.y() >= 1));
 }
 
-bool Board::isEmpty(int x, int y) {
-	return (board[x][y].sequence() == 0);}
-bool Board::isEmpty(Stone s) {
+bool Board::isEmpty(int x, int y) 
+{
+	return (board[x][y].sequence() == 0);
+}
+bool Board::isEmpty(Stone s) 
+{
 	return (s.sequence() == 0);
 }
 
-bool Board::isIllegalpoint(int x, int y, int sqnce) {
-	Color Stone = Stone::Sqnce2color(sqnce);
-	Color AroundStone;
-
-	for (int i = 0; i < 4; i++) //돌 주위에 빈곳이 있다면 착수금지점 아님
+bool Board::isIllegalpoint( int x, int y, Color color )
+{
+	//돌 주위에 빈곳이 있다면 착수금지점 아님
+	for ( int i = 0; i < 4; i++ ) 
 	{
-		AroundStone = getAstone(x, y, i).color();
-		if (AroundStone == Color::Null || AroundStone == Stone)
+		Stone& AroundStone = getAstone( x, y, i );
+		if ( AroundStone.state() == Stone::State::Null || AroundStone.color() == color )
+		{
 			return false;
+		}
 	}
 	return true;
 }
 
-bool Board::isDeadGS(Stone* s1) {
-	Stone* sp = s1;
-	Stone* sptmp;
-	if (s1->color() == Color::Wall)
-		return false;
+bool Board::isDeadGS(const Stone* s1) 
+{
 	if (s1 == nullptr)
+	{
 		return false;
-	while (sp->backStone() != nullptr)
-		sp = sp->backStone();
+	}
+	
+	if (s1->state() == Stone::State::Wall) 
+	{
+		return false;
+	}
 
-	sptmp = sp->nextStone();
-	while (sp != nullptr) {
-		for (int i = 0; i < 4; i++) {
-			if ( getStoneColor( getAstone(*sp, i) ) == Color::Null )
+	Stone* sp( const_cast<Stone*>(s1) );
+	while ( sp->backStone() != nullptr )
+	{
+		sp = sp->backStone();
+	}
+		
+	Stone* sptmp( sp->nextStone() );
+	while (sp != nullptr) 
+	{
+		for (int i = 0; i < 4; i++) 
+		{
+			if ( getAstone(*sp, i).state() == Stone::State::Null )
+			{
 				return false;
+			}
 		}
 		sp = sptmp;
-		if (sptmp != nullptr)
+		if (sptmp != nullptr) 
+		{
 			sptmp = sptmp->nextStone();
+		}
 	}
 	return true;
 }
 
-bool Board::isSolo(int x, int y)
+bool Board::isSolo( int x, int y )
 {
-	for (int i = 0; i < 4; i++)
-	{
-		if (Stone::Sqnce2color(board[x][y].sequence()) == getAstone(x, y, i).color())
-			return true;
-	}
-	if (board[x][y].nextStone() == nullptr && board[x][y].backStone() == nullptr)
-		return true;
-	return false;
+	return isSolo( getStone( x, y ) );
 }
-bool Board::isSolo(Stone s)
+
+bool Board::isSolo( const Stone& stone )
 {
-	for (int i = 0; i < 4; i++)
+	for ( int i = 0; i < 4; i++ )
 	{
-		if (Stone::Sqnce2color(s.sequence()) == getAstone(s, i).color())
+		if ( stone.color() == getAstone( stone, i ).color() )
+		{
 			return false;
+		}
 	}
-	if (s.nextStone() == nullptr && s.backStone() == nullptr)
-		return true;
-	return false;
+
+	return true;
 }

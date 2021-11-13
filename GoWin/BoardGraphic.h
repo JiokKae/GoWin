@@ -1,7 +1,8 @@
 #pragma once
-#include "stdgo.h"
 #include "framework.h"
+#include "stdgo.h"
 
+class Stone;
 class BoardGraphic {
 private:
 	Coord2d m_left_top_point;
@@ -20,6 +21,7 @@ public:
 	void Release();
 	void Draw(HDC hdc);
 	void DrawStone(Stone stone, HDC hdc);
+	const HDC& GetHDCStoneByColor(Color color) const;
 
 	// Setter
 	void SetWidth(int width)			{ m_width = width; }
@@ -37,22 +39,8 @@ public:
 	int border_size() const		{ return m_border_size; }
 	Coord2d left_top_point() const	{ return m_left_top_point; }
 	
-
-	// 마우스의 좌표가 보드 안에 들어가 있는지
-	bool IsMouseInBoard(Coord2d mouse);
+	bool IsMouseInBoard(const Coord2d& mouseCoord) const;
 
 	// 마우스 좌표를 보드 좌표로 변경
-	Coord2d MouseToBoard(int x, int y) {
-		Coord2d board;
-		board.x = (x - m_border_size) / m_space_size + 1;
-		board.y = (y - m_border_size) / m_space_size + 1;
-
-		if (board.x < 1)	board.x = 1;
-		if (board.x > 19)	board.x = 19;
-		if (board.y < 1)	board.y = 1;
-		if (board.y > 19)	board.y = 19;
-
-		return board;
-	}
-
+	Coord2d MouseToBoard(int x, int y);
 };

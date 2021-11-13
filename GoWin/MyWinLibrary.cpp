@@ -1,7 +1,7 @@
 #include "MyWinLibrary.h"
 #pragma warning (disable : 4996)
 
-char * Read(UINT message, char * buffer)
+char* ReadMessage( UINT message, char * buffer )
 {
 	switch (message)
 	{
@@ -25,8 +25,8 @@ char * Read(UINT message, char * buffer)
 	return buffer;
 }
 
-void GetMouseCoord(Coord2d & coord, LPARAM lParam)
+void GetMouseCoord( Coord2d & coord, LPARAM lParam )
 {
-	coord.x = LOWORD(lParam);
-	coord.y = HIWORD(lParam);
+	coord.x = LOWORD( lParam );
+	coord.y = HIWORD( lParam );
 }

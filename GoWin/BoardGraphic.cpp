@@ -1,11 +1,13 @@
 #include "BoardGraphic.h"
+#include "Go.h"
+#include "Stone/Stone.h"
 
-bool BoardGraphic::IsMouseInBoard(Coord2d mouse)
+bool BoardGraphic::IsMouseInBoard(const Coord2d& mouseCoord) const
 {
-	if (mouse.x >= m_left_top_point.x + m_border_size &&
-		mouse.x <= m_left_top_point.x + m_width - m_border_size &&
-		mouse.y >= m_left_top_point.y + m_border_size &&
-		mouse.y <= m_left_top_point.y + m_height - m_border_size)
+	if (mouseCoord.x >= m_left_top_point.x + m_border_size &&
+		mouseCoord.x <= m_left_top_point.x + m_width - m_border_size &&
+		mouseCoord.y >= m_left_top_point.y + m_border_size &&
+		mouseCoord.y <= m_left_top_point.y + m_height - m_border_size)
 	{
 		return true;
 	}
@@ -13,6 +15,20 @@ bool BoardGraphic::IsMouseInBoard(Coord2d mouse)
 	{
 		return false;
 	}
+}
+
+Coord2d BoardGraphic::MouseToBoard(int x, int y)
+{
+	Coord2d board;
+	board.x = (x - m_border_size) / m_space_size + 1;
+	board.y = (y - m_border_size) / m_space_size + 1;
+
+	if (board.x < 1)	board.x = 1;
+	if (board.x > 19)	board.x = 19;
+	if (board.y < 1)	board.y = 1;
+	if (board.y > 19)	board.y = 19;
+
+	return board;
 }
 
 void BoardGraphic::Init(HDC hdc, HINSTANCE hInst)
@@ -56,12 +72,25 @@ void BoardGraphic::Draw(HDC hdc)
 	{
 		for (int y = 1; y < 20; y++)
 		{
-			DrawStone(g_Game.Read({ x, y }), hdc);
+			const Stone& stone = g_Game.ReadCoord({ x, y });
+			if (stone.state() != Stone::State::Normal)
+			{
+				continue;
+			}
+			DrawStone(stone, hdc);
 
-			int sequence = g_Game.Read({ x, y }).sequence();
+			int sequence = stone.sequence();
 			if (sequence != 0 && m_print_sequance == true)
 			{
-				TextOut(hdc, m_space_size * (x - 1) + 25, m_space_size * (y - 1) + 18, std::to_wstring(sequence).c_str(), std::to_wstring(sequence).length());
+				if (stone.color() == Color::Black)
+				{
+					SetTextColor(hdc, RGB(255, 255, 255));
+				}
+				else if (stone.color() == Color::White)
+				{
+					SetTextColor(hdc, RGB(0, 0, 0));
+				}
+				TextOut(hdc, m_space_size * (x - 1) + 25, m_space_size * (y - 1) + 18, std::to_wstring(sequence).c_str(), static_cast<int>(std::to_wstring(sequence).length()));
 			}
 		}
 	}
@@ -69,7 +98,7 @@ void BoardGraphic::Draw(HDC hdc)
 	if (IsMouseInBoard(g_mouse))
 	{
 		Coord2d board_point = MouseToBoard(g_mouse.x, g_mouse.y);
-		if (g_Game.Read(board_point).color() == Color::Null)
+		if ( g_Game.ReadCoord(board_point).state() == Stone::State::Null )
 		{
 			BLENDFUNCTION bf;
 			bf.AlphaFormat = AC_SRC_ALPHA;
@@ -91,15 +120,19 @@ void BoardGraphic::DrawStone(Stone stone, HDC hdc)
 	int y = stone.y();
 	Color color = stone.color();
 
+	const HDC& hdc_stone = GetHDCStoneByColor(color);
+	BitBlt(hdc, m_space_size * (x - 1) + 6, m_space_size * (y - 1) + 6, 39, 39, hdc_stone, 0, 0, SRCCOPY);
+}
+
+const HDC& BoardGraphic::GetHDCStoneByColor(Color color) const
+{
 	if (color == Color::Black)
 	{
-		BitBlt(hdc, m_space_size * (x - 1) + 6, m_space_size * (y - 1) + 6, 39, 39, hdc_BlackStone, 0, 0, SRCCOPY);
-		SetTextColor(hdc, RGB(255, 255, 255));
+		return hdc_BlackStone;
 	}
 	else if (color == Color::White)
 	{
-		BitBlt(hdc, m_space_size * (x - 1) + 6, m_space_size * (y - 1) + 6, 39, 39, hdc_WhiteStone, 0, 0, SRCCOPY);
-		SetTextColor(hdc, RGB(0, 0, 0));
+		return hdc_WhiteStone;
 	}
 }
 

@@ -1,6 +1,13 @@
 ﻿// GoWin.cpp : 애플리케이션에 대한 진입점을 정의합니다.
 //
 #include "framework.h"
+#include "stdgo.h"
+#include "BoardGraphic.h"
+#include "MySocket.h"
+#include "GiboNGF.h"
+#include "Go.h"
+#include "Player/Player.h"
+
 #pragma warning(disable:4996)
 
 #define MAX_LOADSTRING 100
@@ -65,6 +72,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_GOWIN));
 
+	g_Game.Init();
 	// 기본 메시지 루프입니다:
 	MSG msg;
 	while (GetMessageW(&msg, nullptr, 0, 0))
@@ -79,7 +87,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			DispatchMessageW(&msg);
 		}
 	}
-
 	return (int)msg.wParam;
 }
 
@@ -148,7 +155,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 	//char buffer[64] = "";
 	//if(message == WM_PAINT)
-	//   printf("hWnd : %p\t msg : %-15s wParam : %d\t lParam : %d\n", hWnd, Read(message, buffer), wParam, lParam);
+	//   printf("hWnd : %p\t msg : %-15s wParam : %d\t lParam : %d\n", hWnd, ReadMessage(message, buffer), wParam, lParam);
 
 	switch (message)
 	{
@@ -217,11 +224,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			//cout << "보드 안에 있음" << endl;
 			Coord2d placement_point = boardGraphic.MouseToBoard(g_mouse.x, g_mouse.y);
 
-			int errorMSG = g_Game.Placement(placement_point);
+			int errorMSG = g_Game.Placement( placement_point, Color::Black );
 
 			if (errorMSG == 0) {
-				SetWindowText(hBCS, to_wstring(g_Game.info().black_player()->captured_stone()).c_str());
-				SetWindowText(hWCS, to_wstring(g_Game.info().white_player()->captured_stone()).c_str());
+				SetWindowText(hBCS, to_wstring( g_Game.info().black_player()->captured_stone()).c_str() );
+				SetWindowText(hWCS, to_wstring( g_Game.info().white_player()->captured_stone()).c_str() );
 				InvalidateRect(hWnd, NULL, FALSE);
 				if (mysocket.IsConnected())
 				{
@@ -229,8 +236,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					Placement_MSG msg;
 					msg.type = PLACEMENT;
 					msg.sequence = placementInfo.sequence;
-					msg.x = placementInfo.placment.x;
-					msg.y = placementInfo.placment.y;
+					msg.x = placementInfo.placement.x;
+					msg.y = placementInfo.placement.y;
 
 					mysocket.Send((char*)&msg, BUFSIZE);
 				}
@@ -265,7 +272,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			{
 				wsprintf(str, _T("%s 파일을 선택했습니다."), lpstrFile);
 
-				wstring extension = lpstrFile;		//확장자 추출하기
+				std::wstring extension = lpstrFile;		//확장자 추출하기
 				extension = extension.substr(extension.length() - 3, 3);
 				if (extension == _T("NGF") || extension == _T("ngf")) //확장자 NGF
 				{
@@ -435,7 +442,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				//PlacementInfo info = { placement_msg->sequence, Color::Black , { placement_msg->x, placement_msg->y } };
 				//print_data(info);
 				Coord2d point = { placement_msg->x, placement_msg->y };
-				g_Game.Placement(point);
+				g_Game.Placement(point, Color::White);
 				InvalidateRect(hWnd, NULL, FALSE);
 				break;
 			}

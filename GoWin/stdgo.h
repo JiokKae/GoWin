@@ -1,35 +1,47 @@
 ﻿#pragma once
 #include <ostream>
 #include <string>
-#include <tchar.h>
-#include "Stone/Stone.h"
 
 enum class Color
 {
 	Black,
 	White,
 };
+Color Reverse( Color color );
+char Color2Char( Color color ); 
 
-static Color Reverse( Color color )
+struct Coord2d 
 {
-	if (color == Color::White)
-		return Color::Black;
-	else
-		return Color::White;
-}
-static char Color2Char( Color color ) { return ( color == Color::White ) ? 'W' : 'B'; }
+	Coord2d(int x = 0, int y = 0) 
+		: x(x)
+		, y(y)
+	{
+	}
 
-struct Coord2d {
 	int x;
 	int y;
 };
 
 struct PlacementInfo
 {
+	PlacementInfo(int x, int y, int sequence, Color player)
+		: placement(x, y)
+		, sequence(sequence)
+		, player(player)
+	{
+	}
+
+	PlacementInfo(Coord2d placement, int sequence, Color player)
+		: placement(placement)
+		, sequence(sequence)
+		, player(player)
+	{
+	}
+
+	Coord2d placement;
 	int sequence;
 	Color player;
-	Coord2d placment;
-
-	void print( std::wostream& wos );
-	std::wstring to_sgf();
+	
+	void print( std::wostream& wos ) const;
+	std::wstring to_sgf() const;
 };

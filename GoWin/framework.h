@@ -4,18 +4,11 @@
 #pragma once
 
 #include "targetver.h"
-#include "MySocket.h"
-#include "Go.h"
-#include "MyString.h"
-#include "MyWinLibrary.h"
-#include "GiboNGF.h"
-#include "GiboSGF.h"
-#include "BoardGraphic.h"
-
 
 //#define WIN32_LEAN_AND_MEAN             // 거의 사용되지 않는 내용을 Windows 헤더에서 제외합니다.
 // Windows 헤더 파일
-//#include <windows.h>
+#include <WinSock2.h>
+#include <windows.h>
 // C 런타임 헤더 파일입니다.
 #include <stdlib.h>
 #include <malloc.h>
@@ -24,7 +17,15 @@
 
 #include "resource.h"
 
+#include <iostream>
 #include <string>
+#include <vector>
 
+#include "MyWinLibrary.h"
+#include "MyString.h"
+
+struct Coord2d;
 extern Coord2d	g_mouse;
+
+class Go;
 extern Go	g_Game;

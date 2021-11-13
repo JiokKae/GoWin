@@ -1,10 +1,8 @@
 #pragma once
-#include <iostream>
+#include "framework.h"
 #include "stdgo.h"
-using namespace std;
 
 class Node;
-
 class NodeLinkManager
 {
 	Node* m_head;
@@ -27,27 +25,23 @@ class Node {
 	Node* m_link;
 	NodeLinkManager m_child;
 public:
-	Node(PlacementInfo data) { m_data = data; m_link = nullptr; }
-	~Node() { 
-		m_data = { 0, Color::Null, {0,0} };
-		if (m_link != nullptr)
-		{
-			m_link->~Node();
-			m_link = nullptr;
-		}
-		m_child.~NodeLinkManager();
+	Node(const PlacementInfo& data)
+		: m_data(data)
+		, m_link(nullptr)
+	{
 	}
 
-	PlacementInfo data() { return m_data; }
+	~Node();
+
+	const PlacementInfo& data() { return m_data; }
 	Node* link() { return m_link; }
 	Node* next() { return m_child.head(); }
 	NodeLinkManager& child() { return m_child; }
 
 	void set_data(PlacementInfo data) { m_data = data; }
 	void set_link(Node* link) { m_link = link; }
-	void print() {
-		print_data(m_data);
-	}
+	void print();
+	
 };
 
 inline void NodeLinkManager::insert_node(Node* node)
@@ -81,18 +75,7 @@ inline void  NodeLinkManager::pick(int index)
 	}
 }
 
-inline void  NodeLinkManager::print()
-{
-	Node* np = m_head;
 
-	while (np != nullptr)
-	{
-		print_data(np->data());
-		cout << "-->";
-		np = np->link();
-	}
-	cout << endl;
-}
 
 inline void NodeLinkManager::clear()
 {
@@ -177,15 +160,6 @@ public:
 	Node& getLastNode() {
 		return *m_lastNode;
 	}
-	void print() {
-		Node* np = m_head;
-		while (np != nullptr)
-		{
-			np->print();
-			cout << "--------" << endl;
-			np = np->next();
-		}
-		cout << endl;
-	}
 
+	void print() const;
 };

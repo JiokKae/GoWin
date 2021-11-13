@@ -15,8 +15,8 @@ static wstring int2str_ngf(int index)
 static wstring data2str_ngf(PlacementInfo data)
 {
 	wchar_t player = Color2Char(data.player);
-	wchar_t x = data.placment.x + 65;
-	wchar_t y = data.placment.y + 65;
+	wchar_t x = data.placement.x + 65;
+	wchar_t y = data.placement.y + 65;
 
 	return wstring({ player, x, y, y, x });
 }

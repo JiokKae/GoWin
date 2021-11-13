@@ -1,9 +1,8 @@
 #include "MyString.h"
 #include <iostream>
+#include <windows.h>
 
-using namespace std;
-
-bool isStoi(string num)
+bool isStoi( const std::string& num )
 {
 	if (num.size() == 0)
 		return false;
@@ -16,7 +15,7 @@ bool isStoi(string num)
 	return true;
 }
 
-bool isWstoi(wstring num) 
+bool isWstoi( const std::wstring& num )
 {
 	if (num.size() == 0)
 		return false;
@@ -34,7 +33,7 @@ wchar_t* CharToWChar(char* pstrSrc)
 {
 	if (pstrSrc == nullptr)
 		return nullptr;
-	int nLen = strlen(pstrSrc) + 1;
+	int nLen = static_cast<int>( strlen(pstrSrc) + 1 );
 	wchar_t* pwstr = (LPWSTR)malloc(sizeof(wchar_t) * nLen);
 	size_t ConvertedChars = 0;
 	mbstowcs_s(&ConvertedChars, pwstr, nLen, pstrSrc, nLen);
@@ -44,7 +43,7 @@ wchar_t* CharToWChar(char* pstrSrc)
 
 char* WCharToChar(const wchar_t* pwstrSrc)
 {
-	int nLen = wcslen(pwstrSrc);
+	size_t nLen = wcslen( pwstrSrc );
 	char* pstr = (char*)malloc(sizeof(char) * nLen + 1);
 	size_t ConvertedChars = 0;
 	wcstombs_s(&ConvertedChars, pstr, nLen + 1, pwstrSrc, nLen + 1);

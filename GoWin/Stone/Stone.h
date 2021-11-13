@@ -1,5 +1,6 @@
 #pragma once
-#include "../framework.h"
+
+#include "../stdgo.h"
 
 class Stone 
 {
@@ -21,11 +22,12 @@ public:
 	int x() const		{ return m_x; }
 	int y() const		{ return m_y; }
 	Color color() const	{ return m_color; }
+	State state() const	{ return m_state; }
 	int sequence() const	{ return m_sequence; }
 	bool is_killer() const	{ return m_killer; }
 
-	const Stone* backStone()	{ return m_backStone; }
-	const Stone* nextStone()	{ return m_nextStone; }
+	Stone* backStone()	{ return m_backStone; }
+	Stone* nextStone()	{ return m_nextStone; }
 
 	void set_backStone( Stone* s )	{ m_backStone = s; }
 	void set_nextStone( Stone* s )	{ m_nextStone = s; }

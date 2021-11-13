@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "../framework.h"
 
+enum class Color;
 class Player 
 {
 public:
