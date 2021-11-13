@@ -53,6 +53,11 @@ void BoardGraphic::Init(HDC hdc, HINSTANCE hInst)
 	DeleteObject(bitBlackStone);
 	DeleteObject(bitWhiteStone);
 	DeleteObject(bitBoard);
+
+	alphaBF.AlphaFormat = AC_SRC_ALPHA;
+	alphaBF.BlendFlags = 0;
+	alphaBF.BlendOp = 0;
+	alphaBF.SourceConstantAlpha = 180;
 }
 
 void BoardGraphic::Release()
@@ -100,16 +105,10 @@ void BoardGraphic::Draw(HDC hdc)
 		Coord2d board_point = MouseToBoard(g_mouse.x, g_mouse.y);
 		if ( g_Game.ReadCoord(board_point).state() == Stone::State::Null )
 		{
-			BLENDFUNCTION bf;
-			bf.AlphaFormat = AC_SRC_ALPHA;
-			bf.BlendFlags = 0;
-			bf.BlendOp = 0;
-			bf.SourceConstantAlpha = 180;
-
 			if (g_Game.info().sequence() % 2 == 1 )// Stone::Sqnce2color() == Color::Black)
-				GdiAlphaBlend(hdc, m_space_size * (board_point.x - 1) + 6, m_space_size * (board_point.y - 1) + 6, 39, 39, hdc_BlackStone, 0, 0, 39, 39, bf);
+				GdiAlphaBlend(hdc, m_space_size * (board_point.x - 1) + 6, m_space_size * (board_point.y - 1) + 6, 39, 39, hdc_BlackStone, 0, 0, 39, 39, alphaBF);
 			else
-				GdiAlphaBlend(hdc, m_space_size * (board_point.x - 1) + 6, m_space_size * (board_point.y - 1) + 6, 39, 39, hdc_WhiteStone, 0, 0, 39, 39, bf);
+				GdiAlphaBlend(hdc, m_space_size * (board_point.x - 1) + 6, m_space_size * (board_point.y - 1) + 6, 39, 39, hdc_WhiteStone, 0, 0, 39, 39, alphaBF);
 		}
 	}
 }

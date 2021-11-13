@@ -16,6 +16,8 @@ private:
 	HDC hdc_Board;
 
 	bool m_print_sequance;
+
+	BLENDFUNCTION alphaBF;
 public:
 	void Init(HDC hdc, HINSTANCE hInst);
 	void Release();
