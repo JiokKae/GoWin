@@ -178,8 +178,8 @@ bool Go::Save(LPWSTR address, wstring extension) {
 			
 		gibofile << m_info.game_type() << endl;
 		gibofile << m_info.board_size() << endl;
-		gibofile << m_info.white_player()->to_ngf() << endl;
-		gibofile << m_info.black_player()->to_ngf() << endl;
+		gibofile << m_info.get_player(Color::White).to_ngf() << endl;
+		gibofile << m_info.get_player(Color::Black).to_ngf() << endl;
 		gibofile << "https://blog.naver.com/damas125" << endl;
 		gibofile << m_info.go_type() << endl;
 		gibofile << m_info.gongje() << endl;
@@ -208,10 +208,10 @@ bool Go::Save(LPWSTR address, wstring extension) {
 		gibofile << "SZ[" << m_info.board_size() << "]";
 		gibofile << "GN[" << m_info.game_type() << "]";
 		gibofile << "DT[" << date << "]";
-		gibofile << "PB[" << m_info.black_player()->name() << "]";
-		gibofile << "BR[" << m_info.black_player()->kyu() << "]";
-		gibofile << "PW[" << m_info.white_player()->name() << "]";
-		gibofile << "WR[" << m_info.white_player()->kyu() << "]";
+		gibofile << "PB[" << m_info.get_player(Color::Black).name() << "]";
+		gibofile << "BR[" << m_info.get_player(Color::Black).kyu() << "]";
+		gibofile << "PW[" << m_info.get_player(Color::White).name() << "]";
+		gibofile << "WR[" << m_info.get_player(Color::White).kyu() << "]";
 		gibofile << "KM[" << m_info.compensation() << ".5" << "]";
 		gibofile << "HA[" << m_info.go_type() << "]";
 		gibofile << "RE[" << m_info.game_result() << "]";
@@ -252,34 +252,26 @@ bool Go::Information::Init()
 {
 	clear_placement();
 	set_sequence(1);
-	m_white_player = new Player(Color::White);
-	m_black_player = new Player(Color::Black);
+	players.emplace(std::make_pair(Color::Black, Player(Color::Black)));
+	players.emplace(std::make_pair(Color::White, Player(Color::White)));
 
 	return true;
 }
 
 void Go::Information::Release()
 {
-	delete m_white_player;
-	delete m_black_player;
 }
 
 void Go::Information::add_captured_stone(Color color, int captured_stone)
 {
-	switch (color)
+	auto playerItr = players.find(color);
+
+	if (playerItr == players.cend())
 	{
-	case Color::Black:
-		m_black_player->add_captured_stone(captured_stone);
-		break;
-
-	case Color::White:
-		m_white_player->add_captured_stone(captured_stone);
-		break;
-
-	default:
-		break;
+		return;
 	}
 
+	playerItr->second.add_captured_stone(captured_stone);
 }
 
 void Go::Information::add_placement(PlacementInfo placement)
@@ -293,6 +285,18 @@ void Go::Information::clear_placement()
 	{
 		m_placement.delete_back();
 	}
+}
+
+const Player& Go::Information::get_player(Color color) const
+{
+	auto playerItr = players.find(color);
+
+	if ( playerItr != players.cend() )
+	{
+		return playerItr->second;
+	}
+
+	return Player(Color::Black);
 }
 
 Go::Information::Information()

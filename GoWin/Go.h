@@ -3,6 +3,7 @@
 #include "framework.h"
 #include "GiboNGF.h"
 #include "mydatastructure.h"
+#include "Player/player.h"
 
 #define ERR_NOTBOARDIN		1
 #define ERR_NOTEMPTY		2
@@ -10,7 +11,6 @@
 #define ERR_KO			4
 
 class Board;
-class Player;
 class Stone;
 class Go 
 {
@@ -24,8 +24,7 @@ public:
 		void Release();
 
 		// getter
-		Player* white_player()		{ return m_white_player; }
-		Player* black_player()		{ return m_black_player; }
+		const Player& get_player(Color color) const;
 		std::wstring game_type()	{ return m_game_type; }
 		int board_size()		{ return m_board_size; }
 		std::wstring link()		{ return m_link; }
@@ -60,8 +59,7 @@ public:
 		void clear_placement(); 
 
 	private:
-		Player* m_white_player;	// 백 플레이어
-		Player* m_black_player;	// 흑 플레이어
+		std::map<Color, Player> players;
 		LinkedList m_placement;	// 착수
 		std::wstring m_game_type;	// 레이팅, 친선
 		int m_board_size;	// 바둑판 크기(9, 13, 19 ...)

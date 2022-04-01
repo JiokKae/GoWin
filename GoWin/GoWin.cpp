@@ -227,8 +227,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			int errorMSG = g_Game.Placement( placement_point, Color::Black );
 
 			if (errorMSG == 0) {
-				SetWindowText(hBCS, to_wstring( g_Game.info().black_player()->captured_stone()).c_str() );
-				SetWindowText(hWCS, to_wstring( g_Game.info().white_player()->captured_stone()).c_str() );
+				SetWindowText(hBCS, to_wstring( g_Game.info().get_player(Color::Black).captured_stone()).c_str() );
+				SetWindowText(hWCS, to_wstring( g_Game.info().get_player(Color::White).captured_stone()).c_str() );
 				InvalidateRect(hWnd, NULL, FALSE);
 				if (mysocket.IsConnected())
 				{

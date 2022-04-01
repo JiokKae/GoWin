@@ -20,6 +20,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <map>
 
 #include "MyWinLibrary.h"
 #include "MyString.h"

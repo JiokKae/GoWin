@@ -17,6 +17,7 @@ public:
 
 	std::wstring name() const	{ return m_name; }
 	std::wstring kyu() const	{ return m_kyu; }
+	Color color() const { return m_color; }
 	int captured_stone() const	{ return m_captured_stone; }
 
 	std::wstring to_wstring() const;
