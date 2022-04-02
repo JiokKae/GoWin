@@ -224,7 +224,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			//cout << "보드 안에 있음" << endl;
 			Coord2d placement_point = boardGraphic.MouseToBoard(g_mouse.x, g_mouse.y);
 
-			int errorMSG = g_Game.Placement( placement_point, Color::Black );
+			int errorMSG = g_Game.Placement( placement_point, g_Game.get_current_placement_order());
 
 			if (errorMSG == 0) {
 				SetWindowText(hBCS, to_wstring( g_Game.info().get_player(Color::Black).captured_stone()).c_str() );

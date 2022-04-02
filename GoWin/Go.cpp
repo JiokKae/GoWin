@@ -1,17 +1,21 @@
 #include "Go.h"
 #include "Board.h"
-#include "Player/Player.h"
 #include "Stone/Stone.h"
 #include "stdgo.h"
 #include <tchar.h>
+#include <cwctype>
+#include <algorithm>
 
 Go::Go()
 	: m_mode("Single")
 	, m_board( new Board() )
+	, m_info()
+	, currentPlacementOrderIndex(0)
 {
-	m_info.Init();
-
 	m_board->init();
+	placementOrders.push_back(Color::Black);
+	placementOrders.push_back(Color::White);
+	
 }
 
 Go::~Go()
@@ -22,8 +26,10 @@ Go::~Go()
 // 무르기
 bool Go::Backsies() 
 {
-	if (boardLog.empty())
+	if (boardLog.empty() == true)
+	{
 		return false;
+	}
 
 	m_board = boardLog.back();
 	boardLog.pop_back();
@@ -53,7 +59,6 @@ bool Go::Init()
 		return false;
 	boardLog.clear();
 	m_board->init();
-	m_info.Init();
 
 	return true;
 }
@@ -62,9 +67,9 @@ bool Go::Pass()
 {
 	boardLog.push_back(m_board);
 
-	// TODO Color::Black확인
-	m_info.add_placement(PlacementInfo(0, 0, 0, Color::Black));
+	m_info.add_placement(PlacementInfo(0, 0, m_info.sequence(), get_current_placement_order()));
 	m_info.add_sequence(1);
+	set_placement_order_next();
 	return true;
 }
 
@@ -117,6 +122,7 @@ int Go::Placement( Coord2d coord_placement, Color color )
 	m_info.add_placement(placement);
 
 	m_info.add_sequence(1);
+	set_placement_order_next();
 
 	if (m_board->isDeadGS(&m_board->getStone(x, y)))
 	{
@@ -145,7 +151,7 @@ bool Go::Load(GiboNGF& gibo)
 	for (int i = 0; i < gibo.sequence(); i++)
 	{
 		cout << i << endl;
-		int errorMSG = Placement( gibo.getPlacement(i), Color::Black ); // 확인 TODO
+		int errorMSG = Placement( gibo.getPlacement(i), get_current_placement_order() ); // 확인 TODO
 		if (0 != errorMSG)
 		{
 			Init();
@@ -155,7 +161,71 @@ bool Go::Load(GiboNGF& gibo)
 	return true;
 }
 
-bool Go::Save(LPWSTR address, wstring extension) {
+void SaveNGF(LPWSTR directory, const Go::Information& goInfo, const wstring& date)
+{
+	wofstream gibofile(directory);
+	if (gibofile.is_open() == false)
+	{
+		printf("Failed : 파일 열기 실패\n");
+		return;
+	}
+
+	gibofile << goInfo.game_type() << endl;
+	gibofile << goInfo.board_size() << endl;
+	gibofile << goInfo.get_player(Color::White).to_ngf() << endl;
+	gibofile << goInfo.get_player(Color::Black).to_ngf() << endl;
+	gibofile << "https://blog.naver.com/damas125" << endl;
+	gibofile << goInfo.go_type() << endl;
+	gibofile << goInfo.gongje() << endl;
+	gibofile << goInfo.compensation() << endl;
+	gibofile << date << endl;
+	gibofile << goInfo.base_time() << endl;
+	gibofile << goInfo.game_result() << endl;
+	gibofile << goInfo.sequence() - 1 << endl;
+	for (int i = 0; i < goInfo.sequence() - 1; i++)
+	{
+		PlacementInfo data = goInfo.placement().read(i).data();
+		gibofile << _T("PM") << int2str_ngf(i) << data2str_ngf(data) << endl;
+	}
+	gibofile.close();
+}
+
+void SaveSGF(LPWSTR directory, const Go::Information& goInfo, const wstring& date)
+{
+	wofstream gibofile(directory);
+	if (gibofile.is_open() == false)
+	{
+		printf("Failed : 파일 열기 실패\n");
+		return;
+	}
+
+	gibofile << "(";
+	gibofile << ";AP[Go:1.0.2]";
+	gibofile << "SZ[" << goInfo.board_size() << "]";
+	gibofile << "GN[" << goInfo.game_type() << "]";
+	gibofile << "DT[" << date << "]";
+	gibofile << "PB[" << goInfo.get_player(Color::Black).name() << "]";
+	gibofile << "BR[" << goInfo.get_player(Color::Black).kyu() << "]";
+	gibofile << "PW[" << goInfo.get_player(Color::White).name() << "]";
+	gibofile << "WR[" << goInfo.get_player(Color::White).kyu() << "]";
+	gibofile << "KM[" << goInfo.compensation() << ".5" << "]";
+	gibofile << "HA[" << goInfo.go_type() << "]";
+	gibofile << "RE[" << goInfo.game_result() << "]";
+	gibofile << "US[" << "https://blog.naver.com/damas125" << "]";
+	gibofile << endl;
+	for (int i = 0; i < goInfo.sequence() - 1; i++)
+	{
+		PlacementInfo data = goInfo.placement().read(i).data();
+		gibofile << data.to_sgf();
+		if (i % 14 == 13)
+			gibofile << endl;
+	}
+	gibofile << ")";
+	gibofile.close();
+}
+
+bool Go::Save(LPWSTR address, wstring extension) 
+{
 	printf("기보 저장 시작--------\n");
 	printf("경로 : %ls \n확장자 : %ws\n", address, extension.c_str());
 	locale::global(locale("Korean"));
@@ -166,76 +236,23 @@ bool Go::Save(LPWSTR address, wstring extension) {
 		+ ((time.wDay < 10) ? _T("0") : _T(""))	+ to_wstring(time.wDay)
 		+_T(" [") + ((time.wHour < 10) ? _T("0") : _T("")) + to_wstring(time.wHour) + _T(":") + ((time.wMinute < 10) ? _T("0") : _T("")) + to_wstring(time.wMinute) + _T("]");
 
-	if (extension == _T("NGF") || extension == _T("ngf")) //확장자 NGF
+	transform(extension.begin(), extension.end(), extension.begin(), towlower);
+	if (extension == _T("ngf"))
 	{
 		printf("    ngf 기록---------\n");
-		wofstream gibofile(address);
-		if (!gibofile.is_open())
-		{
-			printf("Failed : 파일 열기 실패\n");
-			return false;
-		}
-			
-		gibofile << m_info.game_type() << endl;
-		gibofile << m_info.board_size() << endl;
-		gibofile << m_info.get_player(Color::White).to_ngf() << endl;
-		gibofile << m_info.get_player(Color::Black).to_ngf() << endl;
-		gibofile << "https://blog.naver.com/damas125" << endl;
-		gibofile << m_info.go_type() << endl;
-		gibofile << m_info.gongje() << endl;
-		gibofile << m_info.compensation() << endl;
-		gibofile << date << endl;
-		gibofile << m_info.base_time() << endl;
-		gibofile << m_info.game_result() << endl;
-		gibofile << m_info.sequence()-1 << endl;
-		for (int i = 0; i < m_info.sequence()-1; i++)
-		{
-			PlacementInfo data = m_info.placement().read(i).data();
-			gibofile << _T("PM") << int2str_ngf(i) << data2str_ngf(data) << endl;
-		}	
-		gibofile.close();
-
+		SaveNGF(address, m_info, date);
+		return true;
 	}
-	else if(extension == _T("SGF") || extension == _T("sgf")) //확장자 SGF
+	
+	if(extension == _T("sgf"))
 	{
 		printf("    sgf 기록---------\n");
-		wofstream gibofile(address);
-		if (!gibofile.is_open())
-			return false;
-
-		gibofile << "(";
-		gibofile << ";AP[Go:1.0.2]";
-		gibofile << "SZ[" << m_info.board_size() << "]";
-		gibofile << "GN[" << m_info.game_type() << "]";
-		gibofile << "DT[" << date << "]";
-		gibofile << "PB[" << m_info.get_player(Color::Black).name() << "]";
-		gibofile << "BR[" << m_info.get_player(Color::Black).kyu() << "]";
-		gibofile << "PW[" << m_info.get_player(Color::White).name() << "]";
-		gibofile << "WR[" << m_info.get_player(Color::White).kyu() << "]";
-		gibofile << "KM[" << m_info.compensation() << ".5" << "]";
-		gibofile << "HA[" << m_info.go_type() << "]";
-		gibofile << "RE[" << m_info.game_result() << "]";
-		gibofile << "US[" << "https://blog.naver.com/damas125" << "]";
-		gibofile << endl;
-		for (int i = 0; i < m_info.sequence() - 1; i++)
-		{
-			PlacementInfo data = m_info.placement().read(i).data();
-			gibofile << data.to_sgf();
-			if (i % 14 == 13)
-				gibofile << endl;
-		}
-		gibofile << ")";
-		gibofile.close();
-
+		SaveSGF(address, m_info, date);
+		return true;
 	}
-	else 
-	{
-		printf("Failed : 일치하는 확장자 없음\n");
-		return false;
-	}
-		
 
-	return true;
+	printf("Failed : 일치하는 확장자 없음\n");
+	return false;
 }
 
 const Stone& Go::ReadCoord( Coord2d coord )
@@ -246,20 +263,6 @@ const Stone& Go::ReadCoord( Coord2d coord )
 const PlacementInfo& Go::getLastPlacementInfo() const
 {
 	return m_info.placement().getLastNode().data();
-}
-
-bool Go::Information::Init()
-{
-	clear_placement();
-	set_sequence(1);
-	players.emplace(std::make_pair(Color::Black, Player(Color::Black)));
-	players.emplace(std::make_pair(Color::White, Player(Color::White)));
-
-	return true;
-}
-
-void Go::Information::Release()
-{
 }
 
 void Go::Information::add_captured_stone(Color color, int captured_stone)
@@ -287,6 +290,11 @@ void Go::Information::clear_placement()
 	}
 }
 
+void Go::set_placement_order_next()
+{
+	++currentPlacementOrderIndex %= placementOrders.size();
+}
+
 const Player& Go::Information::get_player(Color color) const
 {
 	auto playerItr = players.find(color);
@@ -296,7 +304,68 @@ const Player& Go::Information::get_player(Color color) const
 		return playerItr->second;
 	}
 
-	return Player(Color::Black);
+	static Player nullPlayer(Color::Black);
+	return nullPlayer;
+}
+
+const std::wstring& Go::Information::game_type() const
+{
+	return m_game_type;
+}
+
+int Go::Information::board_size() const
+{
+	return m_board_size;
+}
+
+const std::wstring& Go::Information::link() const
+{
+	return m_link;
+}
+
+int Go::Information::go_type() const
+{
+	return m_go_type;
+}
+
+int Go::Information::gongje() const
+{
+	return m_gongje;
+}
+
+int Go::Information::compensation() const
+{
+	return m_compensation;
+}
+
+const std::wstring& Go::Information::date() const
+{
+	return m_date;
+}
+
+const std::wstring& Go::Information::base_time() const
+{
+	return m_base_time;
+}
+
+const std::wstring& Go::Information::game_result() const
+{
+	return m_game_result;
+}
+
+int Go::Information::sequence() const
+{
+	return m_sequence;
+}
+
+LinkedList Go::Information::placement() const
+{
+	return m_placement;
+}
+
+Color Go::get_current_placement_order() const
+{
+	return placementOrders.at(currentPlacementOrderIndex);
 }
 
 Go::Information::Information()
@@ -305,5 +374,11 @@ Go::Information::Information()
 	, m_compensation( 6 )
 	, m_base_time( _T( "0" ) )
 	, m_game_result( _T( "결과 없음" ) )
+	
 {
+	clear_placement();
+	set_sequence(1);
+	players.emplace(std::make_pair(Color::Black, Player(Color::Black)));
+	players.emplace(std::make_pair(Color::White, Player(Color::White)));
+	
 }

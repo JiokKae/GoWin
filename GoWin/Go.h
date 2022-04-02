@@ -20,23 +20,21 @@ public:
 	public:
 		Information(); 
 
-		bool Init();
-		void Release();
-
 		// getter
+		const std::map<Color, Player>& get_players() const;
 		const Player& get_player(Color color) const;
-		std::wstring game_type()	{ return m_game_type; }
-		int board_size()		{ return m_board_size; }
-		std::wstring link()		{ return m_link; }
-		int go_type()			{ return m_go_type; }
-		int gongje()			{ return m_gongje; }
-		int compensation()		{ return m_compensation; }
-		std::wstring date()		{ return m_date; }
-		std::wstring base_time()	{ return m_base_time; }
-		std::wstring game_result()	{ return m_game_result; }
-		int sequence()			{ return m_sequence; }
-
-		LinkedList placement() const	{ return m_placement; }
+		
+		const std::wstring& game_type() const;		
+		const std::wstring& link() const;
+		const std::wstring& date() const;
+		const std::wstring& base_time() const;
+		const std::wstring& game_result() const;
+		int board_size() const;
+		int go_type() const;
+		int gongje() const;
+		int compensation() const;
+		int sequence() const;
+		LinkedList placement() const;
 
 		// setter
 		void set_game_type(std::wstring game_type)	{ m_game_type = game_type; }
@@ -60,6 +58,7 @@ public:
 
 	private:
 		std::map<Color, Player> players;
+
 		LinkedList m_placement;	// 착수
 		std::wstring m_game_type;	// 레이팅, 친선
 		int m_board_size;	// 바둑판 크기(9, 13, 19 ...)
@@ -93,10 +92,17 @@ public:
 	bool Load( GiboNGF& gibo );				// 기보 불러오기
 	bool Save( LPWSTR address, std::wstring extension );	// 기보 저장하기
 
+	Color get_current_placement_order() const;
+	void set_placement_order_next();
+
 private:
 	std::vector< Board* > boardLog;	// 보드의 상태를 저장하는 벡터
 	std::vector< Board* > giboLog;
+	
 	Board* m_board;			// 보드
 	Information m_info;		// 바둑의 정보
 	std::string m_mode;		// 모드 : Single, Gibo
+	
+	std::vector<Color> placementOrders;
+	int currentPlacementOrderIndex;
 };
