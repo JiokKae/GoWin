@@ -72,25 +72,36 @@ int Board::setBoard(int x, int y, int sequence, Color color)
 
 	for (int i = 0; i < 4; i++)
 	{
-		if (color == getStoneColor(getAstone(x, y, i)))
+		switch (getAstone(x, y, i).state())
 		{
-			std::cout << i << " " << direction_char[i] << " : 일치" << std::endl;
-			linkGS( &board[x][y], &getAstone(x, y, i) );
-		}
-		else if ( color == Reverse( getStoneColor( getAstone( x, y, i ) ) ) )
-		{
-			std::cout << i << " " << direction_char[i] << " : 불일치" << std::endl;
-			if ( isDeadGS( &getAstone( x, y, i ) ) )
-			{
-				ret = captureGS( &getAstone( x, y, i ) );
-				board[x][y].set_killer(true);
-				std::cout << i << " " << direction_char[i] << " : 삭제" << std::endl;
-			}
-		}
-		else if ( getAstone( x, y, i ).state() == Stone::State::Wall )
-			std::cout << i << " " << direction_char[i] << " : 장외" << std::endl;
-		else
+		case Stone::State::Null:
 			std::cout << i << " " << direction_char[i] << " : 비었음" << std::endl;
+			break;
+		case Stone::State::Wall:
+			std::cout << i << " " << direction_char[i] << " : 장외" << std::endl;
+			break;
+		case Stone::State::Normal:
+			if (color == getAstone(x, y, i).color())
+			{
+				std::cout << i << " " << direction_char[i] << " : 일치" << std::endl;
+				linkGS(&board[x][y], &getAstone(x, y, i));
+			}
+			else
+			{
+				std::cout << i << " " << direction_char[i] << " : 불일치" << std::endl;
+				if (isDeadGS(&getAstone(x, y, i)) == true)
+				{
+					ret = captureGS(&getAstone(x, y, i));
+					board[x][y].set_killer(true);
+					std::cout << i << " " << direction_char[i] << " : 삭제" << std::endl;
+				}
+			}
+			break;
+		default:
+			break;
+		}
+
+		
 	}
 
 	return ret;
