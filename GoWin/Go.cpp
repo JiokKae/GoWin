@@ -12,16 +12,12 @@ Go::Go()
 	, m_info()
 	, currentPlacementOrderIndex(0)
 {
-	m_board->init();
-	placementOrders.push_back(Color::Black);
-	placementOrders.push_back(Color::White);
-	
+	Init();
 }
 
 Go::~Go()
 {
 }
-
 
 // 무르기
 bool Go::Backsies() 
@@ -55,10 +51,14 @@ bool Go::Handicap(int num)
 // 초기화
 bool Go::Init() 
 {
-	if (m_info.sequence() == 1)
-		return false;
 	boardLog.clear();
 	m_board->init();
+	m_info.Init();
+	currentPlacementOrderIndex = 0;
+
+	placementOrders.clear();
+	placementOrders.push_back(Color::Black);
+	placementOrders.push_back(Color::White);
 
 	return true;
 }
@@ -376,9 +376,14 @@ Go::Information::Information()
 	, m_game_result( _T( "결과 없음" ) )
 	
 {
+	Init();
+}
+
+void Go::Information::Init()
+{
 	clear_placement();
 	set_sequence(1);
+	players.clear();
 	players.emplace(std::make_pair(Color::Black, Player(Color::Black)));
 	players.emplace(std::make_pair(Color::White, Player(Color::White)));
-	
 }

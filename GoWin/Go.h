@@ -20,6 +20,8 @@ public:
 	public:
 		Information(); 
 
+		void Init();
+
 		// getter
 		const std::map<Color, Player>& get_players() const;
 		const Player& get_player(Color color) const;
