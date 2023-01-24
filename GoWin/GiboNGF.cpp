@@ -64,6 +64,8 @@ bool GiboNGF::set_sequence(wstring sequence) {
 
 bool GiboNGF::loadGibo(wchar_t* address) {
 	wifstream gibofile(address);
+	std::locale loc("ko-kr");
+	gibofile.imbue(loc);
 	if (!gibofile)
 		return false;
 	wstring buffer;
