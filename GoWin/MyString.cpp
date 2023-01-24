@@ -1,15 +1,16 @@
 #include "MyString.h"
 #include <iostream>
 #include <windows.h>
+#include <cwctype>
 
 bool isStoi( const std::string& num )
 {
-	if (num.size() == 0)
+	if (num.empty() == true)
 		return false;
-	for (int i = 0; i < (signed)num.size(); i++)
+
+	for (const auto& ch : num)
 	{
-		char a = num.at(i);
-		if (a < 48 || a > 57)
+		if (std::isdigit(ch) == false)
 			return false;
 	}
 	return true;
@@ -17,13 +18,12 @@ bool isStoi( const std::string& num )
 
 bool isWstoi( const std::wstring& num )
 {
-	if (num.size() == 0)
+	if (num.empty() == true)
 		return false;
-	for (int i = 0; i < (signed)num.size(); i++)
+
+	for (const auto& ch : num)
 	{
-		WCHAR a = num.at(i);
-		printf("%c<%d> |",a , a);
-		if (a < 48 || a > 57)
+		if (std::iswdigit(ch) == false)
 			return false;
 	}
 	return true;
