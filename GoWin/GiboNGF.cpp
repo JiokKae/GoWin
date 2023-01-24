@@ -7,7 +7,7 @@ Coord2d GiboNGF::getPlacement(int sequence)
 	Coord2d placement;
 	wstring placement_str;
 
-	placement_str = m_placement[sequence].substr(5, 2);
+	placement_str = m_placements[sequence].substr(5, 2);
 	placement = { placement_str[0] - 65, placement_str[1] - 65 };
 
 	return placement;
@@ -91,13 +91,17 @@ bool GiboNGF::loadGibo(wchar_t* address) {
 	getline(gibofile, buffer);
 	if (!set_sequence(buffer))
 		return false;
-	if (m_placement != nullptr)
-		delete[] m_placement;
-	m_placement = new wstring[m_sequence];
+
+	if (m_placements.empty() == false)
+	{
+		m_placements.clear();
+	}
+
+	m_placements.resize(m_sequence);
 	for (int i = 0; i < m_sequence; i++)
 	{
-		getline(gibofile, m_placement[i]);
-		wcout << m_placement[i] << endl;
+		getline(gibofile, m_placements[i]);
+		wcout << m_placements[i] << endl;
 	}
 		
 

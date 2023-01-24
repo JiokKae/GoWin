@@ -2,6 +2,8 @@
 #include <string>
 #include <fstream>
 #include "stdgo.h"
+#include <vector>
+
 using namespace std;
 
 static wstring int2str_ngf(int index)
@@ -35,7 +37,7 @@ class GiboNGF {
 	wstring m_base_time;	// 기본 시간
 	wstring m_game_result;	// 게임 결과
 	int m_sequence;		// 수
-	wstring* m_placement;	// 착수 내역
+	std::vector<std::wstring> m_placements;	// 착수 내역
 
 public:
 	GiboNGF(wchar_t* address) { loadGibo(address); };
