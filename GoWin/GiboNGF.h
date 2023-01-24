@@ -40,8 +40,8 @@ class GiboNGF {
 	std::vector<std::wstring> m_placements;	// 착수 내역
 
 public:
-	GiboNGF(wchar_t* address) { loadGibo(address); };
-	~GiboNGF() { delete[] m_placement; };
+	GiboNGF(wchar_t* address);
+	~GiboNGF(); 
 
 	wstring battle_type()	{ return m_battle_type; }
 	int board_size()	{ return m_board_size; }

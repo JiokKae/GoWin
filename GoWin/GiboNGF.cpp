@@ -2,6 +2,19 @@
 #include "Player/Player.h"
 #include "Mystring.h"
 
+GiboNGF::GiboNGF(wchar_t* address)
+{
+	m_white = new Player(Color::White);
+	m_black = new Player(Color::Black);
+	loadGibo(address);
+};
+
+GiboNGF::~GiboNGF()
+{
+	delete m_white;
+	delete m_black;
+};
+
 Coord2d GiboNGF::getPlacement(int sequence)
 {
 	Coord2d placement;
@@ -103,7 +116,6 @@ bool GiboNGF::loadGibo(wchar_t* address) {
 		getline(gibofile, m_placements[i]);
 		wcout << m_placements[i] << endl;
 	}
-		
 
 	gibofile.close();
 
