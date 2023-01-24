@@ -4,15 +4,11 @@
 
 GiboNGF::GiboNGF(wchar_t* address)
 {
-	m_white = new Player(Color::White);
-	m_black = new Player(Color::Black);
 	loadGibo(address);
 };
 
 GiboNGF::~GiboNGF()
 {
-	delete m_white;
-	delete m_black;
 };
 
 Coord2d GiboNGF::getPlacement(int sequence)
@@ -75,16 +71,10 @@ bool GiboNGF::loadGibo(wchar_t* address) {
 	if (!set_board_size(buffer)) return false;
 
 	getline(gibofile, buffer);
-	wstring name = buffer.substr(0, 11);
-	wstring kyu = buffer.substr(11, 5);
-	m_white->set_name(name);
-	m_white->set_kyu(kyu);
+	m_white.Set(buffer);
 
 	getline(gibofile, buffer);
-	name = buffer.substr(0, 11);
-	kyu = buffer.substr(11, 5);
-	m_black->set_name(name);
-	m_black->set_kyu(kyu);
+	m_black.Set(buffer);
 
 	getline(gibofile, m_link);
 
@@ -122,4 +112,10 @@ bool GiboNGF::loadGibo(wchar_t* address) {
 	gibofile.close();
 
 	return true;
+}
+
+void GiboNGF::Player::Set(const wstring& ngfPlayerString)
+{
+	this->name = ngfPlayerString.substr(0, ngfPlayerString.find_first_of(L' '));
+	this->kyu = ngfPlayerString.substr(ngfPlayerString.find_last_of(L' '));
 }
