@@ -53,16 +53,7 @@ public:
 		Server,
 		Client,
 	};
-private:
-	char server_ip[18] = "";
-	WSADATA wsa; 
-	int current_accept_index = 0;
-	SOCKET client_socket[MAXCLIENT];
-	SOCKET server_socket;
-	HWND hWnd;
-	Status status;
 
-public:
 	MySocket();
 	~MySocket() {}
 
@@ -75,7 +66,6 @@ public:
 	void OnClose(SOCKET* sockArray, SOCKET sock);
 	void FD_Close(SOCKET sock);
 
-	int recvn(SOCKET s, char* buf, int len, int flags);
 
 	bool Enter(HWND hWnd, char* server_ip);
 	int Send(char* buf, int size);
@@ -83,5 +73,16 @@ public:
 	int CurrentAcceptIndex() { return current_accept_index; }
 	
 	bool IsConnected();
+
+private:
+	int recvn(SOCKET s, char* buf, int len, int flags);
+
+	char server_ip[18] = "";
+	WSADATA wsa;
+	int current_accept_index = 0;
+	SOCKET client_socket[MAXCLIENT];
+	SOCKET server_socket;
+	HWND hWnd;
+	Status status;
 };
 
