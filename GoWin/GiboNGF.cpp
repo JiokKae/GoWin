@@ -18,7 +18,7 @@ const GiboNGF::Placement& GiboNGF::getPlacement(int sequence) const
 	return m_placements[sequence - 1];
 }
 
-bool GiboNGF::set_board_size(wstring lineNum) {
+bool GiboNGF::set_board_size(std::wstring lineNum) {
 	if (!isWstoi(lineNum))
 		return false;
 	printf("읽은 문자열 : %s\n", WCharToChar(lineNum.c_str()));
@@ -26,28 +26,28 @@ bool GiboNGF::set_board_size(wstring lineNum) {
 	return true;
 }
 
-bool GiboNGF::set_go_type(wstring goType) {
+bool GiboNGF::set_go_type(std::wstring goType) {
 	if (!isWstoi(goType))
 		return false;
 	m_go_type = stoi(goType);
 	return true;
 }
 
-bool GiboNGF::set_gongje(wstring gongje) {
+bool GiboNGF::set_gongje(std::wstring gongje) {
 	if (!isWstoi(gongje))
 		return false;
 	m_gongje = stoi(gongje);
 	return true;
 }
 
-bool GiboNGF::set_compensation(wstring compensation) {
+bool GiboNGF::set_compensation(std::wstring compensation) {
 	if (!isWstoi(compensation))
 		return false;
 	m_compensation = stoi(compensation);
 	return true;
 }
 
-bool GiboNGF::set_sequence(wstring sequence) {
+bool GiboNGF::set_sequence(std::wstring sequence) {
 	if (!isWstoi(sequence))
 		return false;
 	m_sequence = stoi(sequence);
@@ -55,12 +55,12 @@ bool GiboNGF::set_sequence(wstring sequence) {
 }
 
 bool GiboNGF::loadGibo(wchar_t* address) {
-	wifstream gibofile(address);
+	std::wifstream gibofile(address);
 	std::locale loc("ko-kr");
 	gibofile.imbue(loc);
 	if (!gibofile)
 		return false;
-	wstring buffer;
+	std::wstring buffer;
 	getline(gibofile, m_battle_type);
 
 	getline(gibofile, buffer);
@@ -110,7 +110,7 @@ bool GiboNGF::loadGibo(wchar_t* address) {
 	return true;
 }
 
-void GiboNGF::Player::Set(const wstring& ngfPlayerString)
+void GiboNGF::Player::Set(const std::wstring& ngfPlayerString)
 {
 	this->name = ngfPlayerString.substr(0, ngfPlayerString.find_first_of(L' '));
 	this->kyu = ngfPlayerString.substr(ngfPlayerString.find_last_of(L' '));

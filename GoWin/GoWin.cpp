@@ -227,8 +227,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			int errorMSG = g_Game.Placement( placement_point, g_Game.get_current_placement_order());
 
 			if (errorMSG == 0) {
-				SetWindowText(hBCS, to_wstring( g_Game.info().get_player(Color::Black).captured_stone()).c_str() );
-				SetWindowText(hWCS, to_wstring( g_Game.info().get_player(Color::White).captured_stone()).c_str() );
+				SetWindowText(hBCS, std::to_wstring( g_Game.info().get_player(Color::Black).captured_stone()).c_str() );
+				SetWindowText(hWCS, std::to_wstring( g_Game.info().get_player(Color::White).captured_stone()).c_str() );
 				InvalidateRect(hWnd, NULL, FALSE);
 				if (mysocket.IsConnected())
 				{
@@ -301,7 +301,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			SFN.Flags = OFN_OVERWRITEPROMPT;
 			if (GetSaveFileName(&SFN) != 0)
 			{
-				wstring extension = lpstrFile;		//확장자 추출하기
+				std::wstring extension = lpstrFile;		//확장자 추출하기
 				extension = extension.substr(extension.length() - 3, 3);
 				g_Game.Save(lpstrFile, extension);
 			}

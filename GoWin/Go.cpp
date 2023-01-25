@@ -151,7 +151,7 @@ bool Go::Load(GiboNGF& gibo)
 	Handicap(m_info.go_type());
 	for (int i = 0; i < gibo.sequence(); i++)
 	{
-		wcout << i << endl;
+		std::wcout << i << std::endl;
 		const auto& placement = gibo.getPlacement(i+1);
 		int errorMSG = Placement(Coord2d(placement.x(), placement.y()) , get_current_placement_order() ); // 확인 TODO
 		if (0 != errorMSG)
@@ -163,38 +163,38 @@ bool Go::Load(GiboNGF& gibo)
 	return true;
 }
 
-void SaveNGF(LPWSTR directory, const Go::Information& goInfo, const wstring& date)
+void SaveNGF(LPWSTR directory, const Go::Information& goInfo, const std::wstring& date)
 {
-	wofstream gibofile(directory);
+	std::wofstream gibofile(directory);
 	if (gibofile.is_open() == false)
 	{
 		printf("Failed : 파일 열기 실패\n");
 		return;
 	}
 
-	gibofile << goInfo.game_type() << endl;
-	gibofile << goInfo.board_size() << endl;
-	gibofile << goInfo.get_player(Color::White).to_ngf() << endl;
-	gibofile << goInfo.get_player(Color::Black).to_ngf() << endl;
-	gibofile << "https://blog.naver.com/damas125" << endl;
-	gibofile << goInfo.go_type() << endl;
-	gibofile << goInfo.gongje() << endl;
-	gibofile << goInfo.compensation() << endl;
-	gibofile << date << endl;
-	gibofile << goInfo.base_time() << endl;
-	gibofile << goInfo.game_result() << endl;
-	gibofile << goInfo.sequence() - 1 << endl;
+	gibofile << goInfo.game_type() << std::endl;
+	gibofile << goInfo.board_size() << std::endl;
+	gibofile << goInfo.get_player(Color::White).to_ngf() << std::endl;
+	gibofile << goInfo.get_player(Color::Black).to_ngf() << std::endl;
+	gibofile << "https://blog.naver.com/damas125" << std::endl;
+	gibofile << goInfo.go_type() << std::endl;
+	gibofile << goInfo.gongje() << std::endl;
+	gibofile << goInfo.compensation() << std::endl;
+	gibofile << date << std::endl;
+	gibofile << goInfo.base_time() << std::endl;
+	gibofile << goInfo.game_result() << std::endl;
+	gibofile << goInfo.sequence() - 1 << std::endl;
 	for (int i = 0; i < goInfo.sequence() - 1; i++)
 	{
 		PlacementInfo data = goInfo.placement().read(i).data();
-		gibofile << GiboNGF::Placement(i + 1, data.placement.x, data.placement.y, Color2Char(data.player)).ToString() << endl;
+		gibofile << GiboNGF::Placement(i + 1, data.placement.x, data.placement.y, Color2Char(data.player)).ToString() << std::endl;
 	}
 	gibofile.close();
 }
 
-void SaveSGF(LPWSTR directory, const Go::Information& goInfo, const wstring& date)
+void SaveSGF(LPWSTR directory, const Go::Information& goInfo, const std::wstring& date)
 {
-	wofstream gibofile(directory);
+	std::wofstream gibofile(directory);
 	if (gibofile.is_open() == false)
 	{
 		printf("Failed : 파일 열기 실패\n");
@@ -214,29 +214,29 @@ void SaveSGF(LPWSTR directory, const Go::Information& goInfo, const wstring& dat
 	gibofile << "HA[" << goInfo.go_type() << "]";
 	gibofile << "RE[" << goInfo.game_result() << "]";
 	gibofile << "US[" << "https://blog.naver.com/damas125" << "]";
-	gibofile << endl;
+	gibofile << std::endl;
 	for (int i = 0; i < goInfo.sequence() - 1; i++)
 	{
 		PlacementInfo data = goInfo.placement().read(i).data();
 		gibofile << data.to_sgf();
 		if (i % 14 == 13)
-			gibofile << endl;
+			gibofile << std::endl;
 	}
 	gibofile << ")";
 	gibofile.close();
 }
 
-bool Go::Save(LPWSTR address, wstring extension) 
+bool Go::Save(LPWSTR address, std::wstring extension)
 {
 	printf("기보 저장 시작--------\n");
 	printf("경로 : %ls \n확장자 : %ws\n", address, extension.c_str());
-	locale::global(locale("Korean"));
+	std::locale::global(std::locale("Korean"));
 	SYSTEMTIME time;
 	GetLocalTime(&time);
-	wstring date = to_wstring(time.wYear)
-		+ ((time.wMonth < 10) ? _T("0") : _T("")) + to_wstring(time.wMonth)
-		+ ((time.wDay < 10) ? _T("0") : _T(""))	+ to_wstring(time.wDay)
-		+_T(" [") + ((time.wHour < 10) ? _T("0") : _T("")) + to_wstring(time.wHour) + _T(":") + ((time.wMinute < 10) ? _T("0") : _T("")) + to_wstring(time.wMinute) + _T("]");
+	std::wstring date = std::to_wstring(time.wYear)
+		+ ((time.wMonth < 10) ? _T("0") : _T("")) + std::to_wstring(time.wMonth)
+		+ ((time.wDay < 10) ? _T("0") : _T(""))	+ std::to_wstring(time.wDay)
+		+_T(" [") + ((time.wHour < 10) ? _T("0") : _T("")) + std::to_wstring(time.wHour) + _T(":") + ((time.wMinute < 10) ? _T("0") : _T("")) + std::to_wstring(time.wMinute) + _T("]");
 
 	transform(extension.begin(), extension.end(), extension.begin(), towlower);
 	if (extension == _T("ngf"))
