@@ -6,15 +6,15 @@
 #define UP	2
 #define DOWN	3
 
-void Board::init() 
+void Board::init(int size) 
 {
-	board.resize(21);
-	for (int x = 0; x < 21; x++)
+	board.resize(size + 2);
+	for (int x = 0; x < size + 2; x++)
 	{
-		board[x].resize(21);
-		for (int y = 0; y < 21; y++)
+		board[x].resize(size + 2);
+		for (int y = 0; y < size + 2; y++)
 		{
-			if (x == 0 || x == 20 || y == 0 || y == 20)
+			if (x == 0 || x == size + 1 || y == 0 || y == size + 1)
 				board[x][y] = Stone("Wall");
 			else
 				board[x][y] = Stone();

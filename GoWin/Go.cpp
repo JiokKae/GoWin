@@ -53,7 +53,7 @@ bool Go::Handicap(int num)
 bool Go::Init() 
 {
 	boardLog.clear();
-	m_board->init();
+	m_board->init(19);
 	m_info.Init();
 	currentPlacementOrderIndex = 0;
 

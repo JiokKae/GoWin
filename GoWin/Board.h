@@ -6,7 +6,7 @@
 
 class Board {
 public:
-	void init();					// OverLoad
+	void init(int size);				// OverLoad
 	void setHandicap(int num);
 	int setBoard(int x, int y, int sequence, Color color);
 	void setBoardtmp(int x, int y, int sequence);
