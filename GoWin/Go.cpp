@@ -5,6 +5,7 @@
 #include <tchar.h>
 #include <cwctype>
 #include <algorithm>
+#include <fstream>
 
 Go::Go()
 	: m_mode("Single")
@@ -150,8 +151,9 @@ bool Go::Load(GiboNGF& gibo)
 	Handicap(m_info.go_type());
 	for (int i = 0; i < gibo.sequence(); i++)
 	{
-		cout << i << endl;
-		int errorMSG = Placement( gibo.getPlacement(i), get_current_placement_order() ); // 확인 TODO
+		wcout << i << endl;
+		const auto& placement = gibo.getPlacement(i+1);
+		int errorMSG = Placement(Coord2d(placement.x(), placement.y()) , get_current_placement_order() ); // 확인 TODO
 		if (0 != errorMSG)
 		{
 			Init();
@@ -185,7 +187,7 @@ void SaveNGF(LPWSTR directory, const Go::Information& goInfo, const wstring& dat
 	for (int i = 0; i < goInfo.sequence() - 1; i++)
 	{
 		PlacementInfo data = goInfo.placement().read(i).data();
-		gibofile << _T("PM") << int2str_ngf(i) << data2str_ngf(data) << endl;
+		gibofile << GiboNGF::Placement(i + 1, data.placement.x, data.placement.y, Color2Char(data.player)).ToString() << endl;
 	}
 	gibofile.close();
 }

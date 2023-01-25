@@ -1,35 +1,39 @@
 ﻿#pragma once
 #include <string>
-#include <fstream>
-#include "stdgo.h"
 #include <vector>
 
 using namespace std;
 
-static wstring int2str_ngf(int index)
-{
-	wchar_t first = ++index / 26 + 65;
-	wchar_t second = index % 26 + 65;
-
-	return wstring({ first,second });
-}
-
-static wstring data2str_ngf(PlacementInfo data)
-{
-	wchar_t player = Color2Char(data.player);
-	wchar_t x = data.placement.x + 65;
-	wchar_t y = data.placement.y + 65;
-
-	return wstring({ player, x, y, y, x });
-}
-
 class GiboNGF {
 public:
-	struct Player {
+	class Player {
+	public:
 		std::wstring name;
 		std::wstring kyu;
 
 		void Set(const wstring& ngfPlayerString);
+	};
+
+	class Placement {
+	public:
+		Placement(int sequence, int x, int y, wchar_t color);
+		Placement(const std::wstring& ngfString);
+
+		int sequence() const;
+		int x() const;
+		int y() const;
+		wchar_t color() const;
+
+		std::wstring ToString() const;
+
+	private:
+		int m_sequence;
+		int m_x;
+		int m_y;
+		wchar_t m_color;
+
+		int StringToSequence(const std::wstring& sequence) const;
+		std::wstring SequenceToString(int sequence) const;
 	};
 
 private:
@@ -45,7 +49,7 @@ private:
 	wstring m_base_time;	// 기본 시간
 	wstring m_game_result;	// 게임 결과
 	int m_sequence;		// 수
-	std::vector<std::wstring> m_placements;	// 착수 내역
+	std::vector<GiboNGF::Placement> m_placements;	// 착수 내역
 
 public:
 	GiboNGF(wchar_t* address);
@@ -64,7 +68,7 @@ public:
 	wstring game_result()	{ return m_game_result; }
 	int sequence()		{ return m_sequence; }
 
-	Coord2d getPlacement(int sequence);
+	const GiboNGF::Placement& getPlacement(int sequence) const;
 
 	bool set_board_size(wstring lineNum);
 	bool set_go_type(wstring goType);
