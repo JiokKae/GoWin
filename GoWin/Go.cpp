@@ -152,7 +152,7 @@ bool Go::Load(GiboNGF& gibo)
 	for (int i = 0; i < gibo.sequence(); i++)
 	{
 		std::wcout << i << std::endl;
-		const auto& placement = gibo.getPlacement(i+1);
+		const auto& placement = gibo.getPlacements()[i];
 		int errorMSG = Placement(Coord2d(placement.x(), placement.y()) , get_current_placement_order() ); // È®ÀÎ TODO
 		if (0 != errorMSG)
 		{
