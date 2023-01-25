@@ -6,6 +6,7 @@
 #include <cwctype>
 #include <algorithm>
 #include <fstream>
+#include <format>
 
 Go::Go()
 	: m_mode("Single")
@@ -226,29 +227,25 @@ void SaveSGF(LPWSTR directory, const Go::Information& goInfo, const std::wstring
 	gibofile.close();
 }
 
-bool Go::Save(LPWSTR address, std::wstring extension)
+bool Go::Save(LPWSTR address, const std::wstring& extension)
 {
 	printf("기보 저장 시작--------\n");
 	printf("경로 : %ls \n확장자 : %ws\n", address, extension.c_str());
 	std::locale::global(std::locale("Korean"));
 	SYSTEMTIME time;
 	GetLocalTime(&time);
-	std::wstring date = std::to_wstring(time.wYear)
-		+ ((time.wMonth < 10) ? _T("0") : _T("")) + std::to_wstring(time.wMonth)
-		+ ((time.wDay < 10) ? _T("0") : _T(""))	+ std::to_wstring(time.wDay)
-		+_T(" [") + ((time.wHour < 10) ? _T("0") : _T("")) + std::to_wstring(time.wHour) + _T(":") + ((time.wMinute < 10) ? _T("0") : _T("")) + std::to_wstring(time.wMinute) + _T("]");
+	std::wstring date = std::format(_T("{}{:0>2}{:0>2} [{:0>2}:{:0>2}]"), time.wYear, time.wMonth, time.wDay, time.wHour, time.wMinute);
 
-	transform(extension.begin(), extension.end(), extension.begin(), towlower);
+	std::transform(extension.begin(), extension.end(), extension.begin(), std::towlower);
+	std::wcout << _T("    ") << extension << _T(" 기록-------- - ") << std::endl;
 	if (extension == _T("ngf"))
 	{
-		printf("    ngf 기록---------\n");
 		SaveNGF(address, m_info, date);
 		return true;
 	}
 	
 	if(extension == _T("sgf"))
 	{
-		printf("    sgf 기록---------\n");
 		SaveSGF(address, m_info, date);
 		return true;
 	}

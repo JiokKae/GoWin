@@ -85,14 +85,14 @@ public:
 	const PlacementInfo& getLastPlacementInfo() const;
 
 	// function
-	bool Backsies();					// 무르기
-	bool Handicap(int num);					// 핸디캡 적용
-	bool Init();						// 초기화
-	bool Pass();						// 한수쉼
-	int Placement( Coord2d board, Color color );		// 착수
+	bool Backsies();						// 무르기
+	bool Handicap(int num);						// 핸디캡 적용
+	bool Init();							// 초기화
+	bool Pass();							// 한수쉼
+	int Placement( Coord2d board, Color color );			// 착수
 
-	bool Load( GiboNGF& gibo );				// 기보 불러오기
-	bool Save( LPWSTR address, std::wstring extension );	// 기보 저장하기
+	bool Load( GiboNGF& gibo );					// 기보 불러오기
+	bool Save( LPWSTR address, const std::wstring& giboExtension );	// 기보 저장하기
 
 	Color get_current_placement_order() const;
 	void set_placement_order_next();
