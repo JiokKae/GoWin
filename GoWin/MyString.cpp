@@ -29,7 +29,7 @@ bool isWstoi( const std::wstring& num )
 	return true;
 }
 
-wchar_t* CharToWChar(char* pstrSrc)
+wchar_t* CharToWChar(const char* pstrSrc)
 {
 	if (pstrSrc == nullptr)
 		return nullptr;

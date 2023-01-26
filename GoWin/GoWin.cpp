@@ -7,6 +7,8 @@
 #include "GiboNGF.h"
 #include "Go.h"
 #include "Player/Player.h"
+#include <format>
+#include <fstream>
 
 #pragma warning(disable:4996)
 
@@ -276,9 +278,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				extension = extension.substr(extension.length() - 3, 3);
 				if (extension == _T("NGF") || extension == _T("ngf")) //확장자 NGF
 				{
-					GiboNGF gibo(lpstrFile);
-					g_Game.Load(gibo);
+					try {
+						std::wifstream file(lpstrFile);
+						file.imbue(std::locale(""));
 
+						GiboNGF gibo;
+						gibo.load(file);
+
+						file.close();
+
+						g_Game.Load(gibo);
+					}
+					catch (const std::exception& e)
+					{
+						MessageBox(hWnd, std::format(_T("파일을 불러오는데 실패했습니다."), CharToWChar(e.what())).c_str(), _T("열기 실패"), MB_OK);
+					}
+					
 					InvalidateRect(hWnd, NULL, FALSE);
 				}
 				else

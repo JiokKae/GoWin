@@ -21,7 +21,6 @@ public:
 	int captured_stone() const	{ return m_captured_stone; }
 
 	std::wstring to_wstring() const;
-	std::wstring to_ngf() const;
 	void print( std::wostream& wos) const;
 	
 private:

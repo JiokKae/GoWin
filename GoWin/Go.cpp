@@ -142,7 +142,7 @@ bool Go::Load(GiboNGF& gibo)
 	LinkedList m_placement;
 	m_info.set_game_type(gibo.battle_type());
 	m_info.set_board_size(gibo.board_size());
-	m_info.set_link(gibo.link());
+	m_info.set_link(gibo.url());
 	m_info.set_go_type(gibo.go_type());
 	m_info.set_gongje(gibo.gongje());
 	m_info.set_compensation(gibo.compensation());
@@ -166,94 +166,83 @@ bool Go::Load(GiboNGF& gibo)
 	return true;
 }
 
-void SaveNGF(LPWSTR directory, const Go::Information& goInfo, const std::wstring& date)
+void SaveNGF(std::wostream& wos, const Go::Information& goInfo, const std::wstring& date)
 {
-	std::wofstream gibofile(directory);
-	if (gibofile.is_open() == false)
-	{
-		printf("Failed : 파일 열기 실패\n");
-		return;
-	}
-
-	gibofile << goInfo.game_type() << std::endl;
-	gibofile << goInfo.board_size() << std::endl;
-	gibofile << goInfo.get_player(Color::White).to_ngf() << std::endl;
-	gibofile << goInfo.get_player(Color::Black).to_ngf() << std::endl;
-	gibofile << "https://blog.naver.com/damas125" << std::endl;
-	gibofile << goInfo.go_type() << std::endl;
-	gibofile << goInfo.gongje() << std::endl;
-	gibofile << goInfo.compensation() << std::endl;
-	gibofile << date << std::endl;
-	gibofile << goInfo.base_time() << std::endl;
-	gibofile << goInfo.game_result() << std::endl;
-	gibofile << goInfo.sequence() - 1 << std::endl;
+	GiboNGF ngf;
+	ngf.set_battle_type(goInfo.game_type());
+	ngf.set_board_size(goInfo.board_size());
+	ngf.set_white_player(goInfo.get_player(Color::White).name(), goInfo.get_player(Color::White).kyu());
+	ngf.set_black_player(goInfo.get_player(Color::Black).name(), goInfo.get_player(Color::Black).kyu());
+	ngf.set_url(_T("https://blog.naver.com/damas125"));
+	ngf.set_go_type(goInfo.go_type());
+	ngf.set_gongje(goInfo.gongje());
+	ngf.set_compensation(goInfo.compensation());
+	ngf.set_date(date);
+	ngf.set_base_time(goInfo.base_time());
+	ngf.set_game_result(goInfo.game_result());
 	for (int i = 0; i < goInfo.sequence() - 1; i++)
 	{
-		PlacementInfo data = goInfo.placement().read(i).data();
-		gibofile << GiboNGF::Placement(i + 1, data.placement.x, data.placement.y, Color2Char(data.player)).ToString() << std::endl;
+		const PlacementInfo& data = goInfo.placement().read(i).data();
+		ngf.add_placement(GiboNGF::Placement(data.sequence, data.placement.x, data.placement.y, Color2Char(data.player)));
 	}
-	gibofile.close();
+	ngf.save(wos);
 }
 
-void SaveSGF(LPWSTR directory, const Go::Information& goInfo, const std::wstring& date)
+void SaveSGF(std::wostream& wos, const Go::Information& goInfo, const std::wstring& date)
 {
-	std::wofstream gibofile(directory);
-	if (gibofile.is_open() == false)
-	{
-		printf("Failed : 파일 열기 실패\n");
-		return;
-	}
-
-	gibofile << "(";
-	gibofile << ";AP[Go:1.0.2]";
-	gibofile << "SZ[" << goInfo.board_size() << "]";
-	gibofile << "GN[" << goInfo.game_type() << "]";
-	gibofile << "DT[" << date << "]";
-	gibofile << "PB[" << goInfo.get_player(Color::Black).name() << "]";
-	gibofile << "BR[" << goInfo.get_player(Color::Black).kyu() << "]";
-	gibofile << "PW[" << goInfo.get_player(Color::White).name() << "]";
-	gibofile << "WR[" << goInfo.get_player(Color::White).kyu() << "]";
-	gibofile << "KM[" << goInfo.compensation() << ".5" << "]";
-	gibofile << "HA[" << goInfo.go_type() << "]";
-	gibofile << "RE[" << goInfo.game_result() << "]";
-	gibofile << "US[" << "https://blog.naver.com/damas125" << "]";
-	gibofile << std::endl;
+	wos << "(";
+	wos << ";AP[Go:1.0.2]";
+	wos << "SZ[" << goInfo.board_size() << "]";
+	wos << "GN[" << goInfo.game_type() << "]";
+	wos << "DT[" << date << "]";
+	wos << "PB[" << goInfo.get_player(Color::Black).name() << "]";
+	wos << "BR[" << goInfo.get_player(Color::Black).kyu() << "]";
+	wos << "PW[" << goInfo.get_player(Color::White).name() << "]";
+	wos << "WR[" << goInfo.get_player(Color::White).kyu() << "]";
+	wos << "KM[" << goInfo.compensation() << ".5" << "]";
+	wos << "HA[" << goInfo.go_type() << "]";
+	wos << "RE[" << goInfo.game_result() << "]";
+	wos << "US[" << "https://blog.naver.com/damas125" << "]";
+	wos << std::endl;
 	for (int i = 0; i < goInfo.sequence() - 1; i++)
 	{
 		PlacementInfo data = goInfo.placement().read(i).data();
-		gibofile << data.to_sgf();
+		wos << data.to_sgf();
 		if (i % 14 == 13)
-			gibofile << std::endl;
+			wos << std::endl;
 	}
-	gibofile << ")";
-	gibofile.close();
+	wos << ")";
 }
 
-bool Go::Save(LPWSTR address, std::wstring extension)
+bool Go::Save(LPWSTR directory, std::wstring file_extension)
 {
+	std::transform(file_extension.begin(), file_extension.end(), file_extension.begin(), std::towlower);
+	if (file_extension != _T("ngf") && file_extension != _T("sgf"))
+	{
+		printf("Save failed: invalid file file extension.\n");
+		return false;
+	}
+
 	printf("기보 저장 시작--------\n");
-	printf("경로 : %ls \n확장자 : %ws\n", address, extension.c_str());
-	std::locale::global(std::locale("Korean"));
+	printf("경로 : %ls \n확장자 : %ws\n", directory, file_extension.c_str());
+	//std::locale::global(std::locale(""));
 	SYSTEMTIME time;
 	GetLocalTime(&time);
 	std::wstring date = std::format(_T("{}{:0>2}{:0>2} [{:0>2}:{:0>2}]"), time.wYear, time.wMonth, time.wDay, time.wHour, time.wMinute);
 
-	std::transform(extension.begin(), extension.end(), extension.begin(), std::towlower);
-	std::wcout << _T("    ") << extension << _T(" 기록-------- - ") << std::endl;
-	if (extension == _T("ngf"))
+	std::wofstream file(directory);
+	file.imbue(std::locale(""));
+	if (file_extension == _T("ngf"))
 	{
-		SaveNGF(address, m_info, date);
-		return true;
-	}
-	
-	if(extension == _T("sgf"))
+		SaveNGF(file, m_info, date);
+	} 
+	else if (file_extension == _T("sgf"))
 	{
-		SaveSGF(address, m_info, date);
-		return true;
+		SaveSGF(file, m_info, date);
 	}
+	file.close();
 
-	printf("Failed : 일치하는 확장자 없음\n");
-	return false;
+	return true;
 }
 
 const Stone& Go::ReadCoord( Coord2d coord )
