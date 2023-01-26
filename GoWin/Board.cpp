@@ -6,6 +6,8 @@
 #define UP	2
 #define DOWN	3
 
+const char* Board::direction_char[4] = { "[좌]", "[우]", "[상]", "[하]" };
+
 void Board::init(int size) 
 {
 	board.resize(size + 2);

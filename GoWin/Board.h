@@ -21,7 +21,7 @@ public:
 	bool isDeadGS(const Stone* s1);
 	bool isSolo(const Stone& s);		bool isSolo( int x, int y );
 
-	const char* direction_char[4] = { "[аб]", "[©Л]", "[╩С]", "[го]" };
+	static const char* direction_char[4];
 private:
 	std::vector< std::vector<Stone>> board;
 };
