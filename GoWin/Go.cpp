@@ -1,4 +1,4 @@
-#include "Go.h"
+ï»¿#include "Go.h"
 #include "Stone/Stone.h"
 #include "stdgo.h"
 #include <tchar.h>
@@ -20,7 +20,7 @@ Go::~Go()
 {
 }
 
-// ¹«¸£±â
+// ë¬´ë¥´ê¸°
 bool Go::Backsies() 
 {
 	if (boardLog.empty() == true)
@@ -38,7 +38,7 @@ bool Go::Backsies()
 	return true;
 }
 
-// ÇÚµðÄ¸
+// í•¸ë””ìº¡
 bool Go::Handicap(int num) 
 {
 	if (m_info.sequence() != 1 || num > 9 || num < 2)
@@ -50,7 +50,7 @@ bool Go::Handicap(int num)
 	return true;
 }
 
-// ÃÊ±âÈ­
+// ì´ˆê¸°í™”
 bool Go::Init() 
 {
 	boardLog.clear();
@@ -75,9 +75,9 @@ bool Go::Pass()
 	return true;
 }
 
-// function:	Âø¼ö
+// function:	ì°©ìˆ˜
 // out:		errorMessage 
-// in:		x, y ÁÂÇ¥
+// in:		x, y ì¢Œí‘œ
 int Go::Placement( Coord2d coord_placement ) 
 {
 	int x = coord_placement.x;
@@ -85,7 +85,7 @@ int Go::Placement( Coord2d coord_placement )
 	int sequence = m_info.sequence();
 	Color color = get_current_placement_order();
 
-	// 0, 0 ÂøÁ¡Àº Â÷·Ê ³Ñ±â±â
+	// 0, 0 ì°©ì ì€ ì°¨ë¡€ ë„˜ê¸°ê¸°
 	if (x == 0 && y == 0) {
 		Pass();
 		return 0;
@@ -123,7 +123,7 @@ int Go::Placement( Coord2d coord_placement )
 	if (captured_stone != 0)
 		m_info.add_captured_stone(color, captured_stone);
 	
-	// Âø¼ö Á¤º¸ ÀúÀå
+	// ì°©ìˆ˜ ì •ë³´ ì €ìž¥
 	PlacementInfo placement(x, y, sequence, color);
 	placement.print( std::wcout );
 	m_info.add_placement(placement);
@@ -159,7 +159,7 @@ bool Go::Load(GiboNGF& gibo)
 	{
 		std::wcout << i << std::endl;
 		const auto& placement = gibo.getPlacements()[i];
-		int errorMSG = Placement(Coord2d(placement.x(), placement.y())); // È®ÀÎ TODO
+		int errorMSG = Placement(Coord2d(placement.x(), placement.y())); // í™•ì¸ TODO
 		if (0 != errorMSG)
 		{
 			Init();
@@ -174,7 +174,7 @@ void SaveNGF(LPWSTR directory, const Go::Information& goInfo, const std::wstring
 	std::wofstream gibofile(directory);
 	if (gibofile.is_open() == false)
 	{
-		printf("Failed : ÆÄÀÏ ¿­±â ½ÇÆÐ\n");
+		printf("Failed : íŒŒì¼ ì—´ê¸° ì‹¤íŒ¨\n");
 		return;
 	}
 
@@ -203,7 +203,7 @@ void SaveSGF(LPWSTR directory, const Go::Information& goInfo, const std::wstring
 	std::wofstream gibofile(directory);
 	if (gibofile.is_open() == false)
 	{
-		printf("Failed : ÆÄÀÏ ¿­±â ½ÇÆÐ\n");
+		printf("Failed : íŒŒì¼ ì—´ê¸° ì‹¤íŒ¨\n");
 		return;
 	}
 
@@ -234,15 +234,15 @@ void SaveSGF(LPWSTR directory, const Go::Information& goInfo, const std::wstring
 
 bool Go::Save(LPWSTR address, std::wstring extension)
 {
-	printf("±âº¸ ÀúÀå ½ÃÀÛ--------\n");
-	printf("°æ·Î : %ls \nÈ®ÀåÀÚ : %ws\n", address, extension.c_str());
+	printf("ê¸°ë³´ ì €ìž¥ ì‹œìž‘--------\n");
+	printf("ê²½ë¡œ : %ls \ní™•ìž¥ìž : %ws\n", address, extension.c_str());
 	std::locale::global(std::locale("Korean"));
 	SYSTEMTIME time;
 	GetLocalTime(&time);
 	std::wstring date = std::format(_T("{}{:0>2}{:0>2} [{:0>2}:{:0>2}]"), time.wYear, time.wMonth, time.wDay, time.wHour, time.wMinute);
 
 	std::transform(extension.begin(), extension.end(), extension.begin(), std::towlower);
-	std::wcout << _T("    ") << extension << _T(" ±â·Ï-------- - ") << std::endl;
+	std::wcout << _T("    ") << extension << _T(" ê¸°ë¡-------- - ") << std::endl;
 	if (extension == _T("ngf"))
 	{
 		SaveNGF(address, m_info, date);
@@ -255,7 +255,7 @@ bool Go::Save(LPWSTR address, std::wstring extension)
 		return true;
 	}
 
-	printf("Failed : ÀÏÄ¡ÇÏ´Â È®ÀåÀÚ ¾øÀ½\n");
+	printf("Failed : ì¼ì¹˜í•˜ëŠ” í™•ìž¥ìž ì—†ìŒ\n");
 	return false;
 }
 
@@ -379,11 +379,11 @@ void Go::set_placement_order_next()
 }
 
 Go::Information::Information()
-	: m_game_type( _T( "Ä£¼±´ë±¹" ) )
+	: m_game_type( _T( "ì¹œì„ ëŒ€êµ­" ) )
 	, m_board_size( 19 )
 	, m_compensation( 6 )
 	, m_base_time( _T( "0" ) )
-	, m_game_result( _T( "°á°ú ¾øÀ½" ) )
+	, m_game_result( _T( "ê²°ê³¼ ì—†ìŒ" ) )
 	
 {
 	Init();

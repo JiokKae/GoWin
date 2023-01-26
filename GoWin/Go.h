@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "framework.h"
 #include "GiboNGF.h"
@@ -61,17 +61,17 @@ public:
 	private:
 		std::map<Color, Player> players;
 
-		LinkedList m_placement;	// Âø¼ö
-		std::wstring m_game_type;	// ·¹ÀÌÆÃ, Ä£¼±
-		int m_board_size;	// ¹ÙµÏÆÇ Å©±â(9, 13, 19 ...)
-		std::wstring m_link;		// ÀÎÅÍ³İ ÁÖ¼Ò
-		int m_go_type;		// 0.È£¼± 1.Á¤¼± 2~9.Á¡ Á¢¹ÙµÏ
-		int m_gongje;		// 0.Èæ°øÁ¦ else.¹é°øÁ¦
-		int m_compensation;	// ´ı
-		std::wstring m_date;		// ³¯Â¥ ¹× ½Ã°£
-		std::wstring m_base_time;	// ±âº» ½Ã°£
-		std::wstring m_game_result;	// °ÔÀÓ °á°ú
-		int m_sequence;		// ¼ö
+		LinkedList m_placement;	// ì°©ìˆ˜
+		std::wstring m_game_type;	// ë ˆì´íŒ…, ì¹œì„ 
+		int m_board_size;	// ë°”ë‘‘íŒ í¬ê¸°(9, 13, 19 ...)
+		std::wstring m_link;		// ì¸í„°ë„· ì£¼ì†Œ
+		int m_go_type;		// 0.í˜¸ì„  1.ì •ì„  2~9.ì  ì ‘ë°”ë‘‘
+		int m_gongje;		// 0.í‘ê³µì œ else.ë°±ê³µì œ
+		int m_compensation;	// ë¤
+		std::wstring m_date;		// ë‚ ì§œ ë° ì‹œê°„
+		std::wstring m_base_time;	// ê¸°ë³¸ ì‹œê°„
+		std::wstring m_game_result;	// ê²Œì„ ê²°ê³¼
+		int m_sequence;		// ìˆ˜
 	};
 
 public:
@@ -79,32 +79,32 @@ public:
 	~Go();
 
 	// getter
-	Information info()	{ return m_info; }	// Á¤º¸ 
-	std::string mode()	{ return m_mode; }	// ¸ğµå ¹İÈ¯
-	const Stone& ReadCoord( Coord2d coord );	// ÀĞ±â
+	Information info()	{ return m_info; }	// ì •ë³´ 
+	std::string mode()	{ return m_mode; }	// ëª¨ë“œ ë°˜í™˜
+	const Stone& ReadCoord( Coord2d coord );	// ì½ê¸°
 	const PlacementInfo& getLastPlacementInfo() const;
 
 	// function
-	bool Backsies();						// ¹«¸£±â
-	bool Handicap(int num);						// ÇÚµğÄ¸ Àû¿ë
-	bool Init();							// ÃÊ±âÈ­
-	bool Pass();							// ÇÑ¼ö½°
-	int Placement( Coord2d board );					// Âø¼ö
+	bool Backsies();						// ë¬´ë¥´ê¸°
+	bool Handicap(int num);						// í•¸ë””ìº¡ ì ìš©
+	bool Init();							// ì´ˆê¸°í™”
+	bool Pass();							// í•œìˆ˜ì‰¼
+	int Placement( Coord2d board );					// ì°©ìˆ˜
 
-	bool Load( GiboNGF& gibo );					// ±âº¸ ºÒ·¯¿À±â
-	bool Save( LPWSTR address, std::wstring giboExtension );	// ±âº¸ ÀúÀåÇÏ±â
+	bool Load( GiboNGF& gibo );					// ê¸°ë³´ ë¶ˆëŸ¬ì˜¤ê¸°
+	bool Save( LPWSTR address, std::wstring giboExtension );	// ê¸°ë³´ ì €ì¥í•˜ê¸°
 
 	Color get_current_placement_order() const;
 	void set_placement_order_previous();
 	void set_placement_order_next();
 
 private:
-	std::vector< Board > boardLog;	// º¸µåÀÇ »óÅÂ¸¦ ÀúÀåÇÏ´Â º¤ÅÍ
+	std::vector< Board > boardLog;	// ë³´ë“œì˜ ìƒíƒœë¥¼ ì €ì¥í•˜ëŠ” ë²¡í„°
 	std::vector< Board > giboLog;
 	
-	Board m_board;			// º¸µå
-	Information m_info;		// ¹ÙµÏÀÇ Á¤º¸
-	std::string m_mode;		// ¸ğµå : Single, Gibo
+	Board m_board;			// ë³´ë“œ
+	Information m_info;		// ë°”ë‘‘ì˜ ì •ë³´
+	std::string m_mode;		// ëª¨ë“œ : Single, Gibo
 	
 	std::vector<Color> placementOrders;
 	int currentPlacementOrderIndex;
