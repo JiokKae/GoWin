@@ -1,5 +1,4 @@
 #include "Go.h"
-#include "Board.h"
 #include "Stone/Stone.h"
 #include "stdgo.h"
 #include <tchar.h>
@@ -10,7 +9,7 @@
 
 Go::Go()
 	: m_mode("Single")
-	, m_board( new Board() )
+	, m_board()
 	, m_info()
 	, currentPlacementOrderIndex(0)
 {
@@ -33,6 +32,7 @@ bool Go::Backsies()
 	boardLog.pop_back();
 
 	m_info.delete_placement();
+	set_placement_order_previous();
 	m_info.add_sequence(-1);
 
 	return true;
@@ -44,7 +44,7 @@ bool Go::Handicap(int num)
 	if (m_info.sequence() != 1 || num > 9 || num < 2)
 		return false;
 	boardLog.push_back(m_board);
-	m_board->setHandicap(num);
+	m_board.setHandicap(num);
 
 	m_info.add_sequence(1);
 	return true;
@@ -54,7 +54,7 @@ bool Go::Handicap(int num)
 bool Go::Init() 
 {
 	boardLog.clear();
-	m_board->init(19);
+	m_board.init(19);
 	m_info.Init();
 	currentPlacementOrderIndex = 0;
 
@@ -78,43 +78,48 @@ bool Go::Pass()
 // function:	착수
 // out:		errorMessage 
 // in:		x, y 좌표
-int Go::Placement( Coord2d coord_placement, Color color ) 
+int Go::Placement( Coord2d coord_placement ) 
 {
 	int x = coord_placement.x;
 	int y = coord_placement.y;
 	int sequence = m_info.sequence();
+	Color color = get_current_placement_order();
 
 	// 0, 0 착점은 차례 넘기기
 	if (x == 0 && y == 0) {
 		Pass();
 		return 0;
 	}
-	if (m_board->isBoardin(x, y) == false)
+	if (m_board.isBoardin(x, y) == false)
 		return ERR_NOTBOARDIN;
-	if (m_board->isEmpty(x, y) == false)
+	if (m_board.isEmpty(x, y) == false)
+	{
+		m_board.getStone(x, y).Print(std::cout);
 		return ERR_NOTEMPTY;
-	if (m_board->isIllegalpoint(x, y, color) == true)
+	}
+		
+	if (m_board.isIllegalpoint(x, y, color) == true)
 	{
 		int direction;
-		m_board->setBoardtmp(x, y, sequence);
+		m_board.setBoardtmp(x, y, sequence);
 		for (direction = 0; direction < 4; direction++)
 		{
-			if (m_board->isDeadGS( &m_board->getAstone(x, y, direction) ) == true && color != m_board->getAstone(x, y, direction).color())
+			if (m_board.isDeadGS( &m_board.getAstone(x, y, direction) ) == true && color != m_board.getAstone(x, y, direction).color())
 				break;
 			if (direction == 3)
 			{
-				m_board->setBoardtmp(x, y, sequence);
+				m_board.setBoardtmp(x, y, sequence);
 				return ERR_ILLEGALPOINT;
 			}
 		}
-		m_board->setBoardtmp(x, y, sequence);
-		if (m_board->isSolo(m_board->getAstone(x, y, direction)) && (m_board->getAstone(x, y, direction).sequence() == sequence - 1)
-			&& m_board->getAstone(x, y, direction).is_killer() == true)
+		m_board.setBoardtmp(x, y, sequence);
+		if (m_board.isSolo(m_board.getAstone(x, y, direction)) && (m_board.getAstone(x, y, direction).sequence() == sequence - 1)
+			&& m_board.getAstone(x, y, direction).is_killer() == true)
 			return ERR_KO;
 	}
 
 	boardLog.push_back(m_board);
-	int captured_stone = m_board->setBoard(x, y, sequence, color);
+	int captured_stone = m_board.setBoard(x, y, sequence, color);
 	if (captured_stone != 0)
 		m_info.add_captured_stone(color, captured_stone);
 	
@@ -126,7 +131,7 @@ int Go::Placement( Coord2d coord_placement, Color color )
 	m_info.add_sequence(1);
 	set_placement_order_next();
 
-	if (m_board->isDeadGS(&m_board->getStone(x, y)))
+	if (m_board.isDeadGS(&m_board.getStone(x, y)))
 	{
 		Backsies();
 		return ERR_ILLEGALPOINT;
@@ -154,7 +159,7 @@ bool Go::Load(GiboNGF& gibo)
 	{
 		std::wcout << i << std::endl;
 		const auto& placement = gibo.getPlacements()[i];
-		int errorMSG = Placement(Coord2d(placement.x(), placement.y()) , get_current_placement_order() ); // 확인 TODO
+		int errorMSG = Placement(Coord2d(placement.x(), placement.y())); // 확인 TODO
 		if (0 != errorMSG)
 		{
 			Init();
@@ -227,7 +232,7 @@ void SaveSGF(LPWSTR directory, const Go::Information& goInfo, const std::wstring
 	gibofile.close();
 }
 
-bool Go::Save(LPWSTR address, const std::wstring& extension)
+bool Go::Save(LPWSTR address, std::wstring extension)
 {
 	printf("기보 저장 시작--------\n");
 	printf("경로 : %ls \n확장자 : %ws\n", address, extension.c_str());
@@ -256,7 +261,7 @@ bool Go::Save(LPWSTR address, const std::wstring& extension)
 
 const Stone& Go::ReadCoord( Coord2d coord )
 {
-	return m_board->getStone(coord.x, coord.y);
+	return m_board.getStone(coord.x, coord.y);
 }
 
 const PlacementInfo& Go::getLastPlacementInfo() const
@@ -287,11 +292,6 @@ void Go::Information::clear_placement()
 	{
 		m_placement.delete_back();
 	}
-}
-
-void Go::set_placement_order_next()
-{
-	++currentPlacementOrderIndex %= placementOrders.size();
 }
 
 const Player& Go::Information::get_player(Color color) const
@@ -365,6 +365,17 @@ LinkedList Go::Information::placement() const
 Color Go::get_current_placement_order() const
 {
 	return placementOrders.at(currentPlacementOrderIndex);
+}
+
+void Go::set_placement_order_previous()
+{
+	currentPlacementOrderIndex += placementOrders.size() - 1;
+	currentPlacementOrderIndex %= placementOrders.size();
+}
+
+void Go::set_placement_order_next()
+{
+	++currentPlacementOrderIndex %= placementOrders.size();
 }
 
 Go::Information::Information()

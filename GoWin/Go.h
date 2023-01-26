@@ -4,13 +4,13 @@
 #include "GiboNGF.h"
 #include "mydatastructure.h"
 #include "Player/player.h"
+#include "Board.h"
 
 #define ERR_NOTBOARDIN		1
 #define ERR_NOTEMPTY		2
 #define ERR_ILLEGALPOINT	3 
 #define ERR_KO			4
 
-class Board;
 class Stone;
 class Go 
 {
@@ -89,19 +89,20 @@ public:
 	bool Handicap(int num);						// 핸디캡 적용
 	bool Init();							// 초기화
 	bool Pass();							// 한수쉼
-	int Placement( Coord2d board, Color color );			// 착수
+	int Placement( Coord2d board );					// 착수
 
 	bool Load( GiboNGF& gibo );					// 기보 불러오기
-	bool Save( LPWSTR address, const std::wstring& giboExtension );	// 기보 저장하기
+	bool Save( LPWSTR address, std::wstring giboExtension );	// 기보 저장하기
 
 	Color get_current_placement_order() const;
+	void set_placement_order_previous();
 	void set_placement_order_next();
 
 private:
-	std::vector< Board* > boardLog;	// 보드의 상태를 저장하는 벡터
-	std::vector< Board* > giboLog;
+	std::vector< Board > boardLog;	// 보드의 상태를 저장하는 벡터
+	std::vector< Board > giboLog;
 	
-	Board* m_board;			// 보드
+	Board m_board;			// 보드
 	Information m_info;		// 바둑의 정보
 	std::string m_mode;		// 모드 : Single, Gibo
 	

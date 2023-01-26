@@ -224,7 +224,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			//cout << "보드 안에 있음" << endl;
 			Coord2d placement_point = boardGraphic.MouseToBoard(g_mouse.x, g_mouse.y);
 
-			int errorMSG = g_Game.Placement( placement_point, g_Game.get_current_placement_order());
+			int errorMSG = g_Game.Placement(placement_point);
 
 			if (errorMSG == 0) {
 				SetWindowText(hBCS, std::to_wstring( g_Game.info().get_player(Color::Black).captured_stone()).c_str() );
@@ -441,8 +441,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				//cout << "착수 통신 테스트" << endl;
 				//PlacementInfo info = { placement_msg->sequence, Color::Black , { placement_msg->x, placement_msg->y } };
 				//print_data(info);
-				Coord2d point = { placement_msg->x, placement_msg->y };
-				g_Game.Placement(point, Color::White);
+				g_Game.Placement(Coord2d(placement_msg->x, placement_msg->y));
 				InvalidateRect(hWnd, NULL, FALSE);
 				break;
 			}
