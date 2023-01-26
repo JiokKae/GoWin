@@ -9,6 +9,8 @@
 #include "Player/Player.h"
 #include <format>
 #include <fstream>
+#include <cwctype>
+#include <algorithm>
 
 #pragma warning(disable:4996)
 
@@ -44,6 +46,8 @@ INT_PTR CALLBACK    Netbox(HWND, UINT, WPARAM, LPARAM);
 
 void AppendText(HWND edit, LPCWSTR pText);
 void SendTextEdit(LPCWSTR pText);
+void file_open(HWND);
+std::wstring get_extension(const std::wstring& path);
 
 Coord2d         g_mouse;
 BoardGraphic    boardGraphic;
@@ -261,44 +265,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 		case IDM_FILE_OPEN:
 		{
-			OPENFILENAME OFN;
-			WCHAR lpstrFile[MAX_PATH] = _T("");
-			WCHAR str[256];
-			memset(&OFN, 0, sizeof(OPENFILENAME));
-			OFN.lStructSize = sizeof(OPENFILENAME);
-			OFN.hwndOwner = hWnd;
-			OFN.lpstrFilter = _T("기보 파일(*.ngf)\0*.ngf\0모든 파일(*.*)\0*.*\0");
-			OFN.lpstrFile = lpstrFile;
-			OFN.nMaxFile = 256;
-			if (GetOpenFileName(&OFN) != 0)
-			{
-				wsprintf(str, _T("%s 파일을 선택했습니다."), lpstrFile);
-
-				std::wstring extension = lpstrFile;		//확장자 추출하기
-				extension = extension.substr(extension.length() - 3, 3);
-				if (extension == _T("NGF") || extension == _T("ngf")) //확장자 NGF
-				{
-					try {
-						std::wifstream file(lpstrFile);
-						file.imbue(std::locale(""));
-
-						GiboNGF gibo;
-						gibo.load(file);
-
-						file.close();
-
-						g_Game.Load(gibo);
-					}
-					catch (const std::exception& e)
-					{
-						MessageBox(hWnd, std::format(_T("파일을 불러오는데 실패했습니다."), CharToWChar(e.what())).c_str(), _T("열기 실패"), MB_OK);
-					}
-					
-					InvalidateRect(hWnd, NULL, FALSE);
-				}
-				else
-					MessageBox(hWnd, _T("지원되는 기보 파일이 아닙니다."), _T("열기 실패"), MB_OK);
-			}
+			file_open(hWnd);
+			InvalidateRect(hWnd, NULL, FALSE);
 			break;
 		}
 		// 메뉴 - 파일 - 저장
@@ -624,4 +592,61 @@ void AppendText(HWND hEdit, LPCWSTR pText) {
 void SendTextEdit(LPCWSTR pText) {
 	AppendText(hChatBox, pText);
 	AppendText(hChatBox, _T("\r\n"));
+}
+
+namespace strings {
+	const TCHAR* FILE_OPEN_FILTER = _T("기보 파일(*.ngf)\0*.ngf\0");
+	const TCHAR* INVALID_EXTENSION = _T("지원하는 파일 형식이 아닙니다.");
+	const TCHAR* FILE_OPEN_FAIL_TITLE = _T("파일 열기 실패");
+	const TCHAR* FILE_OPEN_FAIL = _T("파일을 불러오는데 실패했습니다.");
+}
+
+void file_open(HWND hWnd)
+{
+	OPENFILENAME OFN;
+	TCHAR lpstrFile[MAX_PATH]{};
+	memset(&OFN, 0, sizeof(OPENFILENAME));
+	OFN.lStructSize = sizeof(OPENFILENAME);
+	OFN.hwndOwner = hWnd;
+	OFN.lpstrFilter = strings::FILE_OPEN_FILTER;
+	OFN.lpstrFile = lpstrFile;
+	OFN.nMaxFile = MAX_PATH;
+	OFN.Flags = OFN_FILEMUSTEXIST;
+
+	if (GetOpenFileName(&OFN) == 0) 
+	{
+		MessageBox(hWnd, strings::FILE_OPEN_FAIL, strings::FILE_OPEN_FAIL_TITLE, MB_OK);
+		return;
+	}
+	
+	std::wstring extension = get_extension(lpstrFile);
+	if (extension != _T("ngf"))
+	{
+		MessageBox(hWnd, strings::INVALID_EXTENSION, strings::FILE_OPEN_FAIL_TITLE, MB_OK);
+		return;
+	}
+
+	try {
+		std::wifstream file(lpstrFile);
+		file.imbue(std::locale(""));
+
+		GiboNGF gibo;
+		gibo.load(file);
+
+		file.close();
+
+		g_Game.Load(gibo);
+	}
+	catch (const std::exception&)
+	{
+		MessageBox(hWnd, strings::FILE_OPEN_FAIL, strings::FILE_OPEN_FAIL_TITLE, MB_OK);
+	}
+}
+
+std::wstring get_extension(const std::wstring& path)
+{
+	std::wstring extension = path.substr(path.length() - 3, 3);
+	std::transform(extension.begin(), extension.end(), extension.begin(), std::towlower);
+
+	return extension;
 }
