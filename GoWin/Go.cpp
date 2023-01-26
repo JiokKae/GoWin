@@ -20,7 +20,6 @@ Go::~Go()
 {
 }
 
-// 무르기
 bool Go::Backsies() 
 {
 	if (boardLog.empty() == true)
@@ -38,7 +37,6 @@ bool Go::Backsies()
 	return true;
 }
 
-// 핸디캡
 bool Go::Handicap(int num) 
 {
 	if (m_info.sequence() != 1 || num > 9 || num < 2)
@@ -50,7 +48,6 @@ bool Go::Handicap(int num)
 	return true;
 }
 
-// 초기화
 bool Go::Init() 
 {
 	boardLog.clear();
