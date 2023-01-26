@@ -225,7 +225,6 @@ bool Go::Save(LPWSTR directory, std::wstring file_extension)
 
 	printf("기보 저장 시작--------\n");
 	printf("경로 : %ls \n확장자 : %ws\n", directory, file_extension.c_str());
-	//std::locale::global(std::locale(""));
 	SYSTEMTIME time;
 	GetLocalTime(&time);
 	std::wstring date = std::format(_T("{}{:0>2}{:0>2} [{:0>2}:{:0>2}]"), time.wYear, time.wMonth, time.wDay, time.wHour, time.wMinute);
