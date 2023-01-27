@@ -11,6 +11,7 @@
 #include <fstream>
 #include <cwctype>
 #include <algorithm>
+#include <filesystem>
 #include "GoWin/OpenFileName.h"
 
 #pragma warning(disable:4996)
@@ -640,7 +641,7 @@ void file_open(HWND hWnd)
 
 std::wstring get_extension(const std::wstring& path)
 {
-	std::wstring extension = path.substr(path.length() - 3, 3);
+	std::wstring extension = std::filesystem::path(path).extension();
 	std::transform(extension.begin(), extension.end(), extension.begin(), std::towlower);
 
 	return extension;
