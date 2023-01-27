@@ -158,6 +158,7 @@
     <ClInclude Include="GiboNGF.h" />
     <ClInclude Include="GiboSGF.h" />
     <ClInclude Include="Go.h" />
+    <ClInclude Include="GoWin\OpenFileName.h" />
     <ClInclude Include="LinkedListStack.h" />
     <ClInclude Include="mydatastructure.h" />
     <ClInclude Include="MySocket.h" />
@@ -175,6 +176,7 @@
     <ClCompile Include="GiboNGF.cpp" />
     <ClCompile Include="Go.cpp" />
     <ClCompile Include="GoWin.cpp" />
+    <ClCompile Include="GoWin\OpenFileName.cpp" />
     <ClCompile Include="mydatastructure.cpp" />
     <ClCompile Include="MySocket.cpp" />
     <ClCompile Include="MyString.cpp" />

@@ -19,6 +19,9 @@
     <Filter Include="Stone">
       <UniqueIdentifier>{be48f875-4f91-4c04-ab10-e3da98c14f3a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GoWin">
+      <UniqueIdentifier>{0142cad0-2d44-41f3-afa2-c9cb7a0f849f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -69,6 +72,9 @@
     <ClInclude Include="Stone\Stone.h">
       <Filter>Stone</Filter>
     </ClInclude>
+    <ClInclude Include="GoWin\OpenFileName.h">
+      <Filter>GoWin</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BoardGraphic.cpp">
@@ -106,6 +112,9 @@
     </ClCompile>
     <ClCompile Include="mydatastructure.cpp">
       <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="GoWin\OpenFileName.cpp">
+      <Filter>GoWin</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

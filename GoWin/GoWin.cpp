@@ -11,6 +11,7 @@
 #include <fstream>
 #include <cwctype>
 #include <algorithm>
+#include "GoWin/OpenFileName.h"
 
 #pragma warning(disable:4996)
 
@@ -603,31 +604,25 @@ namespace strings {
 
 void file_open(HWND hWnd)
 {
-	OPENFILENAME OFN;
-	TCHAR lpstrFile[MAX_PATH]{};
-	memset(&OFN, 0, sizeof(OPENFILENAME));
-	OFN.lStructSize = sizeof(OPENFILENAME);
-	OFN.hwndOwner = hWnd;
-	OFN.lpstrFilter = strings::FILE_OPEN_FILTER;
-	OFN.lpstrFile = lpstrFile;
-	OFN.nMaxFile = MAX_PATH;
-	OFN.Flags = OFN_FILEMUSTEXIST;
-
-	if (GetOpenFileName(&OFN) == 0) 
+	try 
 	{
-		MessageBox(hWnd, strings::FILE_OPEN_FAIL, strings::FILE_OPEN_FAIL_TITLE, MB_OK);
-		return;
-	}
-	
-	std::wstring extension = get_extension(lpstrFile);
-	if (extension != _T("ngf"))
-	{
-		MessageBox(hWnd, strings::INVALID_EXTENSION, strings::FILE_OPEN_FAIL_TITLE, MB_OK);
-		return;
-	}
+		GoWin::OpenFileName ofn(hWnd, strings::FILE_OPEN_FILTER, OFN_FILEMUSTEXIST);
 
-	try {
-		std::wifstream file(lpstrFile);
+		auto result = ofn.open();
+		if (result.success == false)
+		{
+			MessageBox(hWnd, strings::FILE_OPEN_FAIL, strings::FILE_OPEN_FAIL_TITLE, MB_OK);
+			return;
+		}
+
+		std::wstring extension = get_extension(result.file_path);
+		if (extension != _T(".ngf"))
+		{
+			MessageBox(hWnd, strings::INVALID_EXTENSION, strings::FILE_OPEN_FAIL_TITLE, MB_OK);
+			return;
+		}
+
+		std::wifstream file(result.file_path);
 		file.imbue(std::locale(""));
 
 		GiboNGF gibo;
