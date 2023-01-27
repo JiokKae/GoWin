@@ -72,7 +72,8 @@ public:
 	
 	int CurrentAcceptIndex() { return current_accept_index; }
 	
-	bool IsConnected();
+	bool IsConnected() const;
+	MySocket::Status status() const;
 
 private:
 	int recvn(SOCKET s, char* buf, int len, int flags);
@@ -83,6 +84,6 @@ private:
 	SOCKET client_socket[MAXCLIENT];
 	SOCKET server_socket;
 	HWND hWnd;
-	Status status;
+	Status m_status;
 };
 

@@ -52,7 +52,7 @@ SOCKET MySocket::Create(HWND hWnd) {
 		WSACleanup();
 		return INVALID_SOCKET;
 	}
-	status = Status::Server;
+	m_status = Status::Server;
 	return server_socket;
 }
 //--------------------------------------------------------------------------------------
@@ -163,7 +163,7 @@ bool MySocket::Enter(HWND hWnd, char* server_ip) {
 		return INVALID_SOCKET;
 	} 
 
-	status = Status::Client;
+	m_status = Status::Client;
 
 	return true;
 }
@@ -190,7 +190,7 @@ int MySocket::recvn(SOCKET s, char* buf, int len, int flags)
 
 
 int MySocket::Send(char* buf, int size) {
-	switch (status)
+	switch (m_status)
 	{
 	case Status::Server:
 		return send(client_socket[current_accept_index-1], buf, size, 0);
@@ -205,8 +205,13 @@ int MySocket::Send(char* buf, int size) {
 	return SOCKET_ERROR;
 }
 
-bool MySocket::IsConnected()
+bool MySocket::IsConnected() const
 {
-	return status != Status::notConnected;
+	return m_status != Status::notConnected;
+}
+
+MySocket::Status MySocket::status() const
+{
+	return m_status;
 }
 
