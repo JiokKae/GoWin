@@ -225,11 +225,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 	case WM_LBUTTONDOWN:
 		GetMouseCoord(g_mouse, lParam);
-		//cout << "마우스 좌표 x" << mouse.x << endl;
-		//cout << "마우스 좌표 y" << mouse.y << endl;
 		if (boardGraphic.IsMouseInBoard(g_mouse))
 		{
-			//cout << "보드 안에 있음" << endl;
 			Coord2d placement_point = boardGraphic.MouseToBoard(g_mouse.x, g_mouse.y);
 
 			int errorMSG = g_Game.Placement(placement_point);
@@ -252,9 +249,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			}
 			else if (errorMSG != ERR_NOTEMPTY)
 				MessageBox(hWnd, errorMSG_wchar[errorMSG], _T("ERROR"), MB_OK);
-		}
-		else {
-			// Game.info().placement().print();
 		}
 
 		break;
