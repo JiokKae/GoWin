@@ -26,7 +26,7 @@ WCHAR szWindowClass[MAX_LOADSTRING];	// 기본 창 클래스 이름입니다.
 HBITMAP hBitmapMem, hBitmapMemOld;
 HDC hdc, hdcMem;
 HDC hdc_BackGround;
-HWND hWindow;
+HWND hMainWindow;
 HWND hChatInputBox, hChatBox;
 HWND hWCS, hBCS;
 HFONT hFont;
@@ -85,9 +85,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	MSG msg;
 	while (GetMessageW(&msg, nullptr, 0, 0))
 	{
-		if (msg.message == WM_KEYDOWN && msg.hwnd != hWindow)
+		if (msg.message == WM_KEYDOWN && msg.hwnd != hMainWindow)
 		{
-			PostMessage(hWindow, msg.message, msg.wParam, msg.lParam);
+			PostMessage(hMainWindow, msg.message, msg.wParam, msg.lParam);
 		}
 		if (!TranslateAcceleratorW(msg.hwnd, hAccelTable, &msg))
 		{
@@ -138,16 +138,15 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
 	hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
 
-	HWND hWnd = CreateWindow(szWindowClass, szTitle, WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_CLIPCHILDREN,
-		CW_USEDEFAULT, CW_USEDEFAULT, 1200 + 16, 820 + 50 + 9, nullptr, nullptr, hInstance, nullptr);
-	hWindow = hWnd;
-	if (!hWnd)
+	hMainWindow = CreateWindow(szWindowClass, szTitle, WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_CLIPCHILDREN,
+		CW_USEDEFAULT, CW_USEDEFAULT, 1200 + 16, 820 + 50 + 9, nullptr, nullptr, hInstance, nullptr);;
+	if (!hMainWindow)
 	{
 		return FALSE;
 	}
 
-	ShowWindow(hWnd, nCmdShow);
-	UpdateWindow(hWnd);
+	ShowWindow(hMainWindow, nCmdShow);
+	UpdateWindow(hMainWindow);
 
 	return TRUE;
 }
@@ -563,7 +562,7 @@ INT_PTR CALLBACK Netbox(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 			WCHAR buffer[64];
 			GetWindowText(hIpInputBox, buffer, 64);
-			mysocket.Enter(hWindow, WCharToChar(buffer));
+			mysocket.Enter(hMainWindow, WCharToChar(buffer));
 			EndDialog(hDlg, LOWORD(wParam));
 			return (INT_PTR)TRUE;
 		}
