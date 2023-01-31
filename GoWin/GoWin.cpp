@@ -11,6 +11,7 @@
 #include <fstream>
 #include <cwctype>
 #include <algorithm>
+#include <functional>
 #include <filesystem>
 #include "GoWin/OpenFileName.h"
 
@@ -49,6 +50,9 @@ INT_PTR CALLBACK    Netbox(HWND, UINT, WPARAM, LPARAM);
 void AppendText(HWND edit, LPCWSTR pText);
 void SendTextEdit(LPCWSTR pText);
 void file_open(HWND);
+void backsies(HWND);
+void init(HWND);
+void pass(HWND);
 std::wstring get_extension(const std::wstring& path);
 
 Coord2d         g_mouse;
@@ -56,6 +60,47 @@ BoardGraphic    boardGraphic;
 Go              g_Game;
 MySocket        mysocket;
 PAINTSTRUCT	ps;
+
+typedef std::function<void(HWND)> callback;
+
+std::map<int, callback> command_message_callbacks{ 
+	std::pair<int, callback>(BACKSIES, [](HWND hWnd) {
+		if (g_Game.Backsies() == false)
+		{
+			return;
+		}
+
+		if (mysocket.status() == MySocket::Status::Server)
+		{
+			Command_MSG message{ COMMAND, BACKSIES };
+			mysocket.Send(reinterpret_cast<char*>(&message), BUFSIZE);
+		}
+	}),
+	std::pair<int, callback>(INIT, [](HWND hWnd) {
+		if (g_Game.Init() == false)
+		{
+			return;
+		}
+
+		if (mysocket.status() == MySocket::Status::Server)
+		{
+			Command_MSG message{ COMMAND,INIT };
+			mysocket.Send(reinterpret_cast<char*>(&message), BUFSIZE);
+		}
+	}),
+	std::pair<int, callback>(PASS, [](HWND hWnd) {
+		if (g_Game.Pass() == false)
+		{
+			return;
+		}
+
+		if (mysocket.status() == MySocket::Status::Server)
+		{
+			Command_MSG message{ COMMAND, PASS };
+			mysocket.Send(reinterpret_cast<char*>(&message), BUFSIZE);
+		}
+	}),
+};
 
 //static int drop_file_count = 0;
 
@@ -227,27 +272,30 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		if (boardGraphic.IsMouseInBoard(g_mouse))
 		{
 			Coord2d placement_point = boardGraphic.MouseToBoard(g_mouse.x, g_mouse.y);
+			if (mysocket.status() == MySocket::Status::Client)
+			{
+				Placement_MSG message{ PLACEMENT, g_Game.getLastPlacementInfo().sequence + 1, placement_point.x, placement_point.y };
+				mysocket.Send(reinterpret_cast<char*>(&message), BUFSIZE);
+				break;
+			}
 
 			int errorMSG = g_Game.Placement(placement_point);
-
-			if (errorMSG == 0) {
+			if (errorMSG == 0) 
+			{
+				if (mysocket.status() == MySocket::Status::Server)
+				{
+					const auto& placementInfo = g_Game.getLastPlacementInfo();
+					Placement_MSG message{ PLACEMENT, placementInfo.sequence, placementInfo.placement.x, placementInfo.placement.y };
+					mysocket.Send(reinterpret_cast<char*>(&message), BUFSIZE);
+				}
 				SetWindowText(hBCS, std::to_wstring( g_Game.info().get_player(Color::Black).captured_stone()).c_str() );
 				SetWindowText(hWCS, std::to_wstring( g_Game.info().get_player(Color::White).captured_stone()).c_str() );
 				InvalidateRect(hWnd, NULL, FALSE);
-				if (mysocket.IsConnected())
-				{
-					PlacementInfo placementInfo = g_Game.getLastPlacementInfo();
-					Placement_MSG msg;
-					msg.type = PLACEMENT;
-					msg.sequence = placementInfo.sequence;
-					msg.x = placementInfo.placement.x;
-					msg.y = placementInfo.placement.y;
-
-					mysocket.Send((char*)&msg, BUFSIZE);
-				}
 			}
 			else if (errorMSG != ERR_NOTEMPTY)
+			{
 				MessageBox(hWnd, errorMSG_wchar[errorMSG], _T("ERROR"), MB_OK);
+			}
 		}
 
 		break;
@@ -321,53 +369,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case IDA_BACKSIES:	//무르기 버튼
-			if (g_Game.Backsies())
-			{
-				if (mysocket.IsConnected())
-				{
-					Command_MSG msg;
-					msg.type = COMMAND;
-					msg.command = BACKSIES;
-
-					mysocket.Send((char*)&msg, BUFSIZE);
-				}
-				InvalidateRect(hWnd, NULL, FALSE);
-			}
+			backsies(hWnd);
 			SetFocus(hWnd);
 			break;
 
 		case IDA_INIT:	//초기화 버튼
-			if (g_Game.Init())
-			{
-				if (mysocket.IsConnected())
-				{
-					Command_MSG msg;
-					msg.type = COMMAND;
-					msg.command = INIT;
-
-					mysocket.Send((char*)&msg, BUFSIZE);
-				}
-				InvalidateRect(hWnd, NULL, FALSE);
-				SendTextEdit(_T("[System] 초기화 했습니다."));
-				//MessageBox(hWnd, _T("초기화 했습니다."), _T("알림"), MB_OK);
-			}
+			init(hWnd);
 			SetFocus(hWnd);
 			break;
 
 		case IDA_PASS:	//한수쉼 버튼
-			if (g_Game.Pass())
-			{
-				if (mysocket.IsConnected())
-				{
-					Command_MSG msg;
-					msg.type = COMMAND;
-					msg.command = PASS;
-
-					mysocket.Send((char*)&msg, BUFSIZE);
-				}
-				InvalidateRect(hWnd, NULL, FALSE);
-				SendTextEdit(_T("[System] 한수 쉬었습니다."));
-			}
+			pass(hWnd);
 			SetFocus(hWnd);
 			break;
 
@@ -416,36 +428,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			case PLACEMENT:
 			{
 				Placement_MSG* placement_msg = (Placement_MSG*)&msg;
-				//cout << "착수 통신 테스트" << endl;
-				//PlacementInfo info = { placement_msg->sequence, Color::Black , { placement_msg->x, placement_msg->y } };
-				//print_data(info);
-				g_Game.Placement(Coord2d(placement_msg->x, placement_msg->y));
-				InvalidateRect(hWnd, NULL, FALSE);
+				int errorMSG = g_Game.Placement(Coord2d(placement_msg->x, placement_msg->y));
+				if (errorMSG == 0)
+				{
+					if (mysocket.status() == MySocket::Status::Server)
+					{
+						const auto& placementInfo = g_Game.getLastPlacementInfo();
+						Placement_MSG message{ PLACEMENT, placementInfo.sequence, placementInfo.placement.x, placementInfo.placement.y };
+						mysocket.Send(reinterpret_cast<char*>(&message), BUFSIZE);
+					}
+					SetWindowText(hBCS, std::to_wstring(g_Game.info().get_player(Color::Black).captured_stone()).c_str());
+					SetWindowText(hWCS, std::to_wstring(g_Game.info().get_player(Color::White).captured_stone()).c_str());
+					InvalidateRect(hWnd, NULL, FALSE);
+				}
 				break;
 			}
 			case COMMAND:
 			{
-				Command_MSG* commandMsg = (Command_MSG*)&msg;
-				switch (commandMsg->command)
-				{
-				case BACKSIES:
-					g_Game.Backsies();
-					InvalidateRect(hWnd, NULL, FALSE);
-					break;
-
-				case INIT:
-					g_Game.Init();
-					InvalidateRect(hWnd, NULL, FALSE);
-					break;
-
-				case PASS:
-					g_Game.Pass();
-					InvalidateRect(hWnd, NULL, FALSE);
-					break;
-
-				default:
-					break;
-				}
+				command_message_callbacks[reinterpret_cast<Command_MSG*>(&msg)->command](hWnd);
+				InvalidateRect(hWnd, NULL, FALSE);
 			}
 
 			default:
@@ -638,4 +639,75 @@ std::wstring get_extension(const std::wstring& path)
 	std::transform(extension.begin(), extension.end(), extension.begin(), std::towlower);
 
 	return extension;
+}
+
+void backsies(HWND hWnd)
+{
+	if (mysocket.status() == MySocket::Status::Client)
+	{
+		Command_MSG message{ COMMAND, BACKSIES };
+		mysocket.Send(reinterpret_cast<char*>(&message), BUFSIZE);
+		return;
+	}
+
+	if (g_Game.Backsies() == false)
+	{
+		return;
+	}
+
+	if (mysocket.status() == MySocket::Status::Server)
+	{
+		Command_MSG message{ COMMAND, BACKSIES };
+		mysocket.Send(reinterpret_cast<char*>(&message), BUFSIZE);
+	}
+
+	InvalidateRect(hWnd, NULL, FALSE);
+}
+
+void init(HWND hWnd)
+{
+	if (mysocket.status() == MySocket::Status::Client)
+	{
+		Command_MSG message{ COMMAND, INIT };
+		mysocket.Send(reinterpret_cast<char*>(&message), BUFSIZE);
+		return;
+	}
+
+	if (g_Game.Init() == false)
+	{
+		return;
+	}
+
+	if (mysocket.status() == MySocket::Status::Server)
+	{
+		Command_MSG message{ COMMAND, INIT };
+		mysocket.Send(reinterpret_cast<char*>(&message), BUFSIZE);
+	}
+
+	InvalidateRect(hWnd, NULL, FALSE);
+	SendTextEdit(_T("[System] 바둑판을 초기화 했습니다."));
+}
+
+void pass(HWND hWnd)
+{
+	if (mysocket.status() == MySocket::Status::Client)
+	{
+		Command_MSG message{ COMMAND, PASS };
+		mysocket.Send(reinterpret_cast<char*>(&message), BUFSIZE);
+		return;
+	}
+
+	if (g_Game.Pass() == false)
+	{
+		return;
+	}
+
+	if (mysocket.status() == MySocket::Status::Server)
+	{
+		Command_MSG message{ COMMAND, PASS };
+		mysocket.Send(reinterpret_cast<char*>(&message), BUFSIZE);
+	}
+
+	InvalidateRect(hWnd, NULL, FALSE);
+	SendTextEdit(_T("[System] 한수 쉬었습니다."));
 }
