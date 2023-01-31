@@ -89,7 +89,7 @@
     <ClCompile Include="Go.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="GoWin.cpp">
+    <ClCompile Include="main.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="stdgo.cpp">
