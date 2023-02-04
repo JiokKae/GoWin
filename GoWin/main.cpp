@@ -261,7 +261,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			Coord2d placement_point = boardGraphic.MouseToBoard(g_mouse.x, g_mouse.y);
 			if (mysocket.status() == MySocket::Status::Client)
 			{
-				Placement_MSG message{ PLACEMENT, g_Game.getLastPlacementInfo().sequence + 1, placement_point.x, placement_point.y };
+				Placement_MSG message{ PLACEMENT, g_Game.info().sequence() + 1, placement_point.x, placement_point.y };
 				mysocket.Send(reinterpret_cast<char*>(&message), BUFSIZE);
 				break;
 			}
