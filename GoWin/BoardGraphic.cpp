@@ -117,10 +117,7 @@ void BoardGraphic::DrawStone(Stone stone, HDC hdc)
 {
 	int x = stone.x();
 	int y = stone.y();
-	Color color = stone.color();
-
-	const HDC& hdc_stone = GetHDCStoneByColor(color);
-	BitBlt(hdc, m_space_size * (x - 1) + 6, m_space_size * (y - 1) + 6, 39, 39, hdc_stone, 0, 0, SRCCOPY);
+	BitBlt(hdc, m_space_size * (x - 1) + 6, m_space_size * (y - 1) + 6, 39, 39, GetHDCStoneByColor(stone.color()), 0, 0, SRCCOPY);
 }
 
 const HDC& BoardGraphic::GetHDCStoneByColor(Color color) const
