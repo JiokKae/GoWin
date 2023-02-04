@@ -105,16 +105,13 @@ std::map<int, callback> command_message_callbacks{
 //static int drop_file_count = 0;
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
-	_In_opt_ HINSTANCE hPrevInstance,
-	_In_ LPWSTR    lpCmdLine,
+	_In_opt_ HINSTANCE /*hPrevInstance*/,
+	_In_ LPWSTR    /*lpCmdLine*/,
 	_In_ int       nCmdShow)
 {
-	UNREFERENCED_PARAMETER(hPrevInstance);
-	UNREFERENCED_PARAMETER(lpCmdLine);
-
 	// 전역 문자열을 초기화합니다.
-	LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
-	LoadStringW(hInstance, IDC_GOWIN, szWindowClass, MAX_LOADSTRING);
+	LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
+	LoadString(hInstance, IDC_GOWIN, szWindowClass, MAX_LOADSTRING);
 	MyRegisterClass(hInstance);
 
 	// 애플리케이션 초기화를 수행합니다:
@@ -128,23 +125,21 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	g_Game.Init();
 	// 기본 메시지 루프입니다:
 	MSG msg;
-	while (GetMessageW(&msg, nullptr, 0, 0))
+	while (GetMessage(&msg, nullptr, 0, 0))
 	{
 		if (msg.message == WM_KEYDOWN && msg.hwnd != hMainWindow)
 		{
 			PostMessage(hMainWindow, msg.message, msg.wParam, msg.lParam);
 		}
-		if (!TranslateAcceleratorW(msg.hwnd, hAccelTable, &msg))
+		if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
 		{
 			TranslateMessage(&msg);
-			DispatchMessageW(&msg);
+			DispatchMessage(&msg);
 		}
 	}
 	return (int)msg.wParam;
 }
 
-//
-//  함수: MyRegisterClass()
 //
 //  용도: 창 클래스를 등록합니다.
 //
@@ -170,12 +165,9 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 }
 
 //
-//   함수: InitInstance(HINSTANCE, int)
-//
 //   용도: 인스턴스 핸들을 저장하고 주 창을 만듭니다.
 //
 //   주석:
-//
 //        이 함수를 통해 인스턴스 핸들을 전역 변수에 저장하고
 //        주 프로그램 창을 만든 다음 표시합니다.
 //
@@ -184,7 +176,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
 
 	hMainWindow = CreateWindow(szWindowClass, szTitle, WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_CLIPCHILDREN,
-		CW_USEDEFAULT, CW_USEDEFAULT, 1200 + 16, 820 + 50 + 9, nullptr, nullptr, hInstance, nullptr);;
+		CW_USEDEFAULT, CW_USEDEFAULT, 1200 + 16, 820 + 50 + 9, nullptr, nullptr, hInstance, nullptr);
 	if (!hMainWindow)
 	{
 		return FALSE;
@@ -196,8 +188,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	return TRUE;
 }
 
-//
-//  함수: WndProc(HWND, UINT, WPARAM, LPARAM)
 //
 //  용도: 주 창의 메시지를 처리합니다.
 //
@@ -420,7 +410,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			{
 			case CHATTING:
 			{
-				CHAT_MSG* chat_msg = (CHAT_MSG*)&msg;
+				CHAT_MSG* chat_msg = reinterpret_cast<CHAT_MSG*>(&msg);
 				AppendText(hChatBox, _T("상대 : "));
 				SendTextEdit(chat_msg->buf);
 				break;
@@ -481,7 +471,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				{
 					CHAT_MSG msg;
 					msg.type = CHATTING;
-					wcscpy(msg.buf, buffer);
+					wcscpy_s(msg.buf, buffer);
 
 					if (SOCKET_ERROR == mysocket.Send((char*)&msg, BUFSIZE))
 						SendTextEdit(_T("[System] 메세지 보내기 실패"));
@@ -526,9 +516,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 }
 
 // 정보 대화 상자의 메시지 처리기입니다.
-INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK AboutProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM /*lParam*/)
 {
-	UNREFERENCED_PARAMETER(lParam);
 	switch (message)
 	{
 	case WM_INITDIALOG:
@@ -547,9 +536,8 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 
 HWND hIpInputBox;
 // 멀티 대화 상자의 메시지 처리기입니다.
-INT_PTR CALLBACK Netbox(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK NetboxProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM /*lParam*/)
 {
-	UNREFERENCED_PARAMETER(lParam);
 	switch (message)
 	{
 	case WM_INITDIALOG:
@@ -579,13 +567,13 @@ INT_PTR CALLBACK Netbox(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	return (INT_PTR)FALSE;
 }
 
-void AppendText(HWND hEdit, LPCWSTR pText) {
+void AppendText(HWND hEdit, LPCTSTR pText) {
 	SendMessage(hEdit, EM_SETSEL, 0, -1);
 	SendMessage(hEdit, EM_SETSEL, -1, -1);
 	SendMessage(hEdit, EM_REPLACESEL, 0, (LPARAM)pText); // append!
 }
 
-void SendTextEdit(LPCWSTR pText) {
+void SendTextEdit(LPCTSTR pText) {
 	AppendText(hChatBox, pText);
 	AppendText(hChatBox, _T("\r\n"));
 }
