@@ -30,7 +30,7 @@ HWND hChatInputBox, hChatBox;
 HWND hWCS, hBCS;
 HFONT hFont;
 
-const wchar_t* errorMSG_wchar[5] = {
+const TCHAR* ERROR_MESSAGES[5] = {
     _T(""),
     _T("바둑판 안에 착수해주세요"),
     _T("이미 바둑 돌이 있습니다"),
@@ -281,7 +281,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			}
 			else if (errorMSG != ERR_NOTEMPTY)
 			{
-				MessageBox(hWnd, errorMSG_wchar[errorMSG], _T("ERROR"), MB_OK);
+				MessageBox(hWnd, ERROR_MESSAGES[errorMSG], _T("ERROR"), MB_OK);
 			}
 		}
 
