@@ -139,7 +139,6 @@ int Go::Placement( Coord2d coord_placement )
 
 bool Go::Load(GiboNGF& gibo)
 {
-	LinkedList m_placement;
 	m_info.set_game_type(gibo.battle_type());
 	m_info.set_board_size(gibo.board_size());
 	m_info.set_link(gibo.url());
@@ -182,7 +181,7 @@ void SaveNGF(std::wostream& wos, const Go::Information& goInfo, const std::wstri
 	ngf.set_game_result(goInfo.game_result());
 	for (int i = 0; i < goInfo.sequence() - 1; i++)
 	{
-		const PlacementInfo& data = goInfo.placement().read(i).data();
+		const PlacementInfo& data = goInfo.placements()[i].data();
 		ngf.add_placement(GiboNGF::Placement(data.sequence, data.placement.x, data.placement.y, Color2Char(data.player)));
 	}
 	ngf.save(wos);
@@ -206,8 +205,7 @@ void SaveSGF(std::wostream& wos, const Go::Information& goInfo, const std::wstri
 	wos << std::endl;
 	for (int i = 0; i < goInfo.sequence() - 1; i++)
 	{
-		PlacementInfo data = goInfo.placement().read(i).data();
-		wos << data.to_sgf();
+		wos << goInfo.placements()[i].data().to_sgf();
 		if (i % 14 == 13)
 			wos << std::endl;
 	}
@@ -251,7 +249,7 @@ const Stone& Go::ReadCoord( Coord2d coord )
 
 const PlacementInfo& Go::getLastPlacementInfo() const
 {
-	return m_info.placement().getLastNode().data();
+	return m_info.placements().back().data();
 }
 
 void Go::Information::add_captured_stone(Color color, int captured_stone)
@@ -268,15 +266,7 @@ void Go::Information::add_captured_stone(Color color, int captured_stone)
 
 void Go::Information::add_placement(PlacementInfo placement)
 {
-	m_placement.push_back(new Node(placement));
-}
-
-void Go::Information::clear_placement()
-{
-	while ( m_placement.size() != 0 )
-	{
-		m_placement.delete_back();
-	}
+	m_placements.push_back(Node(placement));
 }
 
 const Player& Go::Information::get_player(Color color) const
@@ -342,9 +332,9 @@ int Go::Information::sequence() const
 	return m_sequence;
 }
 
-LinkedList Go::Information::placement() const
+const std::vector<Node>& Go::Information::placements() const
 {
-	return m_placement;
+	return m_placements;
 }
 
 Color Go::get_current_placement_order() const
@@ -376,7 +366,7 @@ Go::Information::Information()
 
 void Go::Information::Init()
 {
-	clear_placement();
+	m_placements.clear();
 	set_sequence(1);
 	players.clear();
 	players.emplace(std::make_pair(Color::Black, Player(Color::Black)));

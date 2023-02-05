@@ -1,18 +1,5 @@
 #include "mydatastructure.h"
 
-void NodeLinkManager::print()
-{
-	Node* np = m_head;
-
-	while (np != nullptr)
-	{
-		np->data().print(std::wcout);
-		std::cout << "-->";
-		np = np->link();
-	}
-	std::cout << std::endl;
-}
-
 Node::~Node()
 {
 	if (m_link != nullptr)
@@ -20,22 +7,19 @@ Node::~Node()
 		m_link->~Node();
 		m_link = nullptr;
 	}
-	m_child.~NodeLinkManager();
+}
+
+const PlacementInfo& Node::data() const
+{
+	return m_data;
+}
+
+const std::vector<Node>& Node::childs() const
+{
+	return m_childs;
 }
 
 void Node::print()
 {
 	m_data.print(std::wcout);
-}
-
-void LinkedList::print() const
-{
-	Node* np = m_head;
-	while (np != nullptr)
-	{
-		np->print();
-		std::cout << "--------" << std::endl;
-		np = np->next();
-	}
-	std::cout << std::endl;
 }

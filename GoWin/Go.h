@@ -36,7 +36,7 @@ public:
 		int gongje() const;
 		int compensation() const;
 		int sequence() const;
-		LinkedList placement() const;
+		const std::vector<Node>& placements() const;
 
 		// setter
 		void set_game_type(std::wstring game_type)	{ m_game_type = game_type; }
@@ -55,13 +55,12 @@ public:
 
 		// function
 		void add_placement( PlacementInfo placement ); 
-		void delete_placement() { m_placement.delete_back(); }
-		void clear_placement(); 
+		void delete_placement() { m_placements.pop_back(); }
 
 	private:
 		std::map<Color, Player> players;
 
-		LinkedList m_placement;	// 착수
+		std::vector<Node> m_placements;	// 착수
 		std::wstring m_game_type;	// 레이팅, 친선
 		int m_board_size;	// 바둑판 크기(9, 13, 19 ...)
 		std::wstring m_link;		// 인터넷 주소
