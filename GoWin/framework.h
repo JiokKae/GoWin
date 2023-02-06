@@ -27,6 +27,3 @@
 
 struct Coord2d;
 extern Coord2d	g_mouse;
-
-class Go;
-extern Go	g_Game;

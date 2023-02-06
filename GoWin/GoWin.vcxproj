@@ -158,6 +158,7 @@
     <ClInclude Include="GiboNGF.h" />
     <ClInclude Include="GiboSGF.h" />
     <ClInclude Include="Go.h" />
+    <ClInclude Include="GoWinApplication.h" />
     <ClInclude Include="GoWin\OpenFileName.h" />
     <ClInclude Include="LinkedListStack.h" />
     <ClInclude Include="mydatastructure.h" />
@@ -175,6 +176,7 @@
     <ClCompile Include="Board.cpp" />
     <ClCompile Include="GiboNGF.cpp" />
     <ClCompile Include="Go.cpp" />
+    <ClCompile Include="GoWinApplication.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="GoWin\OpenFileName.cpp" />
     <ClCompile Include="mydatastructure.cpp" />

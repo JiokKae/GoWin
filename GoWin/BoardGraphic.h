@@ -1,8 +1,8 @@
 #pragma once
 #include "framework.h"
+#include "Go.h"
 #include "stdgo.h"
 
-class Stone;
 class BoardGraphic {
 public:
 	class Bitmap {
