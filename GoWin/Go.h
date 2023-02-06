@@ -80,7 +80,7 @@ public:
 	// getter
 	Information info()	{ return m_info; }	// 정보 
 	std::string mode()	{ return m_mode; }	// 모드 반환
-	const Stone& ReadCoord( Coord2d coord );	// 읽기
+	const Stone& ReadCoord( Coord2d coord ) const;	// 읽기
 	const PlacementInfo& getLastPlacementInfo() const;
 
 	// function

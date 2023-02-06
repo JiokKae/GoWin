@@ -242,7 +242,7 @@ bool Go::Save(LPWSTR directory, std::wstring file_extension)
 	return true;
 }
 
-const Stone& Go::ReadCoord( Coord2d coord )
+const Stone& Go::ReadCoord( Coord2d coord ) const
 {
 	return m_board.getStone(coord.x, coord.y);
 }

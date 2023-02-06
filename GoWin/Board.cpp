@@ -123,6 +123,11 @@ Color Board::getStoneColor(Stone s) {
 	return s.color();
 }
 
+const Stone& Board::getStone(int x, int y) const
+{
+	return board[x][y];
+}
+
 Stone& Board::getStone(int x, int y)
 {
 	return board[x][y];

@@ -2,6 +2,31 @@
 #include "Go.h"
 #include "Stone/Stone.h"
 
+BoardGraphic::Bitmap::Bitmap()
+	: m_handle(nullptr)
+{
+}
+
+BoardGraphic::Bitmap::Bitmap(HINSTANCE hInst, int resource_id)
+	: m_handle(LoadImage(hInst, MAKEINTRESOURCE(resource_id), IMAGE_BITMAP, 0, 0, NULL))
+{
+}
+
+BoardGraphic::Bitmap::Bitmap(Bitmap&& bitmap) noexcept
+	: m_handle(std::exchange(bitmap.m_handle, nullptr))
+{
+}
+
+BoardGraphic::Bitmap::~Bitmap()
+{
+	if (m_handle != nullptr) DeleteObject(m_handle);
+}
+
+HANDLE BoardGraphic::Bitmap::handle() const
+{
+	return m_handle;
+}
+
 bool BoardGraphic::IsMouseInBoard(const Coord2d& mouseCoord) const
 {
 	if (mouseCoord.x >= m_left_top_point.x + m_border_size &&
@@ -33,103 +58,102 @@ Coord2d BoardGraphic::MouseToBoard(int x, int y)
 
 void BoardGraphic::Init(HDC hdc, HINSTANCE hInst)
 {
-	hdc_BlackStone = CreateCompatibleDC(hdc);
-	hdc_WhiteStone = CreateCompatibleDC(hdc);
-	hdc_Board = CreateCompatibleDC(hdc);
+	this->hdc = CreateCompatibleDC(hdc);
+	bitmaps.emplace("blackStone", BoardGraphic::Bitmap(hInst, IDB_BLACKSTONE));
+	bitmaps.emplace("whiteStone", BoardGraphic::Bitmap(hInst, IDB_WHITESTONE));
+	bitmaps.emplace("board", BoardGraphic::Bitmap(hInst, IDB_BOARD));
 
-	HBITMAP bitBlackStone;
-	HBITMAP bitWhiteStone;
-
-	HBITMAP bitBoard;
-
-	bitBlackStone = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_BLACKSTONE));
-	bitWhiteStone = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_WHITESTONE));
-	bitBoard = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_BOARD));
-
-	SelectObject(hdc_BlackStone, bitBlackStone);
-	SelectObject(hdc_WhiteStone, bitWhiteStone);
-	SelectObject(hdc_Board, bitBoard);
-
-	DeleteObject(bitBlackStone);
-	DeleteObject(bitWhiteStone);
-	DeleteObject(bitBoard);
-
-	alphaBF.AlphaFormat = AC_SRC_ALPHA;
-	alphaBF.BlendFlags = 0;
-	alphaBF.BlendOp = 0;
-	alphaBF.SourceConstantAlpha = 180;
+	alphaBF = { .BlendOp = 0, .BlendFlags = 0, .SourceConstantAlpha = 180, .AlphaFormat = AC_SRC_ALPHA };
 }
 
 void BoardGraphic::Release()
 {
-	DeleteDC(hdc_BlackStone);
-	DeleteDC(hdc_WhiteStone);
-	DeleteDC(hdc_Board);
+	DeleteDC(hdc);
 }
 
-void BoardGraphic::Draw(HDC hdc)
+void BoardGraphic::Draw(HDC destination, const Go& game, const Coord2d& mouse)
 {
-	BitBlt(hdc, 0, 0, 806, 806, hdc_Board, 0, 0, SRCCOPY);
+	SelectObject(hdc, bitmaps["board"].handle());
+	BitBlt(destination, 0, 0, 806, 806, hdc, 0, 0, SRCCOPY);
 
-	SetTextAlign(hdc, TA_CENTER);
-	SetBkMode(hdc, TRANSPARENT);
+	SetTextAlign(destination, TA_CENTER);
+	SetBkMode(destination, TRANSPARENT);
 	for (int x = 1; x < 20; x++)
 	{
 		for (int y = 1; y < 20; y++)
 		{
-			const Stone& stone = g_Game.ReadCoord({ x, y });
+			const Stone& stone = game.ReadCoord({ x, y });
 			if (stone.state() != Stone::State::Normal)
 			{
 				continue;
 			}
-			DrawStone(stone, hdc);
-
-			int sequence = stone.sequence();
-			if (sequence != 0 && m_print_sequance == true)
-			{
-				if (stone.color() == Color::Black)
-				{
-					SetTextColor(hdc, RGB(255, 255, 255));
-				}
-				else if (stone.color() == Color::White)
-				{
-					SetTextColor(hdc, RGB(0, 0, 0));
-				}
-				TextOut(hdc, m_space_size * (x - 1) + 25, m_space_size * (y - 1) + 18, std::to_wstring(sequence).c_str(), static_cast<int>(std::to_wstring(sequence).length()));
-			}
+			DrawStone(destination, stone.x(), stone.y(), stone.color(), stone.sequence());
 		}
 	}
 
-	if (IsMouseInBoard(g_mouse))
+	if (IsMouseInBoard(mouse) == true)
 	{
-		Coord2d board_point = MouseToBoard(g_mouse.x, g_mouse.y);
-		if ( g_Game.ReadCoord(board_point).state() == Stone::State::Null )
+		Coord2d board_point = MouseToBoard(mouse.x, mouse.y);
+		if (game.ReadCoord(board_point).state() == Stone::State::Null )
 		{
-			if (g_Game.info().sequence() % 2 == 1 )// Stone::Sqnce2color() == Color::Black)
-				GdiAlphaBlend(hdc, m_space_size * (board_point.x - 1) + 6, m_space_size * (board_point.y - 1) + 6, 39, 39, hdc_BlackStone, 0, 0, 39, 39, alphaBF);
-			else
-				GdiAlphaBlend(hdc, m_space_size * (board_point.x - 1) + 6, m_space_size * (board_point.y - 1) + 6, 39, 39, hdc_WhiteStone, 0, 0, 39, 39, alphaBF);
+			DrawStone(destination, board_point.x, board_point.y, game.get_current_placement_order(), 0, true);
 		}
 	}
 }
 
-void BoardGraphic::DrawStone(Stone stone, HDC hdc)
+void BoardGraphic::DrawStone(HDC destination, int x, int y, Color color, int sequence, bool alpha)
 {
-	int x = stone.x();
-	int y = stone.y();
-	BitBlt(hdc, m_space_size * (x - 1) + 6, m_space_size * (y - 1) + 6, 39, 39, GetHDCStoneByColor(stone.color()), 0, 0, SRCCOPY);
+	SelectStone(color);
+	if (alpha == true)
+	{
+		GdiAlphaBlend(destination, m_space_size * (x - 1) + 6, m_space_size * (y - 1) + 6, 39, 39, hdc, 0, 0, 39, 39, alphaBF);
+		return;
+	}
+
+	BitBlt(destination, m_space_size * (x - 1) + 6, m_space_size * (y - 1) + 6, 39, 39, hdc, 0, 0, SRCCOPY);
+
+	if (sequence != 0 && m_print_sequance == true)
+	{
+		if (color == Color::Black)
+		{
+			SetTextColor(destination, RGB(255, 255, 255));
+		}
+		else if (color == Color::White)
+		{
+			SetTextColor(destination, RGB(0, 0, 0));
+		}
+		TextOut(destination, m_space_size * (x - 1) + 25, m_space_size * (y - 1) + 18, std::to_wstring(sequence).c_str(), static_cast<int>(std::to_wstring(sequence).length()));
+	}
 }
 
-const HDC& BoardGraphic::GetHDCStoneByColor(Color color) const
+void BoardGraphic::SelectStone(Color color)
 {
-	if (color == Color::Black)
+	switch (color)
 	{
-		return hdc_BlackStone;
+	case Color::Black:
+		SelectObject(hdc, bitmaps["blackStone"].handle());
+		break;
+	case Color::White:
+		SelectObject(hdc, bitmaps["whiteStone"].handle());
+		break;
+	default:
+		break;
 	}
-	else if (color == Color::White)
-	{
-		return hdc_WhiteStone;
-	}
+}
+
+void BoardGraphic::SetWidth(int width)
+{
+	m_width = width;
+}
+
+void BoardGraphic::SetHeight(int height)
+{
+	m_height = height;
+}
+
+void BoardGraphic::SetLeftTopPoint(Coord2d left_top_point)
+{
+	m_left_top_point = left_top_point;
 }
 
 void BoardGraphic::SetSpaceSize(int space_size)
@@ -140,11 +164,6 @@ void BoardGraphic::SetSpaceSize(int space_size)
 void BoardGraphic::SetBorderSize(int border_size)
 {
 	m_border_size = border_size;
-}
-
-void BoardGraphic::SetPrintSeqeance(bool b)
-{
-	m_print_sequance = b;
 }
 
 void BoardGraphic::TogglePrintSequence()

@@ -11,6 +11,7 @@ public:
 	int setBoard(int x, int y, int sequence, Color color);
 	void setBoardtmp(int x, int y, int sequence);
 	Color getStoneColor(int x, int y);		Color getStoneColor(Stone s);
+	const Stone& getStone(int x, int y) const;
 	Stone& getStone(int x, int y);
 	Stone& getAstone(int x, int y, int i);		Stone& getAstone(Stone s, int i);
 	void linkGS(Stone* s1, Stone* s2);
