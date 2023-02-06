@@ -22,7 +22,7 @@ constexpr int SPACE_SIZE = 42;
 HINSTANCE hInst;			// 현재 인스턴스입니다.
 TCHAR szTitle[MAX_LOADSTRING];		// 제목 표시줄 텍스트입니다.
 TCHAR szWindowClass[MAX_LOADSTRING];	// 기본 창 클래스 이름입니다.
-HBITMAP hBitmapMem, hBitmapMemOld;
+HBITMAP hBitmapMem;
 HDC hdc, hdcMem;
 HDC hdc_BackGround;
 HWND hMainWindow;
@@ -100,6 +100,57 @@ std::map<int, callback> command_message_callbacks{
 	}),
 };
 
+std::map<int, callback> MESSAGE_CALLBACKS{
+	std::pair<int, callback>(WM_CREATE, [](HWND hWnd) {
+		
+#ifdef _DEBUG	// 콘솔창 열기
+		AllocConsole();
+		FILE* fp = NULL;
+		_wfreopen_s(&fp, _T("CONOUT$"), _T("wt"), stdout);
+#endif
+		hdc = GetDC(hWnd);
+
+		boardGraphic.SetWidth(806);
+		boardGraphic.SetHeight(806);
+		boardGraphic.SetLeftTopPoint({ 0, 0 });
+		boardGraphic.SetSpaceSize(SPACE_SIZE);
+		boardGraphic.SetBorderSize(6);
+		boardGraphic.Init(hdc, hInst);
+
+		hdc_BackGround = CreateCompatibleDC(hdc);
+		HBITMAP bitBackGround = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_BACKGROUND));
+		SelectObject(hdc_BackGround, bitBackGround);
+		DeleteObject(bitBackGround);
+
+		hdcMem = CreateCompatibleDC(hdc); //2
+		hBitmapMem = CreateCompatibleBitmap(hdc, 1200, 820);//3
+		DeleteObject(SelectObject(hdcMem, hBitmapMem));
+
+		hBCS = CreateWindow(_T("EDIT"), _T("0"), WS_CHILD | WS_VISIBLE | ES_RIGHT | ES_READONLY,
+			840, 200, 50, 30, hWnd, (HMENU)1, hInst, NULL);
+		hWCS = CreateWindow(_T("EDIT"), _T("0"), WS_CHILD | WS_VISIBLE | ES_RIGHT | ES_READONLY,
+			1010, 200, 50, 30, hWnd, (HMENU)2, hInst, NULL);
+
+		hFont = CreateFont(30, 0, 0, 0, 0, 0, 0, 0, HANGEUL_CHARSET, 3, 2, 1,
+			VARIABLE_PITCH | FF_ROMAN, _T("궁서"));
+		SendMessage(hBCS, WM_SETFONT, (WPARAM)hFont, (LPARAM)FALSE);
+		SendMessage(hWCS, WM_SETFONT, (WPARAM)hFont, (LPARAM)FALSE);
+
+		CreateWindow(_T("button"), _T("무르기(Z)"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+			840, 300, 150, 30, hWnd, (HMENU)IDA_BACKSIES, hInst, NULL);
+		CreateWindow(_T("button"), _T("초기화(I)"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+			1010, 300, 150, 30, hWnd, (HMENU)IDA_INIT, hInst, NULL);
+		CreateWindow(_T("button"), _T("한수쉼(P)"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+			840, 340, 150, 30, hWnd, (HMENU)IDA_PASS, hInst, NULL);
+		CreateWindow(_T("button"), _T("수순 표시"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+			1010, 340, 150, 30, hWnd, (HMENU)3, hInst, NULL);
+
+		hChatBox = CreateWindow(_T("EDIT"), _T(""), WS_CHILD | WS_VISIBLE | ES_LEFT | ES_READONLY | ES_AUTOVSCROLL | WS_VSCROLL | ES_MULTILINE,
+			840, 400, 320, 120, hWnd, (HMENU)4, hInst, NULL);
+		hChatInputBox = CreateWindow(_T("EDIT"), _T(""), WS_CHILD | WS_VISIBLE | ES_LEFT | ES_AUTOHSCROLL | ES_WANTRETURN,
+			840, 530, 320, 30, hWnd, (HMENU)5, hInst, NULL);
+	}),
+};
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE /*hPrevInstance*/,
@@ -190,8 +241,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	FILE* fp = NULL;
-
 	//char buffer[64] = "";
 	//if(message == WM_PAINT)
 	//   printf("hWnd : %p\t msg : %-15s wParam : %d\t lParam : %d\n", hWnd, ReadMessage(message, buffer), wParam, lParam);
@@ -199,53 +248,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	switch (message)
 	{
 	case WM_CREATE:
-		// 콘솔창 열기
-		AllocConsole();
-		_wfreopen_s(&fp, _T("CONOUT$"), _T("wt"), stdout);
-		//
-		hdc = GetDC(hWnd);
-
-		boardGraphic.SetWidth(806);
-		boardGraphic.SetHeight(806);
-		boardGraphic.SetLeftTopPoint({ 0, 0 });
-		boardGraphic.SetSpaceSize(SPACE_SIZE);
-		boardGraphic.SetBorderSize(6);
-		boardGraphic.Init(hdc, hInst);
-
-		hdc_BackGround = CreateCompatibleDC(hdc);
-		HBITMAP bitBackGround;
-		bitBackGround = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_BACKGROUND));
-		SelectObject(hdc_BackGround, bitBackGround);
-		DeleteObject(bitBackGround);
-
-		hdcMem = CreateCompatibleDC(hdc); //2
-		hBitmapMem = CreateCompatibleBitmap(hdc, 1200, 820);//3
-		hBitmapMemOld = (HBITMAP)SelectObject(hdcMem, hBitmapMem);//4
-
-		hBCS = CreateWindow(_T("EDIT"), _T("0"), WS_CHILD | WS_VISIBLE | ES_RIGHT | ES_READONLY,
-			840, 200, 50, 30, hWnd, (HMENU)1, hInst, NULL);
-		hWCS = CreateWindow(_T("EDIT"), _T("0"), WS_CHILD | WS_VISIBLE | ES_RIGHT | ES_READONLY,
-			1010, 200, 50, 30, hWnd, (HMENU)2, hInst, NULL);
-
-		hFont = CreateFont(30, 0, 0, 0, 0, 0, 0, 0, HANGEUL_CHARSET, 3, 2, 1,
-			VARIABLE_PITCH | FF_ROMAN, _T("궁서"));
-		SendMessage(hBCS, WM_SETFONT, (WPARAM)hFont, (LPARAM)FALSE);
-		SendMessage(hWCS, WM_SETFONT, (WPARAM)hFont, (LPARAM)FALSE);
-
-		CreateWindow(_T("button"), _T("무르기(Z)"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-			840, 300, 150, 30, hWnd, (HMENU)IDA_BACKSIES, hInst, NULL);
-		CreateWindow(_T("button"), _T("초기화(I)"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-			1010, 300, 150, 30, hWnd, (HMENU)IDA_INIT, hInst, NULL);
-		CreateWindow(_T("button"), _T("한수쉼(P)"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-			840, 340, 150, 30, hWnd, (HMENU)IDA_PASS, hInst, NULL);
-		CreateWindow(_T("button"), _T("수순 표시"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-			1010, 340, 150, 30, hWnd, (HMENU)3, hInst, NULL);
-
-		hChatBox = CreateWindow(_T("EDIT"), _T(""), WS_CHILD | WS_VISIBLE | ES_LEFT | ES_READONLY | ES_AUTOVSCROLL | WS_VSCROLL | ES_MULTILINE,
-			840, 400, 320, 120, hWnd, (HMENU)4, hInst, NULL);
-		hChatInputBox = CreateWindow(_T("EDIT"), _T(""), WS_CHILD | WS_VISIBLE | ES_LEFT | ES_AUTOHSCROLL | ES_WANTRETURN,
-			840, 530, 320, 30, hWnd, (HMENU)5, hInst, NULL);
-
+		MESSAGE_CALLBACKS[message](hWnd);
 		return 0;
 
 	case WM_MOUSEMOVE:
@@ -258,7 +261,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		GetMouseCoord(g_mouse, lParam);
 		if (boardGraphic.IsMouseInBoard(g_mouse))
 		{
-			Coord2d placement_point = boardGraphic.MouseToBoard(g_mouse.x, g_mouse.y);
+			const Coord2d placement_point = boardGraphic.MouseToBoard(g_mouse.x, g_mouse.y);
 			if (mysocket.status() == MySocket::Status::Client)
 			{
 				Placement_MSG message{ PLACEMENT, g_Game.info().sequence() + 1, placement_point.x, placement_point.y };
@@ -484,7 +487,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		hdc = BeginPaint(hWnd, &ps);
 
 		BitBlt(hdcMem, 0, 0, 1200, 820, hdc_BackGround, 0, 0, SRCCOPY);
-		boardGraphic.Draw(hdcMem);
+		boardGraphic.Draw(hdcMem, g_Game, g_mouse);
 
 		BitBlt(hdc, 0, 0, 1200, 820, hdcMem, 0, 0, SRCCOPY);
 
@@ -493,7 +496,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	break;
 
 	case WM_DESTROY:
-		SelectObject(hdcMem, hBitmapMemOld); //-4
 		DeleteObject(hBitmapMem); //-3
 		DeleteDC(hdcMem); //-2
 
