@@ -51,6 +51,7 @@ private:
 	std::map<int, callback> command_message_callbacks;
 	std::map<string_id, std::wstring> strings;
 
+	Coord2d mouse;
 	HINSTANCE m_hInstance;
 	PAINTSTRUCT ps;
 	HWND m_main_window_handle;

@@ -24,6 +24,3 @@
 
 #include "MyWinLibrary.h"
 #include "MyString.h"
-
-struct Coord2d;
-extern Coord2d	g_mouse;

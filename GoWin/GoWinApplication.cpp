@@ -87,16 +87,16 @@ LRESULT GoWinApplication::main_procedure(HWND hWnd, UINT message, WPARAM wParam,
 		return 0;
 
 	case WM_MOUSEMOVE:
-		GetMouseCoord(g_mouse, lParam);
+		GetMouseCoord(mouse, lParam);
 		InvalidateRect(hWnd, NULL, FALSE);
 
 		break;
 
 	case WM_LBUTTONDOWN:
-		GetMouseCoord(g_mouse, lParam);
-		if (board_graphic.IsMouseInBoard(g_mouse))
+		GetMouseCoord(mouse, lParam);
+		if (board_graphic.IsMouseInBoard(mouse))
 		{
-			const Coord2d placement_point = board_graphic.MouseToBoard(g_mouse.x, g_mouse.y);
+			const Coord2d placement_point = board_graphic.MouseToBoard(mouse.x, mouse.y);
 			if (my_socket.status() == MySocket::Status::Client)
 			{
 				Placement_MSG message{ PLACEMENT, go.info().sequence() + 1, placement_point.x, placement_point.y };
@@ -317,7 +317,7 @@ LRESULT GoWinApplication::main_procedure(HWND hWnd, UINT message, WPARAM wParam,
 		hdc = BeginPaint(hWnd, &ps);
 
 		BitBlt(hdcMem, 0, 0, 1200, 820, hdc_BackGround, 0, 0, SRCCOPY);
-		board_graphic.Draw(hdcMem, go, g_mouse);
+		board_graphic.Draw(hdcMem, go, mouse);
 
 		BitBlt(hdc, 0, 0, 1200, 820, hdcMem, 0, 0, SRCCOPY);
 
