@@ -4,6 +4,7 @@
 #include "Go.h"
 #include "MySocket.h"
 #include "BoardGraphic.h"
+#include "GoWin/Chatting.h"
 
 class GoWinApplication
 {
@@ -39,13 +40,12 @@ private:
 	void backsies(HWND);
 	void init(HWND);
 	void pass(HWND);
-	void append_text(HWND, LPCTSTR);
-	void send_text_to_chat(LPCTSTR);
 	std::wstring get_extension(const std::wstring& path);
 	
 	Go go;
 	BoardGraphic board_graphic;
 	MySocket my_socket;
+	GoWin::Chatting chatting;
 
 	using callback = std::function<void(HWND)>;
 	std::map<int, callback> command_message_callbacks;
@@ -59,7 +59,6 @@ private:
 	HBITMAP hBitmapMem;
 	HDC hdc, hdcMem;
 	HDC hdc_BackGround;
-	HWND hChatInputBox, hChatBox;
 	HWND hWCS, hBCS;
 	HFONT hFont;
 };

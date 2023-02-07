@@ -78,6 +78,9 @@
     <ClInclude Include="GoWinApplication.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="GoWin\Chatting.h">
+      <Filter>GoWin</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BoardGraphic.cpp">
@@ -121,6 +124,9 @@
     </ClCompile>
     <ClCompile Include="GoWinApplication.cpp">
       <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="GoWin\Chatting.cpp">
+      <Filter>GoWin</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

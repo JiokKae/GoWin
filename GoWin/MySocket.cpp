@@ -7,7 +7,7 @@ Message::Message(int type = 0)
 {
 }
 
-CHAT_MSG::CHAT_MSG(TCHAR* chat)
+CHAT_MSG::CHAT_MSG(LPCTSTR chat)
 	: Message(CHATTING)
 	, buf()
 {

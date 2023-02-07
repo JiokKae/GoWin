@@ -31,7 +31,7 @@ struct COMM_MSG : public Message {
 };
 
 struct CHAT_MSG : public Message {
-	CHAT_MSG(TCHAR* chat);
+	CHAT_MSG(LPCTSTR chat);
 	TCHAR buf[BUFSIZE/2 - sizeof(int)];
 };
 

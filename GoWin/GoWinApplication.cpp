@@ -172,14 +172,14 @@ LRESULT GoWinApplication::main_procedure(HWND hWnd, UINT message, WPARAM wParam,
 			break;
 		case IDM_SERVER_CREATE:
 			if (my_socket.Create(hWnd) != INVALID_SOCKET) {
-				send_text_to_chat(_T("[System] 서버 생성"));
+				chatting.system_print(_T("서버 생성"));
 				HMENU hMenu = GetMenu(hWnd);
 				HMENU hSubMenu = GetSubMenu(hMenu, 1);
 				EnableMenuItem(hMenu, GetMenuItemID(hSubMenu, 0), MF_GRAYED);
 
 			}
 			else {
-				send_text_to_chat(_T("[System] 서버 생성 실패"));
+				chatting.system_print(_T("서버 생성 실패"));
 			}
 			break;
 		
@@ -218,11 +218,11 @@ LRESULT GoWinApplication::main_procedure(HWND hWnd, UINT message, WPARAM wParam,
 			// 클라이언트의 접속요청이 있을때
 		case FD_ACCEPT:
 			if (my_socket.FD_Accept()) {
-				send_text_to_chat(_T("클라이언트 접속 !!"));
+				chatting.system_print(_T("클라이언트 접속"));
 			}
 			else
 			{
-				send_text_to_chat(_T("클라이언트 접속요청수락 실패 !!"));
+				chatting.system_print(_T("클라이언트 접속 실패"));
 			}
 			break;
 
@@ -237,7 +237,7 @@ LRESULT GoWinApplication::main_procedure(HWND hWnd, UINT message, WPARAM wParam,
 			case CHATTING:
 			{
 				CHAT_MSG* chat_msg = reinterpret_cast<CHAT_MSG*>(&msg);
-				send_text_to_chat(std::format(_T("상대: {}"), chat_msg->buf).c_str());
+				chatting.print(std::format(_T("상대: {}"), chat_msg->buf).c_str());
 				break;
 			}
 			case PLACEMENT:
@@ -273,7 +273,7 @@ LRESULT GoWinApplication::main_procedure(HWND hWnd, UINT message, WPARAM wParam,
 		// 클라이언트가 접속을 해제했을때
 		case FD_CLOSE:
 			my_socket.FD_Close((SOCKET)wParam);
-			send_text_to_chat(_T("클라이언트 연결 해제"));
+			chatting.system_print(_T("클라이언트 접속 종료"));
 			break;
 		}
 		return TRUE;
@@ -283,23 +283,18 @@ LRESULT GoWinApplication::main_procedure(HWND hWnd, UINT message, WPARAM wParam,
 		switch (wParam)
 		{
 		case KEY_ENTER:
-			if (GetWindowTextLength(hChatInputBox) != 0)
+			auto chat = chatting.send();
+			SetFocus(chatting.input_handle());
+
+			if (chat.empty() || my_socket.IsConnected() == false)
 			{
-				TCHAR buffer[512];
-				GetWindowText(hChatInputBox, buffer, 512);
-				send_text_to_chat(std::format(_T("당신: {}"), buffer).c_str());
-				SetWindowText(hChatInputBox, _T(""));
-
-				if (my_socket.IsConnected())
-				{
-					if (SOCKET_ERROR == my_socket.send_message(std::make_unique<CHAT_MSG>(buffer)))
-					{
-						send_text_to_chat(_T("[System] 채팅 보내기 실패"));
-					}
-				}
+				break;
 			}
-			SetFocus(hChatInputBox);
-
+			if (SOCKET_ERROR == my_socket.send_message(std::make_unique<CHAT_MSG>(chat.c_str())))
+			{
+				chatting.system_print(_T("채팅 보내기 실패"));
+			}
+			
 			break;
 		}
 
@@ -332,7 +327,7 @@ LRESULT GoWinApplication::main_procedure(HWND hWnd, UINT message, WPARAM wParam,
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
-	return 0;;
+	return 0;
 }
 
 INT_PTR GoWinApplication::about_procedure(HWND hDlg, UINT message, WPARAM wParam, LPARAM)
@@ -429,11 +424,10 @@ void GoWinApplication::create(HWND hWnd)
 		840, 340, 150, 30, hWnd, (HMENU)IDA_PASS, m_hInstance, NULL);
 	CreateWindow(_T("button"), _T("수순 표시"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
 		1010, 340, 150, 30, hWnd, (HMENU)3, m_hInstance, NULL);
-
-	hChatBox = CreateWindow(_T("EDIT"), _T(""), WS_CHILD | WS_VISIBLE | ES_LEFT | ES_READONLY | ES_AUTOVSCROLL | WS_VSCROLL | ES_MULTILINE,
-		840, 400, 320, 120, hWnd, (HMENU)4, m_hInstance, NULL);
-	hChatInputBox = CreateWindow(_T("EDIT"), _T(""), WS_CHILD | WS_VISIBLE | ES_LEFT | ES_AUTOHSCROLL | ES_WANTRETURN,
-		840, 530, 320, 30, hWnd, (HMENU)5, m_hInstance, NULL);
+	chatting.set_output_handle(CreateWindow(_T("EDIT"), _T(""), WS_CHILD | WS_VISIBLE | ES_LEFT | ES_READONLY | ES_AUTOVSCROLL | WS_VSCROLL | ES_MULTILINE,
+		840, 400, 320, 120, hWnd, (HMENU)4, m_hInstance, NULL));
+	chatting.set_input_handle(CreateWindow(_T("EDIT"), _T(""), WS_CHILD | WS_VISIBLE | ES_LEFT | ES_AUTOHSCROLL | ES_WANTRETURN,
+		840, 530, 320, 30, hWnd, (HMENU)5, m_hInstance, NULL));
 }
 
 void GoWinApplication::file_open(HWND hWnd)
@@ -512,7 +506,7 @@ void GoWinApplication::init(HWND hWnd)
 	}
 
 	InvalidateRect(hWnd, NULL, FALSE);
-	send_text_to_chat(_T("[System] 바둑판을 초기화 했습니다."));
+	chatting.system_print(_T("바둑판을 초기화 했습니다."));
 }
 
 void GoWinApplication::pass(HWND hWnd)
@@ -534,20 +528,7 @@ void GoWinApplication::pass(HWND hWnd)
 	}
 
 	InvalidateRect(hWnd, NULL, FALSE);
-	send_text_to_chat(_T("[System] 한수 쉬었습니다."));
-}
-
-void GoWinApplication::append_text(HWND editbox, LPCTSTR text)
-{
-	SendMessage(editbox, EM_SETSEL, 0, -1);
-	SendMessage(editbox, EM_SETSEL, -1, -1);
-	SendMessage(editbox, EM_REPLACESEL, 0, (LPARAM)text); // append!
-}
-
-void GoWinApplication::send_text_to_chat(LPCTSTR text)
-{
-	append_text(hChatBox, text);
-	append_text(hChatBox, _T("\r\n"));
+	chatting.system_print(_T("한수 쉬었습니다."));
 }
 
 std::wstring GoWinApplication::get_extension(const std::wstring& path)
