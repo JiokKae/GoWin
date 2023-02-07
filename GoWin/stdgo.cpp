@@ -1,21 +1,13 @@
 ﻿#include "stdgo.h"
-
-void PlacementInfo::print( std::wostream& wos ) const
-{
-	wos << "[착수 정보]-----" << std::endl;
-	wos << "수 : " << sequence << std::endl;
-	wos << "플레이어 : " << Color2Char( player ) << std::endl;
-	wos << "좌표 : (" << placement.x << ", " << placement.y << ")" << std::endl;
-	wos << "----------------" << std::endl;
-}
+#include <tchar.h>
+#include <format>
 
 std::wstring PlacementInfo::to_sgf() const
 {
-	wchar_t player = Color2Char( this->player );
-	wchar_t x = (placement.x + 19 ) % 20 + 'a';
-	wchar_t y = (placement.y + 19 ) % 20 + 'a';
+	TCHAR x = (this->x + 19) % 20 + 'a';
+	TCHAR y = (this->y + 19) % 20 + 'a';
 
-	return std::wstring( { ';', player, '[', x, y, ']' } );
+	return std::format(_T(";{}[{}{}]", Color2Char(this->player), x, y));
 }
 
 Color Reverse(Color color)
@@ -29,4 +21,14 @@ Color Reverse(Color color)
 char Color2Char( Color color )
 {
 	return ( color == Color::White ) ? 'W' : 'B';
+}
+
+std::wostream& operator<<(std::wostream& wos, const PlacementInfo& p)
+{
+	wos << "[착수 정보]-----" << std::endl;
+	wos << "수 : " << p.sequence << std::endl;
+	wos << "플레이어 : " << Color2Char(p.player) << std::endl;
+	wos << "좌표 : (" << p.x << ", " << p.y << ")" << std::endl;
+	wos << "----------------" << std::endl;
+	return wos;
 }

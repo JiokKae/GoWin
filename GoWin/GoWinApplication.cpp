@@ -107,7 +107,7 @@ LRESULT GoWinApplication::main_procedure(HWND hWnd, UINT message, WPARAM wParam,
 				{
 
 					const auto& placementInfo = go.getLastPlacementInfo();
-					my_socket.send_message(std::make_unique<Placement_MSG>(placementInfo.sequence, placementInfo.placement.x, placementInfo.placement.y));
+					my_socket.send_message(std::make_unique<Placement_MSG>(placementInfo.sequence, placementInfo.x, placementInfo.y));
 				}
 				SetWindowText(hBCS, std::to_wstring(go.info().get_player(Color::Black).captured_stone()).c_str());
 				SetWindowText(hWCS, std::to_wstring(go.info().get_player(Color::White).captured_stone()).c_str());
@@ -249,7 +249,7 @@ LRESULT GoWinApplication::main_procedure(HWND hWnd, UINT message, WPARAM wParam,
 					if (my_socket.status() == MySocket::Status::Server)
 					{
 						const auto& placementInfo = go.getLastPlacementInfo();
-						my_socket.send_message(std::make_unique<Placement_MSG>(placementInfo.sequence, placementInfo.placement.x, placementInfo.placement.y));
+						my_socket.send_message(std::make_unique<Placement_MSG>(placementInfo.sequence, placementInfo.x, placementInfo.y));
 					}
 					SetWindowText(hBCS, std::to_wstring(go.info().get_player(Color::Black).captured_stone()).c_str());
 					SetWindowText(hWCS, std::to_wstring(go.info().get_player(Color::White).captured_stone()).c_str());

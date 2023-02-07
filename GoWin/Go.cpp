@@ -122,7 +122,7 @@ int Go::Placement( Coord2d coord_placement )
 	
 	// 착수 정보 저장
 	PlacementInfo placement(x, y, sequence, color);
-	placement.print( std::wcout );
+	std::wcout << placement;
 	m_info.add_placement(placement);
 
 	m_info.add_sequence(1);
@@ -182,7 +182,7 @@ void SaveNGF(std::wostream& wos, const Go::Information& goInfo, const std::wstri
 	for (int i = 0; i < goInfo.sequence() - 1; i++)
 	{
 		const PlacementInfo& data = goInfo.placements()[i].data();
-		ngf.add_placement(GiboNGF::Placement(data.sequence, data.placement.x, data.placement.y, Color2Char(data.player)));
+		ngf.add_placement(GiboNGF::Placement(data.sequence, data.x, data.y, Color2Char(data.player)));
 	}
 	ngf.save(wos);
 }

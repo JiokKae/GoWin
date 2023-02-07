@@ -25,23 +25,18 @@ struct Coord2d
 struct PlacementInfo
 {
 	PlacementInfo(int x, int y, int sequence, Color player)
-		: placement(x, y)
+		: x(x)
+		, y(y)
 		, sequence(sequence)
 		, player(player)
 	{
 	}
 
-	PlacementInfo(Coord2d placement, int sequence, Color player)
-		: placement(placement)
-		, sequence(sequence)
-		, player(player)
-	{
-	}
-
-	Coord2d placement;
+	int x, y;
 	int sequence;
 	Color player;
 	
-	void print( std::wostream& wos ) const;
 	std::wstring to_sgf() const;
+
+	friend std::wostream& operator<<(std::wostream&, const PlacementInfo&);
 };

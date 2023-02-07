@@ -21,5 +21,5 @@ const std::vector<Node>& Node::childs() const
 
 void Node::print()
 {
-	m_data.print(std::wcout);
+	std::wcout << m_data;
 }
