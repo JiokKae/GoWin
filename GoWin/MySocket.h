@@ -1,7 +1,8 @@
 ﻿#pragma once
 #include <WinSock2.h>
 #include <process.h>
-#include <stdio.h>
+//#include <stdio.h>
+#include <memory>
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -18,34 +19,36 @@
 #define WM_ASYNC	(WM_USER+1) // 비동기 메시지 정의
 #define MAXCLIENT	2
 
-// 메시지
-struct COMM_MSG {
+struct Message {
+	Message(int type);
+	virtual ~Message() = default;
 	int type;
+};
+
+struct COMM_MSG : public Message {
+	COMM_MSG();
 	char dummy[MSGSIZE];
 };
 
-// 채팅 메시지
-struct CHAT_MSG {
-	int type;
-	WCHAR buf[BUFSIZE/2 - sizeof(int)];
+struct CHAT_MSG : public Message {
+	CHAT_MSG(TCHAR* chat);
+	TCHAR buf[BUFSIZE/2 - sizeof(int)];
 };
 
-// 착수 메시지
-struct Placement_MSG {
-	int type;
+struct Placement_MSG : public Message {
+	Placement_MSG(int sequence, int x, int y);
 	int sequence;
 	int x, y;
 	char dummy[MSGSIZE - sizeof(int) * 3];
 };
 
-// 커맨드 메시지
-struct Command_MSG {
-	int type;
+struct Command_MSG : public Message {
+	Command_MSG(int command);
 	int command;
 	char dummy[MSGSIZE - sizeof(int)];
 };
 
-class MySocket {
+class MySocket : public Message {
 public:
 	// 소켓 상태
 	enum class Status {
@@ -69,6 +72,7 @@ public:
 
 	bool Enter(HWND hWnd, char* server_ip);
 	int Send(char* buf, int size);
+	int send_message(std::unique_ptr<Message>);
 	
 	int CurrentAcceptIndex() { return current_accept_index; }
 	

@@ -2,7 +2,36 @@
 #include "MySocket.h"
 #include <stdio.h>
 
-MySocket::MySocket() {
+Message::Message(int type = 0)
+	: type(type)
+{
+}
+
+CHAT_MSG::CHAT_MSG(TCHAR* chat)
+	: Message(CHATTING)
+	, buf()
+{
+	wcscpy_s(buf, chat);
+}
+
+Placement_MSG::Placement_MSG(int sequence, int x, int y)
+	: Message(PLACEMENT)
+	, sequence(sequence)
+	, x(x)
+	, y(y)
+	, dummy()
+{
+}
+
+Command_MSG::Command_MSG(int command)
+	: Message(COMMAND)
+	, command(command)
+	, dummy()
+{
+}
+
+MySocket::MySocket() 
+{
 	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
 	{
 		printf("not equal version\n");
@@ -205,6 +234,11 @@ int MySocket::Send(char* buf, int size) {
 	return SOCKET_ERROR;
 }
 
+int MySocket::send_message(std::unique_ptr<Message> message)
+{
+	return Send(reinterpret_cast<char*>(message.get()), BUFSIZE);
+}
+
 bool MySocket::IsConnected() const
 {
 	return m_status != Status::notConnected;
@@ -215,3 +249,7 @@ MySocket::Status MySocket::status() const
 	return m_status;
 }
 
+COMM_MSG::COMM_MSG()
+	: Message(0)
+{
+}

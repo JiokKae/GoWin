@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <cwctype>
 #include <fstream>
+#include <memory>
 
 GoWinApplication::GoWinApplication()
 	: m_main_window_handle(nullptr)
@@ -25,8 +26,7 @@ GoWinApplication::GoWinApplication()
 
 			if (my_socket.status() == MySocket::Status::Server)
 			{
-				Command_MSG message{ COMMAND, BACKSIES };
-				my_socket.Send(reinterpret_cast<char*>(&message), BUFSIZE);
+				my_socket.send_message(std::make_unique<Command_MSG>(BACKSIES));
 			}
 		}},
 		{INIT, [this](HWND hWnd) {
@@ -37,8 +37,7 @@ GoWinApplication::GoWinApplication()
 
 			if (my_socket.status() == MySocket::Status::Server)
 			{
-				Command_MSG message{ COMMAND,INIT };
-				my_socket.Send(reinterpret_cast<char*>(&message), BUFSIZE);
+				my_socket.send_message(std::make_unique<Command_MSG>(INIT));
 			}
 		}},
 		{PASS, [this](HWND hWnd) {
@@ -49,8 +48,7 @@ GoWinApplication::GoWinApplication()
 
 			if (my_socket.status() == MySocket::Status::Server)
 			{
-				Command_MSG message{ COMMAND, PASS };
-				my_socket.Send(reinterpret_cast<char*>(&message), BUFSIZE);
+				my_socket.send_message(std::make_unique<Command_MSG>(PASS));
 			}
 		}},
 	} {
@@ -98,8 +96,7 @@ LRESULT GoWinApplication::main_procedure(HWND hWnd, UINT message, WPARAM wParam,
 			const Coord2d placement_point = board_graphic.MouseToBoard(mouse.x, mouse.y);
 			if (my_socket.status() == MySocket::Status::Client)
 			{
-				Placement_MSG message{ PLACEMENT, go.info().sequence() + 1, placement_point.x, placement_point.y };
-				my_socket.Send(reinterpret_cast<char*>(&message), BUFSIZE);
+				my_socket.send_message(std::make_unique<Placement_MSG>(go.info().sequence() + 1, placement_point.x, placement_point.y));
 				break;
 			}
 
@@ -108,9 +105,9 @@ LRESULT GoWinApplication::main_procedure(HWND hWnd, UINT message, WPARAM wParam,
 			{
 				if (my_socket.status() == MySocket::Status::Server)
 				{
+
 					const auto& placementInfo = go.getLastPlacementInfo();
-					Placement_MSG message{ PLACEMENT, placementInfo.sequence, placementInfo.placement.x, placementInfo.placement.y };
-					my_socket.Send(reinterpret_cast<char*>(&message), BUFSIZE);
+					my_socket.send_message(std::make_unique<Placement_MSG>(placementInfo.sequence, placementInfo.placement.x, placementInfo.placement.y));
 				}
 				SetWindowText(hBCS, std::to_wstring(go.info().get_player(Color::Black).captured_stone()).c_str());
 				SetWindowText(hWCS, std::to_wstring(go.info().get_player(Color::White).captured_stone()).c_str());
@@ -240,8 +237,7 @@ LRESULT GoWinApplication::main_procedure(HWND hWnd, UINT message, WPARAM wParam,
 			case CHATTING:
 			{
 				CHAT_MSG* chat_msg = reinterpret_cast<CHAT_MSG*>(&msg);
-				append_text(hChatBox, _T("상대 : "));
-				send_text_to_chat(chat_msg->buf);
+				send_text_to_chat(std::format(_T("상대: {}"), chat_msg->buf).c_str());
 				break;
 			}
 			case PLACEMENT:
@@ -253,8 +249,7 @@ LRESULT GoWinApplication::main_procedure(HWND hWnd, UINT message, WPARAM wParam,
 					if (my_socket.status() == MySocket::Status::Server)
 					{
 						const auto& placementInfo = go.getLastPlacementInfo();
-						Placement_MSG message{ PLACEMENT, placementInfo.sequence, placementInfo.placement.x, placementInfo.placement.y };
-						my_socket.Send(reinterpret_cast<char*>(&message), BUFSIZE);
+						my_socket.send_message(std::make_unique<Placement_MSG>(placementInfo.sequence, placementInfo.placement.x, placementInfo.placement.y));
 					}
 					SetWindowText(hBCS, std::to_wstring(go.info().get_player(Color::Black).captured_stone()).c_str());
 					SetWindowText(hWCS, std::to_wstring(go.info().get_player(Color::White).captured_stone()).c_str());
@@ -290,20 +285,17 @@ LRESULT GoWinApplication::main_procedure(HWND hWnd, UINT message, WPARAM wParam,
 		case KEY_ENTER:
 			if (GetWindowTextLength(hChatInputBox) != 0)
 			{
-				append_text(hChatBox, _T("당신 : "));
-				WCHAR buffer[512];
+				TCHAR buffer[512];
 				GetWindowText(hChatInputBox, buffer, 512);
-				send_text_to_chat(buffer);
+				send_text_to_chat(std::format(_T("당신: {}"), buffer).c_str());
 				SetWindowText(hChatInputBox, _T(""));
 
 				if (my_socket.IsConnected())
 				{
-					CHAT_MSG msg;
-					msg.type = CHATTING;
-					wcscpy_s(msg.buf, buffer);
-
-					if (SOCKET_ERROR == my_socket.Send((char*)&msg, BUFSIZE))
-						send_text_to_chat(_T("[System] 메세지 보내기 실패"));
+					if (SOCKET_ERROR == my_socket.send_message(std::make_unique<CHAT_MSG>(buffer)))
+					{
+						send_text_to_chat(_T("[System] 채팅 보내기 실패"));
+					}
 				}
 			}
 			SetFocus(hChatInputBox);
@@ -484,8 +476,7 @@ void GoWinApplication::backsies(HWND hWnd)
 {
 	if (my_socket.status() == MySocket::Status::Client)
 	{
-		Command_MSG message{ COMMAND, BACKSIES };
-		my_socket.Send(reinterpret_cast<char*>(&message), BUFSIZE);
+		my_socket.send_message(std::make_unique<Command_MSG>(BACKSIES));
 		return;
 	}
 
@@ -496,8 +487,7 @@ void GoWinApplication::backsies(HWND hWnd)
 
 	if (my_socket.status() == MySocket::Status::Server)
 	{
-		Command_MSG message{ COMMAND, BACKSIES };
-		my_socket.Send(reinterpret_cast<char*>(&message), BUFSIZE);
+		my_socket.send_message(std::make_unique<Command_MSG>(BACKSIES));
 	}
 
 	InvalidateRect(hWnd, NULL, FALSE);
@@ -507,8 +497,7 @@ void GoWinApplication::init(HWND hWnd)
 {
 	if (my_socket.status() == MySocket::Status::Client)
 	{
-		Command_MSG message{ COMMAND, INIT };
-		my_socket.Send(reinterpret_cast<char*>(&message), BUFSIZE);
+		my_socket.send_message(std::make_unique<Command_MSG>(INIT));
 		return;
 	}
 
@@ -519,8 +508,7 @@ void GoWinApplication::init(HWND hWnd)
 
 	if (my_socket.status() == MySocket::Status::Server)
 	{
-		Command_MSG message{ COMMAND, INIT };
-		my_socket.Send(reinterpret_cast<char*>(&message), BUFSIZE);
+		my_socket.send_message(std::make_unique<Command_MSG>(INIT));
 	}
 
 	InvalidateRect(hWnd, NULL, FALSE);
@@ -531,8 +519,7 @@ void GoWinApplication::pass(HWND hWnd)
 {
 	if (my_socket.status() == MySocket::Status::Client)
 	{
-		Command_MSG message{ COMMAND, PASS };
-		my_socket.Send(reinterpret_cast<char*>(&message), BUFSIZE);
+		my_socket.send_message(std::make_unique<Command_MSG>(PASS));
 		return;
 	}
 
@@ -543,8 +530,7 @@ void GoWinApplication::pass(HWND hWnd)
 
 	if (my_socket.status() == MySocket::Status::Server)
 	{
-		Command_MSG message{ COMMAND, PASS };
-		my_socket.Send(reinterpret_cast<char*>(&message), BUFSIZE);
+		my_socket.send_message(std::make_unique<Command_MSG>(PASS));
 	}
 
 	InvalidateRect(hWnd, NULL, FALSE);
