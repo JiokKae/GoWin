@@ -12,7 +12,6 @@
 GoWinApplication::GoWinApplication()
 	: m_main_window_handle(nullptr)
 	, strings{
-		{string_id::FILE_OPEN_FILTER, _T("기보 파일(*.ngf)\0*.ngf\0")},
 		{string_id::INVALID_EXTENSION, _T("지원하는 파일 형식이 아닙니다.")},
 		{string_id::FILE_OPEN_FAIL_TITLE, _T("파일 열기 실패")},
 		{string_id::FILE_OPEN_FAIL, _T("파일을 불러오는데 실패했습니다.")},
@@ -449,7 +448,7 @@ void GoWinApplication::file_open(HWND hWnd)
 {
 	try
 	{
-		GoWin::OpenFileName ofn(hWnd, strings[string_id::FILE_OPEN_FILTER].c_str(), OFN_FILEMUSTEXIST);
+		GoWin::OpenFileName ofn(hWnd, _T("기보 파일(*.ngf)\0*.ngf\0"), OFN_FILEMUSTEXIST);
 
 		auto result = ofn.open();
 		if (result.success == false)
