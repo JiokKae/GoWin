@@ -421,11 +421,11 @@ void GoWinApplication::create(HWND hWnd)
 	SendMessage(hBCS, WM_SETFONT, (WPARAM)hFont, (LPARAM)FALSE);
 	SendMessage(hWCS, WM_SETFONT, (WPARAM)hFont, (LPARAM)FALSE);
 
-	CreateWindow(_T("button"), _T("무르기(Z)"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+	CreateWindow(_T("button"), _T("무르기"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
 		840, 300, 150, 30, hWnd, (HMENU)IDA_BACKSIES, m_hInstance, NULL);
-	CreateWindow(_T("button"), _T("초기화(I)"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+	CreateWindow(_T("button"), _T("초기화"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
 		1010, 300, 150, 30, hWnd, (HMENU)IDA_INIT, m_hInstance, NULL);
-	CreateWindow(_T("button"), _T("한수쉼(P)"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+	CreateWindow(_T("button"), _T("한수쉼"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
 		840, 340, 150, 30, hWnd, (HMENU)IDA_PASS, m_hInstance, NULL);
 	CreateWindow(_T("button"), _T("수순 표시"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
 		1010, 340, 150, 30, hWnd, (HMENU)3, m_hInstance, NULL);
