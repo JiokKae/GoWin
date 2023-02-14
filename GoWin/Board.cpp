@@ -257,7 +257,6 @@ bool Board::isDeadGS(const Stone* s1)
 		sp = sp->backStone();
 	}
 		
-	Stone* sptmp( sp->nextStone() );
 	while (sp != nullptr) 
 	{
 		for (int i = 0; i < 4; i++) 
@@ -267,11 +266,7 @@ bool Board::isDeadGS(const Stone* s1)
 				return false;
 			}
 		}
-		sp = sptmp;
-		if (sptmp != nullptr) 
-		{
-			sptmp = sptmp->nextStone();
-		}
+		sp = sp->nextStone();
 	}
 	return true;
 }
