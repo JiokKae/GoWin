@@ -45,16 +45,17 @@ Stone::Stone( std::string Wall )
 {
 }
 
-void Stone::Print(std::ostream& os) const
+std::ostream& operator<<(std::ostream& os, const Stone& s)
 {
 	os << "Stone ----------------" << std::endl;
-	os << "    x: " << m_x << std::endl;
-	os << "    y: " << m_y << std::endl;
-	os << "    sequence: " << m_sequence << std::endl;
-	os << "    backStone: " << m_backStone << std::endl;
-	os << "    nextStone: " << m_nextStone << std::endl;
-	os << "    color: " << (int)m_color << std::endl;
-	os << "    state: " << (int)m_state << std::endl;
-	os << "    killer: " << m_killer << std::endl;
+	os << "    x: " << s.m_x << std::endl;
+	os << "    y: " << s.m_y << std::endl;
+	os << "    sequence: " << s.m_sequence << std::endl;
+	os << "    backStone: " << s.m_backStone << std::endl;
+	os << "    nextStone: " << s.m_nextStone << std::endl;
+	os << "    color: " << int(s.m_color) << std::endl;
+	os << "    state: " << int(s.m_state) << std::endl;
+	os << "    killer: " << s.m_killer << std::endl;
 	os << "----------------------" << std::endl;
+	return os;
 }

@@ -33,7 +33,7 @@ public:
 	void set_nextStone( Stone* s )	{ m_nextStone = s; }
 	void set_killer( bool killer )	{ m_killer = killer; }
 
-	void Print(std::ostream& os) const;
+	friend std::ostream& operator<<(std::ostream&, const Stone&);
 private:
 	int m_x;
 	int m_y;

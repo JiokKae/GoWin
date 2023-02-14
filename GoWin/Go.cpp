@@ -91,7 +91,7 @@ int Go::Placement( Coord2d coord_placement )
 		return ERR_NOTBOARDIN;
 	if (m_board.isEmpty(x, y) == false)
 	{
-		m_board.getStone(x, y).Print(std::cout);
+		std::cout << m_board.getStone(x, y);
 		return ERR_NOTEMPTY;
 	}
 		
