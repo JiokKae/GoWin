@@ -175,34 +175,22 @@ void Board::linkGS(Stone* s1, Stone* s2) {
 //--------------------------------------------------------------------------------------
 // Name:  captureGS
 // Desc:  돌을 따낸다.
-// Param: capturedStone	-> 따낼 돌의 포인터
+// Param: captured	-> 따낼 돌의 포인터
 // Ret:   잡아낸 돌의 숫자
 //--------------------------------------------------------------------------------------
-int Board::captureGS(Stone* capturedStone) 
+int Board::captureGS(Stone* captured)
 {
-	Stone* pStone = capturedStone;
-	Stone* pStoneTemp;
-	
+	while (captured->backStone() != nullptr)
+		captured = captured->backStone();
 
-	while (pStone->backStone() != nullptr)
+	int count(0);
+	Stone* next(nullptr);
+	while (captured != nullptr)
 	{
-		pStone = pStone->backStone();
-	}
-
-	pStoneTemp = pStone->nextStone();
-	int count = 0;
-	while (pStone != nullptr) 
-	{
-		board[ pStone->x() ][ pStone->y() ] = Stone();
-		
-		*pStone = Stone();
+		next = captured->nextStone();
+		*captured = Stone();
 		count++;
-		pStone = pStoneTemp;
-		if (pStoneTemp != nullptr) 
-		{
-			pStoneTemp = pStoneTemp->nextStone();
-		}
-			
+		captured = next;
 	}
 	return count;
 }
