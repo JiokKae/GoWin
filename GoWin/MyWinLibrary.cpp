@@ -1,28 +1,20 @@
 #include "MyWinLibrary.h"
-#pragma warning (disable : 4996)
 
-char* ReadMessage( UINT message, char * buffer )
+#define MSG_TO_STR(x) case x: return #x
+std::string ReadMessage(UINT message)
 {
 	switch (message)
 	{
-	case WM_CREATE:
-		strcpy(buffer, "WM_CREATE"); break;
-	case WM_MOUSEMOVE:
-		strcpy(buffer, "WM_MOUSEMOVE"); break;
-	case WM_COMMAND:
-		strcpy(buffer, "WM_COMMAND"); break;
-	case WM_LBUTTONDOWN:
-		strcpy(buffer, "WM_LBUTTONDOWN"); break;
-	case WM_PAINT:
-		strcpy(buffer, "WM_PAINT"); break;
-	case WM_SETCURSOR:
-		strcpy(buffer, "WM_SETCURSOR"); break;
-	case WM_KEYDOWN:
-		strcpy(buffer, "WM_KEYDOWN"); break;
+	MSG_TO_STR(WM_CREATE);
+	MSG_TO_STR(WM_MOUSEMOVE);
+	MSG_TO_STR(WM_COMMAND);
+	MSG_TO_STR(WM_LBUTTONDOWN);
+	MSG_TO_STR(WM_PAINT);
+	MSG_TO_STR(WM_SETCURSOR);
+	MSG_TO_STR(WM_KEYDOWN);
 	default:
-		itoa(message, buffer, 10);
-	}
-	return buffer;
+		return std::to_string(message);
+	}	
 }
 
 void GetMouseCoord( Coord2d & coord, LPARAM lParam )

@@ -2,6 +2,7 @@
 //
 #include "framework.h"
 #include "GoWinApplication.h"
+#include <format>
 
 constexpr int MAX_LOADSTRING = 100;
 
@@ -40,6 +41,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	MSG msg;
 	while (GetMessage(&msg, nullptr, 0, 0))
 	{
+		if ( false ) std::cout << std::format("hWnd : {:<15}\t msg : {:<15} wParam : {}\t lParam : {}\n", static_cast<void*>(msg.hwnd), ReadMessage(msg.message), msg.wParam, msg.lParam);
+
 		if (msg.message == WM_KEYDOWN && msg.hwnd != goWin.main_window_handle())
 		{
 			PostMessage(goWin.main_window_handle(), msg.message, msg.wParam, msg.lParam);
@@ -105,10 +108,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	//char buffer[64] = "";
-	//if(message == WM_PAINT)
-	//   printf("hWnd : %p\t msg : %-15s wParam : %d\t lParam : %d\n", hWnd, ReadMessage(message, buffer), wParam, lParam);
-
 	switch (message)
 	{
 	case WM_COMMAND:
