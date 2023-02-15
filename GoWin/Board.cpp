@@ -110,17 +110,10 @@ int Board::setBoard(int x, int y, int sequence, Color color)
 }
 
 void Board::setBoardtmp(int x, int y, int sequence) {
-	if (isEmpty(board[x][y]))
+	if (isEmpty(x, y))
 		board[x][y] = Stone(x, y, sequence, "temp");
 	else
 		board[x][y] = Stone();
-}
-
-Color Board::getStoneColor(int x, int y) {
-	return board[x][y].color();
-}
-Color Board::getStoneColor(Stone s) {
-	return s.color();
 }
 
 const Stone& Board::getStone(int x, int y) const
@@ -195,22 +188,14 @@ int Board::captureGS(Stone* captured)
 	return count;
 }
 
-bool Board::isBoardin(int x, int y) 
+bool Board::isBoardin(int x, int y) const
 {
-	return ((x < 20 && x >= 1) && (y < 20 && y >= 1));
-}
-bool Board::isBoardin(Stone s) 
-{
-	return ((s.x() < 20 && s.x() >= 1) && (s.y() < 20 && s.y() >= 1));
+	return (x < 20 && x >= 1) && (y < 20 && y >= 1);
 }
 
 bool Board::isEmpty(int x, int y) 
 {
-	return (board[x][y].sequence() == 0);
-}
-bool Board::isEmpty(Stone s) 
-{
-	return (s.sequence() == 0);
+	return board[x][y].sequence() == 0;
 }
 
 bool Board::isIllegalpoint( int x, int y, Color color )
@@ -261,7 +246,7 @@ bool Board::isDeadGS(const Stone* s1)
 
 bool Board::isSolo( int x, int y )
 {
-	return isSolo( getStone( x, y ) );
+	return isSolo( board[x][y] );
 }
 
 bool Board::isSolo( const Stone& stone )
