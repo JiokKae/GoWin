@@ -66,7 +66,7 @@ public:
 	bool FD_Accept();
 
 	void FD_Read(SOCKET sock, COMM_MSG* pMsg);
-	void OnClose(SOCKET* sockArray, SOCKET sock);
+	void OnClose(SOCKET sock);
 	void FD_Close(SOCKET sock);
 
 
@@ -85,7 +85,7 @@ private:
 	char server_ip[18] = "";
 	WSADATA wsa;
 	int current_accept_index = 0;
-	SOCKET client_socket[MAXCLIENT];
+	SOCKET client_sockets[MAXCLIENT];
 	SOCKET server_socket;
 	HWND hWnd;
 	Status m_status;

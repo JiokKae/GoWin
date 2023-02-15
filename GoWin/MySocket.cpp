@@ -1,4 +1,4 @@
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
+ï»¿#define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include "MySocket.h"
 #include <stdio.h>
 
@@ -58,7 +58,7 @@ SOCKET MySocket::Create(HWND hWnd) {
 	rt = bind(server_socket, (const sockaddr*)&server_addr, sizeof(SOCKADDR_IN));
 	if (rt == SOCKET_ERROR)
 	{
-		printf("¹ÙÀÎµù ½ÇÆĞ\n");
+		printf("ë°”ì¸ë”© ì‹¤íŒ¨\n");
 		closesocket(server_socket);
 		WSACleanup();
 		return INVALID_SOCKET;
@@ -67,7 +67,7 @@ SOCKET MySocket::Create(HWND hWnd) {
 	rt = listen(server_socket, 5);
 	if (rt == SOCKET_ERROR)
 	{
-		printf("´ë±â»óÅÂ ¼³Á¤ ½ÇÆĞ\n");
+		printf("ëŒ€ê¸°ìƒíƒœ ì„¤ì • ì‹¤íŒ¨\n");
 		closesocket(server_socket);
 		WSACleanup();
 		return INVALID_SOCKET;
@@ -76,7 +76,7 @@ SOCKET MySocket::Create(HWND hWnd) {
 	rt = WSAAsyncSelect(server_socket, hWnd, WM_ASYNC, FD_ACCEPT | FD_READ | FD_CLOSE);
 	if (rt == SOCKET_ERROR)
 	{
-		printf("Create() : WSAAsyncSelect() ½ÇÆĞ\n");
+		printf("Create() : WSAAsyncSelect() ì‹¤íŒ¨\n");
 		closesocket(server_socket);
 		WSACleanup();
 		return INVALID_SOCKET;
@@ -86,9 +86,9 @@ SOCKET MySocket::Create(HWND hWnd) {
 }
 //--------------------------------------------------------------------------------------
 // Name:  OnAccept
-// Desc:  FD_ACCEPT ÇÚµé·¯ ÇÔ¼ö, Å¬¶óÀÌ¾ğÆ®ÀÇ Á¢¼ÓÀ» ¼ö¶ôÇÑ´Ù
-// Param: serSock -> ¼­¹ö¼ÒÄÏ
-// Ret:   Á¢¼ÓµÈ Å¬¶óÀÌ¾ğÆ®ÀÇ »õ·Î »ı¼ºµÈ ¼ÒÄÏ
+// Desc:  FD_ACCEPT í•¸ë“¤ëŸ¬ í•¨ìˆ˜, í´ë¼ì´ì–¸íŠ¸ì˜ ì ‘ì†ì„ ìˆ˜ë½í•œë‹¤
+// Param: serSock -> ì„œë²„ì†Œì¼“
+// Ret:   ì ‘ì†ëœ í´ë¼ì´ì–¸íŠ¸ì˜ ìƒˆë¡œ ìƒì„±ëœ ì†Œì¼“
 //--------------------------------------------------------------------------------------
 SOCKET MySocket::OnAccept(HWND hWnd, SOCKET sockServ)
 {
@@ -97,18 +97,18 @@ SOCKET MySocket::OnAccept(HWND hWnd, SOCKET sockServ)
 	int		iLen;
 
 	//
-	// Á¢¼ÓÀ» ¼ö¶ôÇÑ´Ù
+	// ì ‘ì†ì„ ìˆ˜ë½í•œë‹¤
 	iLen = sizeof(SOCKADDR_IN);
 	sock = accept(sockServ, (SOCKADDR*)&Addr, &iLen);
 	if (INVALID_SOCKET == sock)
 		return INVALID_SOCKET;
 
 	//
-	// Å¬¶óÀÌ¾ğÆ® ¼ÒÄÏµµ ºñµ¿±â¼ÒÄÏÀ¸·Î ÀüÈ¯ÇÑ´Ù
+	// í´ë¼ì´ì–¸íŠ¸ ì†Œì¼“ë„ ë¹„ë™ê¸°ì†Œì¼“ìœ¼ë¡œ ì „í™˜í•œë‹¤
 	iLen = WSAAsyncSelect(sock, hWnd, WM_ASYNC, FD_READ | FD_CLOSE);
 	if (SOCKET_ERROR == iLen)
 	{
-		printf("OnAccept() : WSAAsyncSelect() ½ÇÆĞ\n");
+		printf("OnAccept() : WSAAsyncSelect() ì‹¤íŒ¨\n");
 		closesocket(sock);
 		return INVALID_SOCKET;
 	}
@@ -116,13 +116,13 @@ SOCKET MySocket::OnAccept(HWND hWnd, SOCKET sockServ)
 	return sock;
 }
 bool MySocket::FD_Accept() {
-	// ÃÖ´ëÅ¬¶óÀÌ¾ğÆ® ¼ö¸¦ Ã¼Å©ÇØ¼­ ²Ë Ã¡´Ù¸é Á¢¼Ó¿äÃ»À» ¹«½ÃÇÑ´Ù
+	// ìµœëŒ€í´ë¼ì´ì–¸íŠ¸ ìˆ˜ë¥¼ ì²´í¬í•´ì„œ ê½‰ ì°¼ë‹¤ë©´ ì ‘ì†ìš”ì²­ì„ ë¬´ì‹œí•œë‹¤
 	if (MAXCLIENT - 1 <= current_accept_index)
 		return false;
 
-	client_socket[current_accept_index] = OnAccept(hWnd, server_socket);
+	client_sockets[current_accept_index] = OnAccept(hWnd, server_socket);
 
-	if (INVALID_SOCKET == client_socket[current_accept_index])
+	if (INVALID_SOCKET == client_sockets[current_accept_index])
 		return false;
 	else
 	{
@@ -132,7 +132,7 @@ bool MySocket::FD_Accept() {
 }
 
 void MySocket::FD_Read(SOCKET sock, COMM_MSG* pMsg) {
-	printf("FD_READ È£ÃâµÊ\n");
+	printf("FD_READ í˜¸ì¶œë¨\n");
 	if (SOCKET_ERROR == recvn(sock, (char*)pMsg, 512, 0))
 		pMsg = nullptr;
 }
@@ -140,39 +140,36 @@ void MySocket::FD_Read(SOCKET sock, COMM_MSG* pMsg) {
 
 //--------------------------------------------------------------------------------------
 // Name:	OnClose
-// Desc:	FD_CLOSE ÇÚµé·¯. Å¬¶óÀÌ¾ğÆ®ÀÇ ¼ÒÄÏÀ» ÇØÁ¦ÇÏ°í ¹è¿­À» ÀçÁ¤¸®ÇÑ´Ù
-// Param:	sockArray	-> Å¬¶óÀÌ¾ğÆ®ÀÇ ¼ÒÄÏ¹è¿­
-//		sock		-> FD_CLOSE ¸Ş½ÃÁö¸¦ ¹ß»ı½ÃÅ² ¼ÒÄÏ
-// Retern:	void
+// Desc:	FD_CLOSE í•¸ë“¤ëŸ¬. í´ë¼ì´ì–¸íŠ¸ì˜ ì†Œì¼“ì„ í•´ì œí•˜ê³  ë°°ì—´ì„ ì¬ì •ë¦¬í•œë‹¤
+// Param:	sock		-> FD_CLOSE ë©”ì‹œì§€ë¥¼ ë°œìƒì‹œí‚¨ ì†Œì¼“
+// TODO:	vector<socket>ìœ¼ë¡œ êµ¬ì¡° ê°œì„ 
 //--------------------------------------------------------------------------------------
-void MySocket::OnClose(SOCKET* sockArray, SOCKET sock)
+void MySocket::OnClose(SOCKET sock)
 {
-	int			i, j;
-
-	for (i = 0; i < MAXCLIENT; i++)
+	for (int i = 0; i < MAXCLIENT; i++)
 	{
-		if (sock == sockArray[i])
+		if (sock == client_sockets[i])
 		{
-			closesocket(sockArray[i]);
-			for (j = i; j < MAXCLIENT - 1; j++)
-				sockArray[j] = sockArray[j + 1];
+			closesocket(client_sockets[i]);
+			for (int j = i; j < MAXCLIENT - 1; j++)
+				client_sockets[j] = client_sockets[j + 1];
 		}
 	}
 }
 void MySocket::FD_Close(SOCKET sock) {
-	OnClose(client_socket, sock);
+	OnClose(sock);
 	current_accept_index--;
 }
 
 bool MySocket::Enter(HWND hWnd, char* server_ip) {
 	int rt;
 	this->hWnd = hWnd;
-	printf("Enter() : ÀÔ·ÂµÈ server ip = %s\n", server_ip);
+	printf("Enter() : ì…ë ¥ëœ server ip = %s\n", server_ip);
 	
 	rt = WSAAsyncSelect(server_socket, hWnd, WM_ASYNC, FD_CONNECT | FD_READ | FD_WRITE | FD_CLOSE );
 	if (rt == SOCKET_ERROR)
 	{
-		printf("WSAAsyncSelect() ½ÇÆĞ\n");
+		printf("WSAAsyncSelect() ì‹¤íŒ¨\n");
 		closesocket(server_socket);
 		WSACleanup();
 		return INVALID_SOCKET;
@@ -186,7 +183,7 @@ bool MySocket::Enter(HWND hWnd, char* server_ip) {
 	rt = connect(server_socket, (const sockaddr*)&server_addr, sizeof(SOCKADDR_IN));
 	if (rt == SOCKET_ERROR && WSAEWOULDBLOCK != WSAGetLastError())
 	{
-		printf("Ä¿³ØÆ® ½ÇÆĞ\n");
+		printf("ì»¤ë„¥íŠ¸ ì‹¤íŒ¨\n");
 		closesocket(server_socket);
 		WSACleanup();
 		return INVALID_SOCKET;
@@ -200,18 +197,17 @@ bool MySocket::Enter(HWND hWnd, char* server_ip) {
 int MySocket::recvn(SOCKET s, char* buf, int len, int flags)
 {
 	int received;
-	char* ptr = buf;
 	int left = len;
 
 	while (left > 0)
 	{
-		received = recv(s, ptr, left, flags);
+		received = recv(s, buf, left, flags);
 		if (received == SOCKET_ERROR)
 			return SOCKET_ERROR;
 		else if (received == 0)
 			break;
 		left -= received;
-		ptr += received;
+		buf += received;
 	}
 
 	return (len - left);
@@ -222,7 +218,7 @@ int MySocket::Send(char* buf, int size) {
 	switch (m_status)
 	{
 	case Status::Server:
-		return send(client_socket[current_accept_index-1], buf, size, 0);
+		return send(client_sockets[0], buf, size, 0);
 		break;
 	case Status::Client:
 		return send(server_socket, buf, size, 0);
