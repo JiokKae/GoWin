@@ -79,8 +79,6 @@ public:
 		for (int i = 0; i < m_sequence; i++)
 			getline(gibofile, placement_[i]);
 
-		gibofile.close();
-
 		return true;
 	}
 
@@ -127,7 +125,6 @@ public:
 		for (int i = 0; i < sequence_; i++)
 		getline(gibo, placement_[i]);
 		
-		gibofile.close();
 		return true;
 		
 	}

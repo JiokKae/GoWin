@@ -42,6 +42,7 @@ public:
 
 public:
 	GiboNGF();
+	GiboNGF(std::wistream&);
 	~GiboNGF(); 
 
 	const std::vector<GiboNGF::Placement>& getPlacements() const;

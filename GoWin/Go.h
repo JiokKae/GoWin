@@ -90,7 +90,7 @@ public:
 	bool Pass();							// 한수쉼
 	int Placement( Coord2d board );					// 착수
 
-	bool Load( GiboNGF& gibo );					// 기보 불러오기
+	bool Load(const GiboNGF&);					// 기보 불러오기
 	bool Save( LPWSTR address, std::wstring giboExtension );	// 기보 저장하기
 
 	Color get_current_placement_order() const;

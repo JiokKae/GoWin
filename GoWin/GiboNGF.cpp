@@ -93,6 +93,11 @@ GiboNGF::GiboNGF()
 {
 }
 
+GiboNGF::GiboNGF(std::wistream& wis)
+{
+	load(wis);
+}
+
 GiboNGF::~GiboNGF()
 {
 }

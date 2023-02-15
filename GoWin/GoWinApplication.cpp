@@ -453,12 +453,7 @@ void GoWinApplication::file_open(HWND hWnd)
 		std::wifstream file(result.file_path);
 		file.imbue(std::locale(""));
 
-		GiboNGF gibo;
-		gibo.load(file);
-
-		file.close();
-
-		go.Load(gibo);
+		go.Load(GiboNGF(file));
 	}
 	catch (const std::exception&)
 	{

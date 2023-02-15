@@ -137,7 +137,7 @@ int Go::Placement( Coord2d coord_placement )
 	return 0;
 }
 
-bool Go::Load(GiboNGF& gibo)
+bool Go::Load(const GiboNGF& gibo)
 {
 	m_info.set_game_type(gibo.battle_type());
 	m_info.set_board_size(gibo.board_size());
@@ -237,7 +237,6 @@ bool Go::Save(LPWSTR directory, std::wstring file_extension)
 	{
 		SaveSGF(file, m_info, date);
 	}
-	file.close();
 
 	return true;
 }
