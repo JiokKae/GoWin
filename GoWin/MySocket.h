@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <WinSock2.h>
 #include <process.h>
-//#include <stdio.h>
+#include <vector>
 #include <memory>
 
 #pragma comment(lib, "ws2_32.lib")
@@ -17,7 +17,7 @@
 #define PASS		10023
 
 #define WM_ASYNC	(WM_USER+1) // 비동기 메시지 정의
-#define MAXCLIENT	2
+#define MAXCLIENT	1
 
 struct Message {
 	Message(int type);
@@ -48,9 +48,8 @@ struct Command_MSG : public Message {
 	char dummy[MSGSIZE - sizeof(int)];
 };
 
-class MySocket : public Message {
+class MySocket {
 public:
-	// 소켓 상태
 	enum class Status {
 		notConnected,
 		Server,
@@ -61,31 +60,25 @@ public:
 	~MySocket() {}
 
 	SOCKET Create(HWND hWnd);
-	
-	SOCKET OnAccept(HWND hWnd, SOCKET sockServ);
-	bool FD_Accept();
 
+	bool FD_Accept();
 	void FD_Read(SOCKET sock, COMM_MSG* pMsg);
-	void OnClose(SOCKET sock);
 	void FD_Close(SOCKET sock);
 
-
 	bool Enter(HWND hWnd, char* server_ip);
-	int Send(char* buf, int size);
 	int send_message(std::unique_ptr<Message>);
-	
-	int CurrentAcceptIndex() { return current_accept_index; }
 	
 	bool IsConnected() const;
 	MySocket::Status status() const;
 
 private:
+	SOCKET OnAccept(HWND hWnd, SOCKET sockServ);
+	void OnClose(SOCKET sock);
+	int Send(char* buf, int size);
 	int recvn(SOCKET s, char* buf, int len, int flags);
 
-	char server_ip[18] = "";
+	std::vector<SOCKET> client_sockets;
 	WSADATA wsa;
-	int current_accept_index = 0;
-	SOCKET client_sockets[MAXCLIENT];
 	SOCKET server_socket;
 	HWND hWnd;
 	Status m_status;

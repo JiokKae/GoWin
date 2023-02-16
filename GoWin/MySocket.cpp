@@ -1,9 +1,16 @@
 ﻿#define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include "MySocket.h"
 #include <stdio.h>
+#include <algorithm>
 
 Message::Message(int type = 0)
 	: type(type)
+{
+}
+
+COMM_MSG::COMM_MSG()
+	: Message(0)
+	, dummy()
 {
 }
 
@@ -31,6 +38,9 @@ Command_MSG::Command_MSG(int command)
 }
 
 MySocket::MySocket() 
+	: server_socket(INVALID_SOCKET)
+	, hWnd(nullptr)
+	, m_status(MySocket::Status::notConnected)
 {
 	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
 	{
@@ -43,19 +53,18 @@ MySocket::MySocket()
 		printf("Create Socket Fail\n");
 		return;
 	}
-	server_ip[0] = '\0';
 }
 
 SOCKET MySocket::Create(HWND hWnd) {
-	int rt;
 	this->hWnd = hWnd;
+
 	SOCKADDR_IN server_addr;
 	memset(&server_addr, 0, sizeof(server_addr));
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(4777);
 	server_addr.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
 
-	rt = bind(server_socket, (const sockaddr*)&server_addr, sizeof(SOCKADDR_IN));
+	int rt = bind(server_socket, (const sockaddr*)&server_addr, sizeof(SOCKADDR_IN));
 	if (rt == SOCKET_ERROR)
 	{
 		printf("바인딩 실패\n");
@@ -92,18 +101,14 @@ SOCKET MySocket::Create(HWND hWnd) {
 //--------------------------------------------------------------------------------------
 SOCKET MySocket::OnAccept(HWND hWnd, SOCKET sockServ)
 {
-	SOCKET		sock;
-	SOCKADDR_IN	Addr;
-	int		iLen;
-
-	//
 	// 접속을 수락한다
-	iLen = sizeof(SOCKADDR_IN);
-	sock = accept(sockServ, (SOCKADDR*)&Addr, &iLen);
+	int iLen = sizeof(SOCKADDR_IN);
+
+	SOCKADDR_IN Addr;
+	SOCKET sock = accept(sockServ, (SOCKADDR*)&Addr, &iLen);
 	if (INVALID_SOCKET == sock)
 		return INVALID_SOCKET;
 
-	//
 	// 클라이언트 소켓도 비동기소켓으로 전환한다
 	iLen = WSAAsyncSelect(sock, hWnd, WM_ASYNC, FD_READ | FD_CLOSE);
 	if (SOCKET_ERROR == iLen)
@@ -115,24 +120,24 @@ SOCKET MySocket::OnAccept(HWND hWnd, SOCKET sockServ)
 
 	return sock;
 }
-bool MySocket::FD_Accept() {
-	// 최대클라이언트 수를 체크해서 꽉 찼다면 접속요청을 무시한다
-	if (MAXCLIENT - 1 <= current_accept_index)
+bool MySocket::FD_Accept() 
+{
+	if (MAXCLIENT <= client_sockets.size())
 		return false;
 
-	client_sockets[current_accept_index] = OnAccept(hWnd, server_socket);
-
-	if (INVALID_SOCKET == client_sockets[current_accept_index])
-		return false;
-	else
+	auto client_socket = OnAccept(hWnd, server_socket);
+	if (client_socket == INVALID_SOCKET)
 	{
-		current_accept_index++;
-		return true;
+		return false;
 	}
+	client_sockets.push_back(client_socket);
+
+	return true;
 }
 
-void MySocket::FD_Read(SOCKET sock, COMM_MSG* pMsg) {
-	printf("FD_READ 호출됨\n");
+void MySocket::FD_Read(SOCKET sock, COMM_MSG* pMsg)
+{
+	printf("MySocket::FD_READ()\n");
 	if (SOCKET_ERROR == recvn(sock, (char*)pMsg, 512, 0))
 		pMsg = nullptr;
 }
@@ -142,31 +147,34 @@ void MySocket::FD_Read(SOCKET sock, COMM_MSG* pMsg) {
 // Name:	OnClose
 // Desc:	FD_CLOSE 핸들러. 클라이언트의 소켓을 해제하고 배열을 재정리한다
 // Param:	sock		-> FD_CLOSE 메시지를 발생시킨 소켓
-// TODO:	vector<socket>으로 구조 개선
 //--------------------------------------------------------------------------------------
 void MySocket::OnClose(SOCKET sock)
 {
-	for (int i = 0; i < MAXCLIENT; i++)
+	closesocket(sock);
+
+	if (m_status == Status::Server)
 	{
-		if (sock == client_sockets[i])
-		{
-			closesocket(client_sockets[i]);
-			for (int j = i; j < MAXCLIENT - 1; j++)
-				client_sockets[j] = client_sockets[j + 1];
-		}
+		client_sockets.erase(std::ranges::find(client_sockets, sock));
+	}
+	else if (m_status == Status::Client)
+	{
+		WSACleanup();
+		server_socket = INVALID_SOCKET;
+		m_status = Status::notConnected;
 	}
 }
-void MySocket::FD_Close(SOCKET sock) {
+
+void MySocket::FD_Close(SOCKET sock)
+{
 	OnClose(sock);
-	current_accept_index--;
 }
 
-bool MySocket::Enter(HWND hWnd, char* server_ip) {
-	int rt;
+bool MySocket::Enter(HWND hWnd, char* server_ip)
+{
 	this->hWnd = hWnd;
 	printf("Enter() : 입력된 server ip = %s\n", server_ip);
 	
-	rt = WSAAsyncSelect(server_socket, hWnd, WM_ASYNC, FD_CONNECT | FD_READ | FD_WRITE | FD_CLOSE );
+	int rt = WSAAsyncSelect(server_socket, hWnd, WM_ASYNC, FD_CONNECT | FD_READ | FD_WRITE | FD_CLOSE );
 	if (rt == SOCKET_ERROR)
 	{
 		printf("WSAAsyncSelect() 실패\n");
@@ -214,7 +222,8 @@ int MySocket::recvn(SOCKET s, char* buf, int len, int flags)
 }
 
 
-int MySocket::Send(char* buf, int size) {
+int MySocket::Send(char* buf, int size)
+{
 	switch (m_status)
 	{
 	case Status::Server:
@@ -245,7 +254,3 @@ MySocket::Status MySocket::status() const
 	return m_status;
 }
 
-COMM_MSG::COMM_MSG()
-	: Message(0)
-{
-}
