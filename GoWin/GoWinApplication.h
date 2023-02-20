@@ -30,7 +30,6 @@ private:
 		_T("패 입니다"),
 	};
 	enum class string_id {
-		FILE_OPEN_FILTER,
 		INVALID_EXTENSION,
 		FILE_OPEN_FAIL_TITLE,
 		FILE_OPEN_FAIL,
