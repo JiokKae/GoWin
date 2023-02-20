@@ -40,6 +40,7 @@ private:
 	void init(HWND);
 	void pass(HWND);
 	std::wstring get_extension(const std::wstring& path);
+	void ok_message_box(HWND, const std::wstring& title, const std::wstring& content);
 	
 	Go go;
 	BoardGraphic board_graphic;

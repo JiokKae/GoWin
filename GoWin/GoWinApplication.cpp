@@ -439,14 +439,14 @@ void GoWinApplication::file_open(HWND hWnd)
 		auto result = ofn.open();
 		if (result.success == false)
 		{
-			MessageBox(hWnd, strings[string_id::FILE_OPEN_FAIL].c_str(), strings[string_id::FILE_OPEN_FAIL_TITLE].c_str() , MB_OK);
+			ok_message_box(hWnd, strings[string_id::FILE_OPEN_FAIL_TITLE], strings[string_id::FILE_OPEN_FAIL]);
 			return;
 		}
 
 		std::wstring extension = get_extension(result.file_path);
 		if (extension != _T(".ngf"))
 		{
-			MessageBox(hWnd, strings[string_id::INVALID_EXTENSION].c_str(), strings[string_id::FILE_OPEN_FAIL_TITLE].c_str(), MB_OK);
+			ok_message_box(hWnd, strings[string_id::FILE_OPEN_FAIL_TITLE], strings[string_id::INVALID_EXTENSION]);
 			return;
 		}
 
@@ -457,7 +457,7 @@ void GoWinApplication::file_open(HWND hWnd)
 	}
 	catch (const std::exception&)
 	{
-		MessageBox(hWnd, strings[string_id::FILE_OPEN_FAIL].c_str(), strings[string_id::FILE_OPEN_FAIL_TITLE].c_str(), MB_OK);
+		ok_message_box(hWnd, strings[string_id::FILE_OPEN_FAIL_TITLE], strings[string_id::FILE_OPEN_FAIL]);
 	}
 }
 
@@ -532,4 +532,9 @@ std::wstring GoWinApplication::get_extension(const std::wstring& path)
 	std::transform(extension.begin(), extension.end(), extension.begin(), std::towlower);
 
 	return extension;
+}
+
+void GoWinApplication::ok_message_box(HWND hWnd, const std::wstring& title, const std::wstring& content)
+{
+	MessageBox(hWnd, content.c_str(), title.c_str(), MB_OK);
 }
