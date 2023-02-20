@@ -16,9 +16,9 @@ namespace GoWin
 		OpenFileName(HWND hWnd, const TCHAR* filter, DWORD flags);
 
 		OpenFileName::result open();
+		OpenFileName::result save(const TCHAR* defExt);
 	private:
 		TCHAR file_path[MAX_PATH];
 		OPENFILENAME ofn;
-		const TCHAR* filter;
 	};
 }

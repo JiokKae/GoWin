@@ -33,9 +33,12 @@ private:
 		INVALID_EXTENSION,
 		FILE_OPEN_FAIL_TITLE,
 		FILE_OPEN_FAIL,
+		FILE_SAVE_FAIL_TITLE,
+		FILE_SAVE_FAIL,
 	};
 	void create(HWND);
 	void file_open(HWND);
+	void file_save(HWND);
 	void backsies(HWND);
 	void init(HWND);
 	void pass(HWND);

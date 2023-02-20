@@ -16,6 +16,8 @@ GoWinApplication::GoWinApplication()
 		{string_id::INVALID_EXTENSION, _T("지원하는 파일 형식이 아닙니다.")},
 		{string_id::FILE_OPEN_FAIL_TITLE, _T("파일 열기 실패")},
 		{string_id::FILE_OPEN_FAIL, _T("파일을 불러오는데 실패했습니다.")},
+		{string_id::FILE_SAVE_FAIL_TITLE, _T("파일 저장 실패")},
+		{string_id::FILE_SAVE_FAIL, _T("파일 저장을 실패했습니다.")},
 	}
 	, command_message_callbacks{
 		{BACKSIES, [this](HWND hWnd) {
@@ -136,22 +138,7 @@ LRESULT GoWinApplication::main_procedure(HWND hWnd, UINT message, WPARAM wParam,
 		// 메뉴 - 파일 - 저장
 		case IDM_FILE_SAVE:
 		{
-			OPENFILENAME SFN;
-			WCHAR lpstrFile[MAX_PATH] = _T("");
-			memset(&SFN, 0, sizeof(OPENFILENAME));
-			SFN.lStructSize = sizeof(OPENFILENAME);
-			SFN.hwndOwner = hWnd;
-			SFN.lpstrFilter = _T("기보 파일(*.ngf)\0*.ngf\0기보 파일(*.sgf)\0*.sgf\0모든 파일(*.*)\0*.*\0");
-			SFN.lpstrDefExt = _T("ngf");
-			SFN.lpstrFile = lpstrFile;
-			SFN.nMaxFile = 256;
-			SFN.Flags = OFN_OVERWRITEPROMPT;
-			if (GetSaveFileName(&SFN) != 0)
-			{
-				std::wstring extension = lpstrFile;		//확장자 추출하기
-				extension = extension.substr(extension.length() - 3, 3);
-				go.Save(lpstrFile, extension);
-			}
+			file_save(hWnd);
 
 			break;
 		}
@@ -458,6 +445,26 @@ void GoWinApplication::file_open(HWND hWnd)
 	catch (const std::exception&)
 	{
 		ok_message_box(hWnd, strings[string_id::FILE_OPEN_FAIL_TITLE], strings[string_id::FILE_OPEN_FAIL]);
+	}
+}
+
+void GoWinApplication::file_save(HWND hWnd)
+{
+	try
+	{
+		GoWin::OpenFileName sfn(hWnd, _T("기보 파일(*.ngf)\0*.ngf\0기보 파일(*.sgf)\0*.sgf\0모든 파일(*.*)\0*.*\0"), OFN_OVERWRITEPROMPT);
+
+		auto result = sfn.save(_T("ngf"));
+		if (result.success == false)
+		{
+			return;
+		}
+
+		go.Save(result.file_path, get_extension(result.file_path));
+	}
+	catch (const std::exception& e)
+	{
+		ok_message_box(hWnd, strings[string_id::FILE_SAVE_FAIL_TITLE], strings[string_id::FILE_SAVE_FAIL]);
 	}
 }
 

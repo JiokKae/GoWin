@@ -91,7 +91,7 @@ public:
 	int Placement( Coord2d board );					// 착수
 
 	bool Load(const GiboNGF&);					// 기보 불러오기
-	bool Save( LPWSTR address, std::wstring giboExtension );	// 기보 저장하기
+	bool Save( const std::wstring& directory, const std::wstring& giboExtension );	// 기보 저장하기
 
 	Color get_current_placement_order() const;
 	void set_placement_order_previous();

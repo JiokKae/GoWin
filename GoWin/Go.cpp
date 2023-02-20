@@ -212,28 +212,27 @@ void SaveSGF(std::wostream& wos, const Go::Information& goInfo, const std::wstri
 	wos << ")";
 }
 
-bool Go::Save(LPWSTR directory, std::wstring file_extension)
+bool Go::Save(const std::wstring& directory, const std::wstring& file_extension)
 {
-	std::transform(file_extension.begin(), file_extension.end(), file_extension.begin(), std::towlower);
-	if (file_extension != _T("ngf") && file_extension != _T("sgf"))
+	if (file_extension != _T(".ngf") && file_extension != _T(".sgf"))
 	{
 		printf("Save failed: invalid file file extension.\n");
 		return false;
 	}
 
 	printf("기보 저장 시작--------\n");
-	printf("경로 : %ls \n확장자 : %ws\n", directory, file_extension.c_str());
+	printf("경로 : %ls \n확장자 : %ws\n", directory.c_str(), file_extension.c_str());
 	SYSTEMTIME time;
 	GetLocalTime(&time);
 	std::wstring date = std::format(_T("{}{:0>2}{:0>2} [{:0>2}:{:0>2}]"), time.wYear, time.wMonth, time.wDay, time.wHour, time.wMinute);
 
 	std::wofstream file(directory);
 	file.imbue(std::locale(""));
-	if (file_extension == _T("ngf"))
+	if (file_extension == _T(".ngf"))
 	{
 		SaveNGF(file, m_info, date);
 	} 
-	else if (file_extension == _T("sgf"))
+	else if (file_extension == _T(".sgf"))
 	{
 		SaveSGF(file, m_info, date);
 	}
