@@ -113,9 +113,6 @@
     <ClCompile Include="Stone\Stone.cpp">
       <Filter>Stone</Filter>
     </ClCompile>
-    <ClCompile Include="mydatastructure.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="GoWin\OpenFileName.cpp">
       <Filter>GoWin</Filter>
     </ClCompile>

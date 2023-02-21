@@ -121,9 +121,8 @@ int Go::Placement( Coord2d coord_placement )
 		m_info.add_captured_stone(color, captured_stone);
 	
 	// 착수 정보 저장
-	PlacementInfo placement(x, y, sequence, color);
-	std::wcout << placement;
-	m_info.add_placement(placement);
+	m_info.add_placement(PlacementInfo(x, y, sequence, color));
+	std::wcout << m_info.placements().back().data();
 
 	m_info.add_sequence(1);
 	set_placement_order_next();
@@ -262,9 +261,9 @@ void Go::Information::add_captured_stone(Color color, int captured_stone)
 	playerItr->second.add_captured_stone(captured_stone);
 }
 
-void Go::Information::add_placement(PlacementInfo placement)
+void Go::Information::add_placement(PlacementInfo&& placement)
 {
-	m_placements.push_back(Node(placement));
+	m_placements.emplace_back(placement);
 }
 
 const Player& Go::Information::get_player(Color color) const
@@ -330,7 +329,7 @@ int Go::Information::sequence() const
 	return m_sequence;
 }
 
-const std::vector<Node>& Go::Information::placements() const
+const std::vector<Node<PlacementInfo>>& Go::Information::placements() const
 {
 	return m_placements;
 }

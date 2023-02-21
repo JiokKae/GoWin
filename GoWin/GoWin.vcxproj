@@ -180,7 +180,6 @@
     <ClCompile Include="GoWin\Chatting.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="GoWin\OpenFileName.cpp" />
-    <ClCompile Include="mydatastructure.cpp" />
     <ClCompile Include="MySocket.cpp" />
     <ClCompile Include="MyString.cpp" />
     <ClCompile Include="MyWinLibrary.cpp" />
