@@ -227,6 +227,7 @@ int MySocket::Send(char* buf, int size)
 	switch (m_status)
 	{
 	case Status::Server:
+		if (client_sockets.empty()) return SOCKET_ERROR;
 		return send(client_sockets[0], buf, size, 0);
 		break;
 	case Status::Client:
