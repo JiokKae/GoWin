@@ -122,6 +122,9 @@
     <ClCompile Include="GoWin\Chatting.cpp">
       <Filter>GoWin</Filter>
     </ClCompile>
+    <ClCompile Include="GiboSGF.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resource\Go_b.bmp">

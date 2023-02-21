@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <fstream>
 #include <format>
+#include "GiboSGF.h"
 
 Go::Go()
 	: m_mode("Single")
@@ -188,27 +189,27 @@ void SaveNGF(std::wostream& wos, const Go::Information& goInfo, const std::wstri
 
 void SaveSGF(std::wostream& wos, const Go::Information& goInfo, const std::wstring& date)
 {
-	wos << "(";
-	wos << ";AP[Go:1.0.2]";
-	wos << "SZ[" << goInfo.board_size() << "]";
-	wos << "GN[" << goInfo.game_type() << "]";
-	wos << "DT[" << date << "]";
-	wos << "PB[" << goInfo.get_player(Color::Black).name() << "]";
-	wos << "BR[" << goInfo.get_player(Color::Black).kyu() << "]";
-	wos << "PW[" << goInfo.get_player(Color::White).name() << "]";
-	wos << "WR[" << goInfo.get_player(Color::White).kyu() << "]";
-	wos << "KM[" << goInfo.compensation() << ".5" << "]";
-	wos << "HA[" << goInfo.go_type() << "]";
-	wos << "RE[" << goInfo.game_result() << "]";
-	wos << "US[" << "https://blog.naver.com/damas125" << "]";
-	wos << std::endl;
-	for (int i = 0; i < goInfo.sequence() - 1; i++)
+	GiboSGF sgf{
+		.application = _T("Go:1.0.2"),
+		.game_name = goInfo.game_type(),
+		.date = date,
+		.black_name = goInfo.get_player(Color::Black).name(),
+		.black_rank = goInfo.get_player(Color::Black).kyu(),
+		.white_name = goInfo.get_player(Color::White).name(),
+		.white_rank = goInfo.get_player(Color::White).kyu(),
+		.komi = std::to_wstring(goInfo.compensation()) + _T(".5"),
+		.result = goInfo.game_result(),	// TODO: https://www.red-bean.com/sgf/user_guide/index.html format 맞추기
+		.user = _T("https://blog.naver.com/damas125"),
+		.size = goInfo.board_size(),
+		.handicap = goInfo.go_type(),
+	};
+	
+	for (const auto& placement : goInfo.placements())
 	{
-		wos << goInfo.placements()[i].data().to_sgf();
-		if (i % 14 == 13)
-			wos << std::endl;
+		sgf.placements.emplace_back(GiboSGF::Placement{ .x = placement.data().x, .y = placement.data().y, .color = TCHAR(Color2Char(placement.data().player)) });
 	}
-	wos << ")";
+
+	wos << sgf;
 }
 
 bool Go::Save(const std::wstring& directory, const std::wstring& file_extension)

@@ -1,6 +1,5 @@
 ﻿#pragma once
 #include <ostream>
-#include <string>
 
 enum class Color
 {
@@ -35,8 +34,6 @@ struct PlacementInfo
 	int x, y;
 	int sequence;
 	Color player;
-	
-	std::wstring to_sgf() const;
 
 	friend std::wostream& operator<<(std::wostream&, const PlacementInfo&);
 };

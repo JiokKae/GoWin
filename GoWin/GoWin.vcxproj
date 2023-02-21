@@ -175,6 +175,7 @@
     <ClCompile Include="BoardGraphic.cpp" />
     <ClCompile Include="Board.cpp" />
     <ClCompile Include="GiboNGF.cpp" />
+    <ClCompile Include="GiboSGF.cpp" />
     <ClCompile Include="Go.cpp" />
     <ClCompile Include="GoWinApplication.cpp" />
     <ClCompile Include="GoWin\Chatting.cpp" />

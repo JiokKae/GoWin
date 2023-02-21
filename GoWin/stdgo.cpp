@@ -1,14 +1,4 @@
 ﻿#include "stdgo.h"
-#include <tchar.h>
-#include <format>
-
-std::wstring PlacementInfo::to_sgf() const
-{
-	TCHAR x = (this->x + 19) % 20 + 'a';
-	TCHAR y = (this->y + 19) % 20 + 'a';
-
-	return std::format(_T(";{}[{}{}]"), Color2Char(this->player), x, y);
-}
 
 Color Reverse(Color color)
 {
