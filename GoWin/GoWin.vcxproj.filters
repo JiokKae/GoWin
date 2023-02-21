@@ -48,9 +48,6 @@
     <ClInclude Include="Go.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="LinkedListStack.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="mydatastructure.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>

@@ -161,7 +161,6 @@
     <ClInclude Include="GoWinApplication.h" />
     <ClInclude Include="GoWin\Chatting.h" />
     <ClInclude Include="GoWin\OpenFileName.h" />
-    <ClInclude Include="LinkedListStack.h" />
     <ClInclude Include="mydatastructure.h" />
     <ClInclude Include="MySocket.h" />
     <ClInclude Include="MyString.h" />
