@@ -16,8 +16,6 @@ LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    AboutProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    NetboxProc(HWND, UINT, WPARAM, LPARAM);
 
-Coord2d         g_mouse;
-
 GoWinApplication goWin;
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
