@@ -1,33 +1,5 @@
 #include "MyString.h"
-#include <iostream>
 #include <windows.h>
-#include <cwctype>
-
-bool isStoi( const std::string& num )
-{
-	if (num.empty() == true)
-		return false;
-
-	for (const auto& ch : num)
-	{
-		if (std::isdigit(ch) == false)
-			return false;
-	}
-	return true;
-}
-
-bool isWstoi( const std::wstring& num )
-{
-	if (num.empty() == true)
-		return false;
-
-	for (const auto& ch : num)
-	{
-		if (std::iswdigit(ch) == false)
-			return false;
-	}
-	return true;
-}
 
 wchar_t* CharToWChar(const char* pstrSrc)
 {
