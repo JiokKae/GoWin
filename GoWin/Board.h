@@ -1,8 +1,8 @@
 #pragma once
 
-#include "framework.h"
 #include "Stone/Stone.h"
 #include "stdgo.h"
+#include <vector>
 
 class Board {
 public:

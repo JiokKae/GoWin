@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "../framework.h"
+#include <string>
 
 enum class Color;
 class Player 

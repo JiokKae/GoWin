@@ -7,6 +7,8 @@
 #include <fstream>
 #include <format>
 #include "GiboSGF.h"
+#include <iostream>
+#include <wtypes.h>
 
 Go::Go()
 	: m_mode("Single")

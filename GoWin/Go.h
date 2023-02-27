@@ -1,10 +1,12 @@
 ﻿#pragma once
 
-#include "framework.h"
 #include "GiboNGF.h"
 #include "mydatastructure.h"
 #include "Player/player.h"
 #include "Board.h"
+#include "stdgo.h"
+#include <map>
+#include <vector>
 
 #define ERR_NOTBOARDIN		1
 #define ERR_NOTEMPTY		2

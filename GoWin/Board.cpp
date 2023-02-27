@@ -1,5 +1,5 @@
 ﻿#include "Board.h" 
-
+#include <iostream>
 
 #define LEFT	0
 #define RIGHT	1

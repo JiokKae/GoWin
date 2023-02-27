@@ -1,4 +1,6 @@
 ﻿#include "Player.h"
+#include <tchar.h>
+#include <iostream>
 
 Player::Player( Color color )
 	: m_name( _T( "player" ) )

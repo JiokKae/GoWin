@@ -1,7 +1,6 @@
 #pragma once
-#include "framework.h"
 #include "Go.h"
-#include "stdgo.h"
+#include <wtypes.h>
 
 class BoardGraphic {
 public:

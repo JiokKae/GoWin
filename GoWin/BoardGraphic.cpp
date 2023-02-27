@@ -1,6 +1,5 @@
 #include "BoardGraphic.h"
-#include "Go.h"
-#include "Stone/Stone.h"
+#include "resource.h"
 
 BoardGraphic::Bitmap::Bitmap()
 	: m_handle(nullptr)
