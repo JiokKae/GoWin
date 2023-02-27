@@ -86,13 +86,13 @@ LRESULT GoWinApplication::main_procedure(HWND hWnd, UINT message, WPARAM wParam,
 		return 0;
 
 	case WM_MOUSEMOVE:
-		GetMouseCoord(mouse, lParam);
+		set_mouse_coord(lParam);
 		InvalidateRect(hWnd, NULL, FALSE);
 
 		break;
 
 	case WM_LBUTTONDOWN:
-		GetMouseCoord(mouse, lParam);
+		set_mouse_coord(lParam);
 		if (board_graphic.IsMouseInBoard(mouse))
 		{
 			const Coord2d placement_point = board_graphic.MouseToBoard(mouse.x, mouse.y);
@@ -531,6 +531,12 @@ void GoWinApplication::pass(HWND hWnd)
 
 	InvalidateRect(hWnd, NULL, FALSE);
 	chatting.system_print(_T("한수 쉬었습니다."));
+}
+
+void GoWinApplication::set_mouse_coord(LPARAM lparam)
+{
+	mouse.x = LOWORD(lparam);
+	mouse.y = HIWORD(lparam);
 }
 
 std::wstring GoWinApplication::get_extension(const std::wstring& path)

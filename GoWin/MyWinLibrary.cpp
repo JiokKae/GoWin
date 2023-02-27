@@ -16,9 +16,3 @@ std::string ReadMessage(UINT message)
 		return std::to_string(message);
 	}	
 }
-
-void GetMouseCoord( Coord2d & coord, LPARAM lParam )
-{
-	coord.x = LOWORD( lParam );
-	coord.y = HIWORD( lParam );
-}

@@ -42,6 +42,7 @@ private:
 	void backsies(HWND);
 	void init(HWND);
 	void pass(HWND);
+	void set_mouse_coord(LPARAM);
 	std::wstring get_extension(const std::wstring& path);
 	void ok_message_box(HWND, const std::wstring& title, const std::wstring& content);
 	
