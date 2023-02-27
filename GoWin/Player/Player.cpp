@@ -1,36 +1,50 @@
 ﻿#include "Player.h"
 #include <tchar.h>
-#include <iostream>
 
-Player::Player( Color color )
-	: m_name( _T( "player" ) )
-	, m_kyu( _T( "18급" ) )
-	, m_color( color )
-	, m_captured_stone( 0 )
+Player::Player(Color color)
+	: m_name{ _T("player") }
+	, m_kyu{ _T("18급") }
+	, m_color{ color }
+	, m_captured_stone{ 0 }
 {
 }
 
-
-bool Player::init( Color color )
+void Player::set_name(const std::wstring& name)
 {
-	m_name = _T( "player" );
-	m_kyu = _T( "18급" ); 
-	m_color = color;
-	m_captured_stone = 0;
-
-	return true;
+	m_name = name;
 }
 
-std::wstring Player::to_wstring() const
+void Player::set_kyu(const std::wstring& kyu)
 {
-	return _T( "이름 : " ) + m_name + _T( " 급 : " ) + m_kyu + _T( " 따낸 돌 : " ) + std::to_wstring( m_captured_stone );
+	m_kyu = kyu;
 }
 
-void Player::print( std::wostream& wos ) const
+void Player::set_captured_stone(int captured_stone)
 {
-	wos << _T( "[Player]---------" ) << std::endl;
-	wos << _T( "이름 : " ) << m_name << std::endl;
-	wos << _T( "급 : " ) << m_kyu << std::endl;
-	wos << _T( "따낸 돌 : " ) << m_captured_stone << std::endl;
-	wos << _T( "------------------------" ) << std::endl;
+	m_captured_stone = captured_stone;
+}
+
+void Player::add_captured_stone(int num)
+{
+	m_captured_stone += num;
+}
+
+const std::wstring& Player::name() const
+{
+	return m_name;
+}
+
+const std::wstring& Player::kyu() const
+{
+	return m_kyu;
+}
+
+Color Player::color() const
+{
+	return m_color;
+}
+
+int Player::captured_stone() const
+{
+	return m_captured_stone;
 }
