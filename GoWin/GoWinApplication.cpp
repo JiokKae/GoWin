@@ -20,7 +20,7 @@ GoWinApplication::GoWinApplication()
 		{string_id::FILE_SAVE_FAIL, _T("파일 저장을 실패했습니다.")},
 	}
 	, command_message_callbacks{
-		{BACKSIES, [this](HWND hWnd) {
+		{Command_MSG::Command::BACKSIES, [this](HWND hWnd) {
 			if (go.Backsies() == false)
 			{
 				return;
@@ -28,10 +28,10 @@ GoWinApplication::GoWinApplication()
 
 			if (my_socket.status() == MySocket::Status::Server)
 			{
-				my_socket.send_message(std::make_unique<Command_MSG>(BACKSIES));
+				my_socket.send_message(std::make_unique<Command_MSG>(Command_MSG::Command::BACKSIES));
 			}
 		}},
-		{INIT, [this](HWND hWnd) {
+		{Command_MSG::Command::INIT, [this](HWND hWnd) {
 			if (go.Init() == false)
 			{
 				return;
@@ -39,10 +39,10 @@ GoWinApplication::GoWinApplication()
 
 			if (my_socket.status() == MySocket::Status::Server)
 			{
-				my_socket.send_message(std::make_unique<Command_MSG>(INIT));
+				my_socket.send_message(std::make_unique<Command_MSG>(Command_MSG::Command::INIT));
 			}
 		}},
-		{PASS, [this](HWND hWnd) {
+		{Command_MSG::Command::PASS, [this](HWND hWnd) {
 			if (go.Pass() == false)
 			{
 				return;
@@ -50,7 +50,7 @@ GoWinApplication::GoWinApplication()
 
 			if (my_socket.status() == MySocket::Status::Server)
 			{
-				my_socket.send_message(std::make_unique<Command_MSG>(PASS));
+				my_socket.send_message(std::make_unique<Command_MSG>(Command_MSG::Command::PASS));
 			}
 		}},
 	} {
@@ -221,13 +221,13 @@ LRESULT GoWinApplication::main_procedure(HWND hWnd, UINT message, WPARAM wParam,
 			my_socket.FD_Read((SOCKET)wParam, &msg);
 			switch (msg.type)
 			{
-			case CHATTING:
+			case Message::Type::CHATTING:
 			{
 				CHAT_MSG* chat_msg = reinterpret_cast<CHAT_MSG*>(&msg);
 				chatting.print(std::format(_T("상대: {}"), chat_msg->buf).c_str());
 				break;
 			}
-			case PLACEMENT:
+			case Message::Type::PLACEMENT:
 			{
 				Placement_MSG* placement_msg = (Placement_MSG*)&msg;
 				int errorMSG = go.Placement(Coord2d(placement_msg->x, placement_msg->y));
@@ -244,7 +244,7 @@ LRESULT GoWinApplication::main_procedure(HWND hWnd, UINT message, WPARAM wParam,
 				}
 				break;
 			}
-			case COMMAND:
+			case Message::Type::COMMAND:
 			{
 				command_message_callbacks[reinterpret_cast<Command_MSG*>(&msg)->command](hWnd);
 				InvalidateRect(hWnd, NULL, FALSE);
@@ -472,7 +472,7 @@ void GoWinApplication::backsies(HWND hWnd)
 {
 	if (my_socket.status() == MySocket::Status::Client)
 	{
-		my_socket.send_message(std::make_unique<Command_MSG>(BACKSIES));
+		my_socket.send_message(std::make_unique<Command_MSG>(Command_MSG::Command::BACKSIES));
 		return;
 	}
 
@@ -483,7 +483,7 @@ void GoWinApplication::backsies(HWND hWnd)
 
 	if (my_socket.status() == MySocket::Status::Server)
 	{
-		my_socket.send_message(std::make_unique<Command_MSG>(BACKSIES));
+		my_socket.send_message(std::make_unique<Command_MSG>(Command_MSG::Command::BACKSIES));
 	}
 
 	InvalidateRect(hWnd, NULL, FALSE);
@@ -493,7 +493,7 @@ void GoWinApplication::init(HWND hWnd)
 {
 	if (my_socket.status() == MySocket::Status::Client)
 	{
-		my_socket.send_message(std::make_unique<Command_MSG>(INIT));
+		my_socket.send_message(std::make_unique<Command_MSG>(Command_MSG::Command::INIT));
 		return;
 	}
 
@@ -504,7 +504,7 @@ void GoWinApplication::init(HWND hWnd)
 
 	if (my_socket.status() == MySocket::Status::Server)
 	{
-		my_socket.send_message(std::make_unique<Command_MSG>(INIT));
+		my_socket.send_message(std::make_unique<Command_MSG>(Command_MSG::Command::INIT));
 	}
 
 	InvalidateRect(hWnd, NULL, FALSE);
@@ -515,7 +515,7 @@ void GoWinApplication::pass(HWND hWnd)
 {
 	if (my_socket.status() == MySocket::Status::Client)
 	{
-		my_socket.send_message(std::make_unique<Command_MSG>(PASS));
+		my_socket.send_message(std::make_unique<Command_MSG>(Command_MSG::Command::PASS));
 		return;
 	}
 
@@ -526,7 +526,7 @@ void GoWinApplication::pass(HWND hWnd)
 
 	if (my_socket.status() == MySocket::Status::Server)
 	{
-		my_socket.send_message(std::make_unique<Command_MSG>(PASS));
+		my_socket.send_message(std::make_unique<Command_MSG>(Command_MSG::Command::PASS));
 	}
 
 	InvalidateRect(hWnd, NULL, FALSE);

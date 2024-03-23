@@ -52,7 +52,7 @@ private:
 	GoWin::Chatting chatting;
 
 	using callback = std::function<void(HWND)>;
-	std::map<int, callback> command_message_callbacks;
+	std::map<Command_MSG::Command, callback> command_message_callbacks;
 	std::map<string_id, std::wstring> strings;
 
 	Coord2d mouse;

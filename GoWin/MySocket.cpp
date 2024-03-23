@@ -3,26 +3,26 @@
 #include <stdio.h>
 #include <algorithm>
 
-Message::Message(int type = 0)
+Message::Message(Type type = Type::COMMON)
 	: type(type)
 {
 }
 
 COMM_MSG::COMM_MSG()
-	: Message(0)
+	: Message(Type::COMMON)
 	, dummy()
 {
 }
 
 CHAT_MSG::CHAT_MSG(LPCTSTR chat)
-	: Message(CHATTING)
+	: Message(Type::CHATTING)
 	, buf()
 {
 	wcscpy_s(buf, chat);
 }
 
 Placement_MSG::Placement_MSG(int sequence, int x, int y)
-	: Message(PLACEMENT)
+	: Message(Type::PLACEMENT)
 	, sequence(sequence)
 	, x(x)
 	, y(y)
@@ -30,8 +30,8 @@ Placement_MSG::Placement_MSG(int sequence, int x, int y)
 {
 }
 
-Command_MSG::Command_MSG(int command)
-	: Message(COMMAND)
+Command_MSG::Command_MSG(Command command)
+	: Message(Type::COMMAND)
 	, command(command)
 	, dummy()
 {
@@ -122,7 +122,7 @@ SOCKET MySocket::OnAccept(HWND hWnd, SOCKET sockServ)
 }
 bool MySocket::FD_Accept() 
 {
-	if (MAXCLIENT <= client_sockets.size())
+	if (MAX_CLIENT <= client_sockets.size())
 		return false;
 
 	auto client_socket = OnAccept(hWnd, server_socket);
