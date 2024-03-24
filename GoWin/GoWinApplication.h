@@ -5,6 +5,7 @@
 #include "MySocket.h"
 #include "BoardGraphic.h"
 #include "GoWin/Chatting.h"
+#include "GoWin/Font.h"
 
 class GoWinApplication
 {
@@ -64,5 +65,5 @@ private:
 	HDC hdc, hdcMem;
 	HDC hdc_BackGround;
 	HWND hWCS, hBCS;
-	HFONT hFont;
+	GoWin::Font font_gungseo;
 };

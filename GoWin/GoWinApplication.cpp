@@ -53,7 +53,10 @@ GoWinApplication::GoWinApplication()
 				my_socket.send_message(std::make_unique<Command_MSG>(Command_MSG::Command::PASS));
 			}
 		}},
-	} {
+	}
+	, font_gungseo(30, 0, 0, 0, 0, false, false, false, HANGEUL_CHARSET, OUT_STROKE_PRECIS, CLIP_STROKE_PRECIS, DRAFT_QUALITY,
+		VARIABLE_PITCH | FF_ROMAN, _T("궁서"))
+{
 	go.Init();
 }
 
@@ -398,10 +401,8 @@ void GoWinApplication::create(HWND hWnd)
 	hWCS = CreateWindow(_T("EDIT"), _T("0"), WS_CHILD | WS_VISIBLE | ES_RIGHT | ES_READONLY,
 		1010, 200, 50, 30, hWnd, (HMENU)2, m_hInstance, NULL);
 
-	hFont = CreateFont(30, 0, 0, 0, 0, 0, 0, 0, HANGEUL_CHARSET, 3, 2, 1,
-		VARIABLE_PITCH | FF_ROMAN, _T("궁서"));
-	SendMessage(hBCS, WM_SETFONT, (WPARAM)hFont, (LPARAM)FALSE);
-	SendMessage(hWCS, WM_SETFONT, (WPARAM)hFont, (LPARAM)FALSE);
+	SendMessage(hBCS, WM_SETFONT, (WPARAM)font_gungseo.handle(), (LPARAM)FALSE);
+	SendMessage(hWCS, WM_SETFONT, (WPARAM)font_gungseo.handle(), (LPARAM)FALSE);
 
 	CreateWindow(_T("button"), _T("무르기"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
 		840, 300, 150, 30, hWnd, (HMENU)IDA_BACKSIES, m_hInstance, NULL);
