@@ -15,29 +15,29 @@ public:
 	void set_main_window_handle(HWND);
 	void set_hInstance(HINSTANCE);
 
-	HINSTANCE hInstance();
-	HWND main_window_handle();
+	HINSTANCE hInstance() const;
+	HWND main_window_handle() const;
 
 	LRESULT CALLBACK main_procedure(HWND hWnd, UINT message, WPARAM, LPARAM);
 	INT_PTR CALLBACK about_procedure(HWND hDlg, UINT message, WPARAM, LPARAM);
 	INT_PTR CALLBACK netbox_procedure(HWND hDlg, UINT message, WPARAM, LPARAM);
 
+private: // procedure callback
+	std::map<UINT, std::function<void(HWND, WPARAM, LPARAM)>> procedure_callbacks;
+
+	void on_create(HWND hWnd, WPARAM wParam, LPARAM lParam);
+	void on_mouse_move(HWND hWnd, WPARAM wParam, LPARAM lParam);
+	void on_lbutton_down(HWND hWnd, WPARAM wParam, LPARAM lParam);
+	void on_command(HWND hWnd, WPARAM wParam, LPARAM lParam);
+	void on_async(HWND hWnd, WPARAM wParam, LPARAM lParam);
+	void on_key_down(HWND hWnd, WPARAM wParam, LPARAM lParam);
+	void on_paint(HWND hWnd, WPARAM wParam, LPARAM lParam);
+	void on_destroy(HWND hWnd, WPARAM wParam, LPARAM lParam);
+
 private:
-	const TCHAR* ERROR_MESSAGES[5] = {
-		_T(""),
-		_T("바둑판 안에 착수해주세요"),
-		_T("이미 바둑 돌이 있습니다"),
-		_T("착수 금지점입니다"),
-		_T("패 입니다"),
-	};
-	enum class string_id {
-		INVALID_EXTENSION,
-		FILE_OPEN_FAIL_TITLE,
-		FILE_OPEN_FAIL,
-		FILE_SAVE_FAIL_TITLE,
-		FILE_SAVE_FAIL,
-	};
-	void create(HWND);
+	std::map<Command_MSG::Command, std::function<void(HWND)>> command_message_callbacks;
+
+private:
 	void file_open(HWND);
 	void file_save(HWND);
 	void backsies(HWND);
@@ -52,18 +52,37 @@ private:
 	MySocket my_socket;
 	GoWin::Chatting chatting;
 
-	using callback = std::function<void(HWND)>;
-	std::map<Command_MSG::Command, callback> command_message_callbacks;
+	enum class string_id {
+		INVALID_EXTENSION,
+		FILE_OPEN_FAIL_TITLE,
+		FILE_OPEN_FAIL,
+		FILE_SAVE_FAIL_TITLE,
+		FILE_SAVE_FAIL,
+	};
 	std::map<string_id, std::wstring> strings;
 
 	Coord2d mouse;
-	HINSTANCE m_hInstance;
 	PAINTSTRUCT ps;
-	HWND m_main_window_handle;
-	HWND ip_input_box; 
-	HBITMAP hBitmapMem;
-	HDC hdc, hdcMem;
-	HDC hdc_BackGround;
-	HWND hWCS, hBCS;
 	GoWin::Font font_gungseo;
+
+	HINSTANCE m_hInstance = nullptr;
+	HWND m_main_window_handle = nullptr;
+	HWND ip_input_box = nullptr;
+	HBITMAP hBitmapMem = nullptr;
+	HDC hdc = nullptr;
+	HDC hdcMem = nullptr;
+	HDC hdc_BackGround = nullptr;
+	HWND hWCS = nullptr;
+	HWND hBCS = nullptr;
+
+private:
+	const TCHAR* ERROR_MESSAGES[5] = {
+	_T(""),
+	_T("바둑판 안에 착수해주세요"),
+	_T("이미 바둑 돌이 있습니다"),
+	_T("착수 금지점입니다"),
+	_T("패 입니다"),
+	};
+
+	static constexpr int TOGGLE_SHOW_SEQUENCE = 3;
 };

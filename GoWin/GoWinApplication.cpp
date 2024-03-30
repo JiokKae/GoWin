@@ -11,8 +11,7 @@
 #include <memory>
 
 GoWinApplication::GoWinApplication()
-	: m_main_window_handle(nullptr)
-	, strings{
+	: strings{
 		{string_id::INVALID_EXTENSION, _T("지원하는 파일 형식이 아닙니다.")},
 		{string_id::FILE_OPEN_FAIL_TITLE, _T("파일 열기 실패")},
 		{string_id::FILE_OPEN_FAIL, _T("파일을 불러오는데 실패했습니다.")},
@@ -56,6 +55,16 @@ GoWinApplication::GoWinApplication()
 	}
 	, font_gungseo(30, 0, 0, 0, 0, false, false, false, HANGEUL_CHARSET, OUT_STROKE_PRECIS, CLIP_STROKE_PRECIS, DRAFT_QUALITY,
 		VARIABLE_PITCH | FF_ROMAN, _T("궁서"))
+	, procedure_callbacks {
+		{ WM_CREATE, [this](HWND hWnd, WPARAM wParam, LPARAM lParam) { on_create(hWnd, wParam, lParam); }},
+		{ WM_MOUSEMOVE, [this](HWND hWnd, WPARAM wParam, LPARAM lParam) { on_mouse_move(hWnd, wParam, lParam); }},
+		{ WM_LBUTTONDOWN, [this](HWND hWnd, WPARAM wParam, LPARAM lParam) { on_lbutton_down(hWnd, wParam, lParam); }},
+		{ WM_COMMAND, [this](HWND hWnd, WPARAM wParam, LPARAM lParam) { on_command(hWnd, wParam, lParam); }},
+		{ WM_ASYNC, [this](HWND hWnd, WPARAM wParam, LPARAM lParam) { on_async(hWnd, wParam, lParam); }},
+		{ WM_KEYDOWN, [this](HWND hWnd, WPARAM wParam, LPARAM lParam) { on_key_down(hWnd, wParam, lParam); }},
+		{ WM_PAINT, [this](HWND hWnd, WPARAM wParam, LPARAM lParam) { on_paint(hWnd, wParam, lParam); }},
+		{ WM_DESTROY, [this](HWND hWnd, WPARAM wParam, LPARAM lParam) { on_destroy(hWnd, wParam, lParam); }},
+	}
 {
 	go.Init();
 }
@@ -70,253 +79,25 @@ void GoWinApplication::set_hInstance(HINSTANCE hInstance)
 	m_hInstance = hInstance;
 }
 
-HINSTANCE GoWinApplication::hInstance()
+HINSTANCE GoWinApplication::hInstance() const
 {
 	return m_hInstance;
 }
 
-HWND GoWinApplication::main_window_handle()
+HWND GoWinApplication::main_window_handle() const
 {
 	return m_main_window_handle;
 }
 
 LRESULT GoWinApplication::main_procedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	switch (message)
+	if (procedure_callbacks.contains(message) == false)
 	{
-	case WM_CREATE:
-		create(hWnd);
-		return 0;
-
-	case WM_MOUSEMOVE:
-		set_mouse_coord(lParam);
-		InvalidateRect(hWnd, NULL, FALSE);
-
-		break;
-
-	case WM_LBUTTONDOWN:
-		set_mouse_coord(lParam);
-		if (board_graphic.IsMouseInBoard(mouse))
-		{
-			const Coord2d placement_point = board_graphic.MouseToBoard(mouse.x, mouse.y);
-			if (my_socket.status() == MySocket::Status::Client)
-			{
-				my_socket.send_message(std::make_unique<Placement_MSG>(go.info().sequence() + 1, placement_point.x, placement_point.y));
-				break;
-			}
-
-			int errorMSG = go.Placement(placement_point);
-			if (errorMSG == 0)
-			{
-				if (my_socket.status() == MySocket::Status::Server)
-				{
-
-					const auto& placementInfo = go.getLastPlacementInfo();
-					my_socket.send_message(std::make_unique<Placement_MSG>(placementInfo.sequence, placementInfo.x, placementInfo.y));
-				}
-				SetWindowText(hBCS, std::to_wstring(go.info().get_player(Color::Black).captured_stone()).c_str());
-				SetWindowText(hWCS, std::to_wstring(go.info().get_player(Color::White).captured_stone()).c_str());
-				InvalidateRect(hWnd, NULL, FALSE);
-			}
-			else if (errorMSG != ERR_NOTEMPTY)
-			{
-				MessageBox(hWnd, ERROR_MESSAGES[errorMSG], _T("ERROR"), MB_OK);
-			}
-		}
-
-		break;
-
-	case WM_COMMAND:
-	{
-		int wmId = LOWORD(wParam);
-		// 메뉴 선택을 구문 분석합니다:
-		switch (wmId)
-		{
-		case IDM_FILE_OPEN:
-		{
-			file_open(hWnd);
-			InvalidateRect(hWnd, NULL, FALSE);
-			break;
-		}
-		// 메뉴 - 파일 - 저장
-		case IDM_FILE_SAVE:
-		{
-			file_save(hWnd);
-
-			break;
-		}
-		break;
-
-		case IDM_FILE_EXIT:
-			// 콘솔 닫기
-			FreeConsole();
-			//
-
-			DeleteDC(hdc);
-			DeleteDC(hdcMem);
-
-			// PostQuitMessage(0);
-			 //break;
-
-			DestroyWindow(hWnd);
-			break;
-		case IDM_SERVER_CREATE:
-			if (my_socket.Create(hWnd) != INVALID_SOCKET) {
-				chatting.system_print(_T("서버 생성"));
-				HMENU hMenu = GetMenu(hWnd);
-				HMENU hSubMenu = GetSubMenu(hMenu, 1);
-				EnableMenuItem(hMenu, GetMenuItemID(hSubMenu, 0), MF_GRAYED);
-
-			}
-			else {
-				chatting.system_print(_T("서버 생성 실패"));
-			}
-			break;
-		
-
-		case IDA_BACKSIES:	//무르기 버튼
-			backsies(hWnd);
-			SetFocus(hWnd);
-			break;
-
-		case IDA_INIT:	//초기화 버튼
-			init(hWnd);
-			SetFocus(hWnd);
-			break;
-
-		case IDA_PASS:	//한수쉼 버튼
-			pass(hWnd);
-			SetFocus(hWnd);
-			break;
-
-		case 3:	// 수순 표시
-			board_graphic.TogglePrintSequence();
-			InvalidateRect(hWnd, NULL, FALSE);
-			SetFocus(hWnd);
-			break;
-
-		default:
-			return DefWindowProc(hWnd, message, wParam, lParam);
-		}
-	}
-	break;
-
-	case WM_ASYNC:
-		switch (WSAGETSELECTEVENT(lParam))
-		{
-			//
-			// 클라이언트의 접속요청이 있을때
-		case FD_ACCEPT:
-			if (my_socket.FD_Accept()) {
-				chatting.system_print(_T("클라이언트 접속"));
-			}
-			else
-			{
-				chatting.system_print(_T("클라이언트 접속 실패"));
-			}
-			break;
-
-			//
-			// 클라이언트가 채팅메시지를 보내왔을때
-		case FD_READ:
-		{
-			COMM_MSG msg;
-			my_socket.FD_Read((SOCKET)wParam, &msg);
-			switch (msg.type)
-			{
-			case Message::Type::CHATTING:
-			{
-				CHAT_MSG* chat_msg = reinterpret_cast<CHAT_MSG*>(&msg);
-				chatting.print(std::format(_T("상대: {}"), chat_msg->buf).c_str());
-				break;
-			}
-			case Message::Type::PLACEMENT:
-			{
-				Placement_MSG* placement_msg = (Placement_MSG*)&msg;
-				int errorMSG = go.Placement(Coord2d(placement_msg->x, placement_msg->y));
-				if (errorMSG == 0)
-				{
-					if (my_socket.status() == MySocket::Status::Server)
-					{
-						const auto& placementInfo = go.getLastPlacementInfo();
-						my_socket.send_message(std::make_unique<Placement_MSG>(placementInfo.sequence, placementInfo.x, placementInfo.y));
-					}
-					SetWindowText(hBCS, std::to_wstring(go.info().get_player(Color::Black).captured_stone()).c_str());
-					SetWindowText(hWCS, std::to_wstring(go.info().get_player(Color::White).captured_stone()).c_str());
-					InvalidateRect(hWnd, NULL, FALSE);
-				}
-				break;
-			}
-			case Message::Type::COMMAND:
-			{
-				command_message_callbacks[reinterpret_cast<Command_MSG*>(&msg)->command](hWnd);
-				InvalidateRect(hWnd, NULL, FALSE);
-			}
-
-			default:
-				break;
-			}
-
-		}
-		break;
-
-		// 클라이언트가 접속을 해제했을때
-		case FD_CLOSE:
-			my_socket.FD_Close((SOCKET)wParam);
-			chatting.system_print(_T("클라이언트 접속 종료"));
-			break;
-		}
-		return TRUE;
-
-	case WM_KEYDOWN:
-		//cout << wParam <<"키 눌림" << endl;
-		switch (wParam)
-		{
-		case KEY_ENTER:
-			auto chat = chatting.send();
-			SetFocus(chatting.input_handle());
-
-			if (chat.empty() || my_socket.IsConnected() == false)
-			{
-				break;
-			}
-			if (SOCKET_ERROR == my_socket.send_message(std::make_unique<CHAT_MSG>(chat.c_str())))
-			{
-				chatting.system_print(_T("채팅 보내기 실패"));
-			}
-			
-			break;
-		}
-
-	case WM_PAINT:
-	{
-		hdc = BeginPaint(hWnd, &ps);
-
-		BitBlt(hdcMem, 0, 0, 1200, 820, hdc_BackGround, 0, 0, SRCCOPY);
-		board_graphic.Draw(hdcMem, go, mouse);
-
-		BitBlt(hdc, 0, 0, 1200, 820, hdcMem, 0, 0, SRCCOPY);
-
-		EndPaint(hWnd, &ps);
-	}
-	break;
-
-	case WM_DESTROY:
-		DeleteObject(hBitmapMem); //-3
-		DeleteDC(hdcMem); //-2
-
-		DeleteDC(hdc_BackGround);
-		board_graphic.Release();
-
-		ReleaseDC(hWnd, hdc);
-
-		PostQuitMessage(0);
-
-		break;
-
-	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
+
+	procedure_callbacks[message](hWnd, wParam, lParam);
+
 	return 0;
 }
 
@@ -371,7 +152,7 @@ INT_PTR GoWinApplication::netbox_procedure(HWND hDlg, UINT message, WPARAM wPara
 	return INT_PTR(FALSE);
 }
 
-void GoWinApplication::create(HWND hWnd)
+void GoWinApplication::on_create(HWND hWnd, WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
 #ifdef _DEBUG	// 콘솔창 열기
 	AllocConsole();
@@ -411,11 +192,242 @@ void GoWinApplication::create(HWND hWnd)
 	CreateWindow(_T("button"), _T("한수쉼"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
 		840, 340, 150, 30, hWnd, (HMENU)IDA_PASS, m_hInstance, NULL);
 	CreateWindow(_T("button"), _T("수순 표시"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-		1010, 340, 150, 30, hWnd, (HMENU)3, m_hInstance, NULL);
+		1010, 340, 150, 30, hWnd, (HMENU)TOGGLE_SHOW_SEQUENCE, m_hInstance, NULL);
 	chatting.set_output_handle(CreateWindow(_T("EDIT"), _T(""), WS_CHILD | WS_VISIBLE | ES_LEFT | ES_READONLY | ES_AUTOVSCROLL | WS_VSCROLL | ES_MULTILINE,
 		840, 400, 320, 120, hWnd, (HMENU)4, m_hInstance, NULL));
 	chatting.set_input_handle(CreateWindow(_T("EDIT"), _T(""), WS_CHILD | WS_VISIBLE | ES_LEFT | ES_AUTOHSCROLL | ES_WANTRETURN,
 		840, 530, 320, 30, hWnd, (HMENU)5, m_hInstance, NULL));
+}
+
+void GoWinApplication::on_mouse_move(HWND hWnd, WPARAM /*wParam*/, LPARAM lParam)
+{
+	set_mouse_coord(lParam);
+
+	InvalidateRect(hWnd, NULL, FALSE);
+}
+
+void GoWinApplication::on_lbutton_down(HWND hWnd, WPARAM wParam, LPARAM lParam)
+{
+	set_mouse_coord(lParam);
+
+	if (board_graphic.IsMouseInBoard(mouse) == true)
+	{
+		const Coord2d placement_point = board_graphic.MouseToBoard(mouse.x, mouse.y);
+		if (my_socket.status() == MySocket::Status::Client)
+		{
+			my_socket.send_message(std::make_unique<Placement_MSG>(go.info().sequence() + 1, placement_point.x, placement_point.y));
+			return;
+		}
+
+		int errorMSG = go.Placement(placement_point);
+		if (errorMSG == 0)
+		{
+			if (my_socket.status() == MySocket::Status::Server)
+			{
+
+				const auto& placementInfo = go.getLastPlacementInfo();
+				my_socket.send_message(std::make_unique<Placement_MSG>(placementInfo.sequence, placementInfo.x, placementInfo.y));
+			}
+			SetWindowText(hBCS, std::to_wstring(go.info().get_player(Color::Black).captured_stone()).c_str());
+			SetWindowText(hWCS, std::to_wstring(go.info().get_player(Color::White).captured_stone()).c_str());
+
+			InvalidateRect(hWnd, NULL, FALSE);
+		}
+		else if (errorMSG != ERR_NOTEMPTY)
+		{
+			MessageBox(hWnd, ERROR_MESSAGES[errorMSG], _T("ERROR"), MB_OK);
+		}
+	}
+}
+
+void GoWinApplication::on_command(HWND hWnd, WPARAM wParam, LPARAM lParam)
+{
+	const int wmId = LOWORD(wParam);
+	// 메뉴 선택을 구문 분석합니다:
+	switch (wmId)
+	{
+	case IDM_FILE_OPEN:
+	{
+		file_open(hWnd);
+		InvalidateRect(hWnd, NULL, FALSE);
+		break;
+	}
+	// 메뉴 - 파일 - 저장
+	case IDM_FILE_SAVE:
+		file_save(hWnd);
+		break;
+
+	case IDM_FILE_EXIT:
+#ifdef _DEBUG	// 콘솔창 닫기
+		FreeConsole();
+#endif
+		DeleteDC(hdc);
+		DeleteDC(hdcMem);
+
+		// PostQuitMessage(0);
+		// break;
+
+		DestroyWindow(hWnd);
+		break;
+
+	case IDM_SERVER_CREATE:
+		if (my_socket.Create(hWnd) != INVALID_SOCKET) 
+		{
+			chatting.system_print(_T("서버 생성"));
+			const HMENU hMenu = GetMenu(hWnd);
+			const HMENU hSubMenu = GetSubMenu(hMenu, 1);
+			EnableMenuItem(hMenu, GetMenuItemID(hSubMenu, 0), MF_GRAYED);
+		}
+		else
+		{
+			chatting.system_print(_T("서버 생성 실패"));
+		}
+		break;
+
+	case IDA_BACKSIES:	//무르기 버튼
+		backsies(hWnd);
+		SetFocus(hWnd);
+		break;
+
+	case IDA_INIT:	//초기화 버튼
+		init(hWnd);
+		SetFocus(hWnd);
+		break;
+
+	case IDA_PASS:	//한수쉼 버튼
+		pass(hWnd);
+		SetFocus(hWnd);
+		break;
+
+	case TOGGLE_SHOW_SEQUENCE:
+		board_graphic.TogglePrintSequence();
+		InvalidateRect(hWnd, NULL, FALSE);
+		SetFocus(hWnd);
+		break;
+	}
+}
+
+void GoWinApplication::on_async(HWND hWnd, WPARAM wParam, LPARAM lParam)
+{
+	switch (WSAGETSELECTEVENT(lParam))
+	{
+	// 클라이언트의 접속 요청이 있을 때
+	case FD_ACCEPT:
+		if (my_socket.FD_Accept()) 
+		{
+			chatting.system_print(_T("클라이언트 접속"));
+		}
+		else
+		{
+			chatting.system_print(_T("클라이언트 접속 실패"));
+		}
+		break;
+
+	// 상호간에 메시지를 받았을 때
+	case FD_READ:
+	{
+		COMM_MSG msg;
+		my_socket.FD_Read((SOCKET)wParam, &msg);
+		switch (msg.type)
+		{
+		case Message::Type::CHATTING:
+		{
+			CHAT_MSG* chat_msg = reinterpret_cast<CHAT_MSG*>(&msg);
+			chatting.print(std::format(_T("상대: {}"), chat_msg->buf).c_str());
+			break;
+		}
+		case Message::Type::PLACEMENT:
+		{
+			Placement_MSG* placement_msg = reinterpret_cast<Placement_MSG*>(&msg);
+			int errorMSG = go.Placement({ placement_msg->x, placement_msg->y });
+			if (errorMSG == 0)
+			{
+				if (my_socket.status() == MySocket::Status::Server)
+				{
+					const PlacementInfo& placementInfo = go.getLastPlacementInfo();
+					my_socket.send_message(std::make_unique<Placement_MSG>(placementInfo.sequence, placementInfo.x, placementInfo.y));
+				}
+				SetWindowText(hBCS, std::to_wstring(go.info().get_player(Color::Black).captured_stone()).c_str());
+				SetWindowText(hWCS, std::to_wstring(go.info().get_player(Color::White).captured_stone()).c_str());
+
+				InvalidateRect(hWnd, NULL, FALSE);
+			}
+			break;
+		}
+		case Message::Type::COMMAND:
+		{
+			Command_MSG* command_msg = reinterpret_cast<Command_MSG*>(&msg);
+			command_message_callbacks[command_msg->command](hWnd);
+
+			InvalidateRect(hWnd, NULL, FALSE);
+			break;
+		}
+		default:
+			break;
+		}
+	}
+	break;
+
+	// 클라이언트가 접속을 해제 했을 때
+	case FD_CLOSE:
+		my_socket.FD_Close((SOCKET)wParam);
+		chatting.system_print(_T("클라이언트 접속 종료"));
+		break;
+	}
+}
+
+void GoWinApplication::on_key_down(HWND hWnd, WPARAM wParam, LPARAM lParam)
+{
+#ifdef _DEBUG
+	//cout << wParam <<"키 눌림" << endl;
+#endif
+	switch (wParam)
+	{
+	case KEY_ENTER:
+	{
+		SetFocus(chatting.input_handle());
+
+		const std::wstring chat = chatting.send();
+		if (chat.empty() == false && my_socket.IsConnected() == true)
+		{
+			const int ret = my_socket.send_message(std::make_unique<CHAT_MSG>(chat.c_str()));
+			if (ret == SOCKET_ERROR)
+			{
+				chatting.system_print(_T("채팅 보내기 실패"));
+			}
+		}
+		break;
+	}
+	default:
+		break;
+	}
+}
+
+void GoWinApplication::on_paint(HWND hWnd, WPARAM wParam, LPARAM lParam)
+{
+	hdc = BeginPaint(hWnd, &ps);
+
+	BitBlt(hdcMem, 0, 0, 1200, 820, hdc_BackGround, 0, 0, SRCCOPY);
+
+	board_graphic.Draw(hdcMem, go, mouse);
+
+	BitBlt(hdc, 0, 0, 1200, 820, hdcMem, 0, 0, SRCCOPY);
+
+	EndPaint(hWnd, &ps);
+}
+
+void GoWinApplication::on_destroy(HWND hWnd, WPARAM wParam, LPARAM lParam)
+{
+	DeleteObject(hBitmapMem); //-3
+	DeleteDC(hdcMem); //-2
+
+	DeleteDC(hdc_BackGround);
+	board_graphic.Release();
+
+	ReleaseDC(hWnd, hdc);
+
+	PostQuitMessage(0);
+
 }
 
 void GoWinApplication::file_open(HWND hWnd)
