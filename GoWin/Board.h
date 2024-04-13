@@ -2,6 +2,7 @@
 
 #include "Stone/Stone.h"
 #include "stdgo.h"
+#include <set>
 #include <vector>
 
 class Board {
@@ -22,6 +23,7 @@ public:
 	bool isSolo(const Stone& s);		bool isSolo( int x, int y );
 
 private:
+	std::set<Stone*> getStoneGroup(Stone* stone);
 	int captureGS(Stone* pStone);
 	void linkGS(Stone* s1, Stone* s2);
 

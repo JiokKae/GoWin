@@ -1,6 +1,5 @@
 ﻿#include "Board.h" 
 #include <iostream>
-#include <set>
 
 #define LEFT	0
 #define RIGHT	1
@@ -193,27 +192,46 @@ void Board::linkGS(Stone* s1, Stone* s2) {
 	}
 }
 
+std::set<Stone*> Board::getStoneGroup(Stone* stone)
+{
+	std::vector<Stone*> search_stones{ stone };
+	std::set<Stone*> searched_stones{};
+
+	while (search_stones.empty() == false)
+	{
+		Stone* search_stone = search_stones.back();
+		search_stones.pop_back();
+		searched_stones.insert(search_stone);
+
+		for (int direction = 0; direction < 4; direction++)
+		{
+			Stone* around_stone = &getAstone(*search_stone, direction);
+
+			if (around_stone->color() == search_stone->color() && searched_stones.contains(around_stone) == false)
+			{
+				search_stones.push_back(around_stone);
+			}
+		}
+	}
+
+	return searched_stones;
+}
+
 //--------------------------------------------------------------------------------------
 // Name:  captureGS
 // Desc:  돌을 따낸다.
 // Param: captured	-> 따낼 돌의 포인터
-// Ret:   잡아낸 돌의 숫자
+// Ret:   따낸 돌의 숫자
 //--------------------------------------------------------------------------------------
 int Board::captureGS(Stone* captured)
 {
-	while (captured->backStone() != nullptr)
-		captured = captured->backStone();
-
-	int count(0);
-	Stone* next(nullptr);
-	while (captured != nullptr)
+	const std::set<Stone*> captured_stones = getStoneGroup(captured);
+	for (Stone* captured_stone : captured_stones)
 	{
-		next = captured->nextStone();
-		*captured = Stone();
-		count++;
-		captured = next;
+		*captured_stone = Stone();
 	}
-	return count;
+
+	return captured_stones.size();
 }
 
 bool Board::isBoardin(int x, int y) const
