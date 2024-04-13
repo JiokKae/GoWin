@@ -1,5 +1,6 @@
 ﻿#include "Board.h" 
 #include <iostream>
+#include <set>
 
 #define LEFT	0
 #define RIGHT	1
@@ -150,6 +151,28 @@ Stone& Board::getAstone( int x, int y, int index )
 		return getStone( 0, 0 );
 }
 
+const Stone& Board::getAstone(int x, int y, int direction) const
+{
+	switch (direction)
+	{
+	case LEFT:
+		return getStone(x - 1, y);
+	case RIGHT:
+		return getStone(x + 1, y);
+	case UP:
+		return getStone(x, y - 1);
+	case DOWN:
+		return getStone(x, y + 1);
+	default:
+		return getStone(0, 0);
+	}
+}
+
+const Stone& Board::getAstone(const Stone& stone, int direction) const
+{
+	return getAstone(stone.x(), stone.y(), direction);
+}
+
 //s1과 s2를 연결
 // TODO: GS 객체 만들어서 관리하도록 수정
 void Board::linkGS(Stone* s1, Stone* s2) {
@@ -217,35 +240,43 @@ bool Board::isIllegalpoint( int x, int y, Color color )
 	return true;
 }
 
-bool Board::isDeadGS(const Stone* s1) 
+bool Board::isDeadGS(const Stone* stone) const
 {
-	if (s1 == nullptr)
-	{
-		return false;
-	}
-	
-	if (s1->state() == Stone::State::Wall) 
+	if (stone == nullptr)
 	{
 		return false;
 	}
 
-	Stone* sp( const_cast<Stone*>(s1) );
-	while ( sp->backStone() != nullptr )
+	if (stone->state() != Stone::State::Stone && stone->state() != Stone::State::TempStone)
 	{
-		sp = sp->backStone();
+		return false;
 	}
-		
-	while (sp != nullptr) 
+
+	std::vector<const Stone*> search_stones{ stone };
+	std::set<const Stone*> searched_stones{};
+	
+	while (search_stones.empty() == false)
 	{
-		for (int i = 0; i < 4; i++) 
+		const Stone* search_stone = search_stones.back();
+		search_stones.pop_back();
+		searched_stones.insert(search_stone);
+		
+		for (int direction = 0; direction < 4; direction++)
 		{
-			if ( getAstone(*sp, i).state() == Stone::State::Null )
+			const Stone* around_stone = &getAstone(*search_stone, direction);
+
+			if (around_stone->state() == Stone::State::Null)
 			{
 				return false;
 			}
+
+			if (around_stone->color() == search_stone->color() && searched_stones.contains(around_stone) == false)
+			{
+				search_stones.push_back(around_stone);
+			}
 		}
-		sp = sp->nextStone();
 	}
+	
 	return true;
 }
 

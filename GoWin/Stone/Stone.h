@@ -30,6 +30,6 @@ private:
 	int m_sequence = 0;
 	Stone* m_backStone = nullptr;
 	Stone* m_nextStone = nullptr;
-	Color m_color = Color::Black;
+	Color m_color = Color::None;
 	bool m_killer = false;
 };

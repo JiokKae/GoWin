@@ -13,10 +13,12 @@ public:
 	const Stone& getStone(int x, int y) const;
 	Stone& getStone(int x, int y);
 	Stone& getAstone(int x, int y, int i);		Stone& getAstone(Stone s, int i);
+	const Stone& getAstone(int x, int y, int direction) const;
+	const Stone& getAstone(const Stone& stone, int direction) const;
 	bool isBoardin(int x, int y) const;
 	bool isEmpty(int x, int y);
 	bool isIllegalpoint(int x, int y, Color color);
-	bool isDeadGS(const Stone* s1);
+	bool isDeadGS(const Stone* stone) const;
 	bool isSolo(const Stone& s);		bool isSolo( int x, int y );
 
 private:
