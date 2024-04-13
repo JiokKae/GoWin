@@ -87,7 +87,7 @@ int Board::setBoard(int x, int y, int sequence, Color color)
 		case Stone::State::Wall:
 			std::cout << i << " " << direction_char[i] << " : 장외" << std::endl;
 			break;
-		case Stone::State::Normal:
+		case Stone::State::Stone:
 			if (color == getAstone(x, y, i).color())
 			{
 				std::cout << i << " " << direction_char[i] << " : 일치" << std::endl;

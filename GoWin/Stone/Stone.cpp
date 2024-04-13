@@ -2,64 +2,41 @@
 #include <format>
 
 Stone::Stone( int x, int y, int sequence, Color color )
-	: m_x( x )
-	, m_y( y )
+	: GridItem(x, y, State::Stone)
 	, m_sequence( sequence )
 	, m_color( color )
-	, m_backStone( nullptr )
-	, m_nextStone( nullptr )
-	, m_killer( false )
-	, m_state( State::Normal )
 {
 }
 
 Stone::Stone( int x, int y, int sequence, std::string temp ) 
-	: m_x( x )
-	, m_y( y )
+	: GridItem(x, y, State::TempStone)
 	, m_sequence( sequence )
-	, m_backStone( nullptr )
-	, m_nextStone( nullptr )
-	, m_killer( false )
-	, m_state( State::Temp )
 {
 }
 
 Stone::Stone()
-	: m_x( 1 )
-	, m_y( 1 )
-	, m_sequence( 0 )
-	, m_backStone( nullptr )
-	, m_nextStone( nullptr )
-	, m_killer( false )
-	, m_state( State::Null )
+	: GridItem(1, 1, State::Null)
 {
 }
 
 Stone::Stone( std::string Wall )
-	: m_x( 0 )
-	, m_y( 0 )
-	, m_sequence( 0 )
-	, m_backStone( nullptr )
-	, m_nextStone( nullptr )
-	, m_killer( false )
-	, m_state( State::Wall )
+	: GridItem(0, 0, State::Wall)
 {
 }
 
 Stone::operator std::string() const
 {
-	return std::format("Stone({}, {})", m_x, m_y);
+	return std::format("Stone({}, {})", x(), y());
 }
 
-std::ostream& operator<<(std::ostream& os, const Stone& s)
+Stone::value_array Stone::values() const
 {
-	os << std::string(s) << "----------------" << std::endl;
-	os << "    sequence: " << s.m_sequence << std::endl;
-	os << "    backStone: " << (s.m_backStone ? std::string(*s.m_backStone) : "nullptr") << std::endl;
-	os << "    nextStone: " << (s.m_nextStone ? std::string(*s.m_nextStone) : "nullptr") << std::endl;
-	os << "    color: " << int(s.m_color) << std::endl;
-	os << "    state: " << int(s.m_state) << std::endl;
-	os << "    killer: " << s.m_killer << std::endl;
-	os << "----------------------" << std::endl;
-	return os;
+	value_array stone_values{ GridItem::values() };
+	stone_values.emplace_back("sequence", std::to_string(m_sequence));
+	stone_values.emplace_back("backStone", m_backStone ? std::string(*m_backStone) : "nullptr");
+	stone_values.emplace_back("nextStone", m_nextStone ? std::string(*m_nextStone) : "nullptr");
+	stone_values.emplace_back("color", std::to_string((int)m_color));
+	stone_values.emplace_back("killer", std::to_string(m_killer));
+
+	return stone_values;
 }

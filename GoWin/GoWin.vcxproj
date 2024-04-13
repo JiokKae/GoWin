@@ -162,6 +162,7 @@
     <ClInclude Include="GoWin\Chatting.h" />
     <ClInclude Include="GoWin\Font.h" />
     <ClInclude Include="GoWin\OpenFileName.h" />
+    <ClInclude Include="Grid\GridItem.h" />
     <ClInclude Include="mydatastructure.h" />
     <ClInclude Include="MySocket.h" />
     <ClInclude Include="MyString.h" />
@@ -181,6 +182,7 @@
     <ClCompile Include="GoWinApplication.cpp" />
     <ClCompile Include="GoWin\Chatting.cpp" />
     <ClCompile Include="GoWin\Font.cpp" />
+    <ClCompile Include="Grid\GridItem.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="GoWin\OpenFileName.cpp" />
     <ClCompile Include="MySocket.cpp" />

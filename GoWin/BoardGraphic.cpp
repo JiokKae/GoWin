@@ -82,7 +82,7 @@ void BoardGraphic::Draw(HDC destination, const Go& game, const Coord2d& mouse)
 		for (int y = 1; y < 20; y++)
 		{
 			const Stone& stone = game.ReadCoord({ x, y });
-			if (stone.state() != Stone::State::Normal)
+			if (stone.state() != Stone::State::Stone)
 			{
 				continue;
 			}

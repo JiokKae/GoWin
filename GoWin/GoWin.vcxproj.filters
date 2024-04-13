@@ -22,6 +22,9 @@
     <Filter Include="GoWin">
       <UniqueIdentifier>{0142cad0-2d44-41f3-afa2-c9cb7a0f849f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Grid">
+      <UniqueIdentifier>{411002c8-8d6a-47a6-bf67-b8c528260d1c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -81,6 +84,9 @@
     <ClInclude Include="GoWin\Font.h">
       <Filter>GoWin</Filter>
     </ClInclude>
+    <ClInclude Include="Grid\GridItem.h">
+      <Filter>Grid</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BoardGraphic.cpp">
@@ -130,6 +136,9 @@
     </ClCompile>
     <ClCompile Include="GoWin\Font.cpp">
       <Filter>GoWin</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\GridItem.cpp">
+      <Filter>Grid</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
