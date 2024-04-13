@@ -91,7 +91,6 @@ int Board::setBoard(int x, int y, int sequence, Color color)
 			if (color == getAstone(x, y, i).color())
 			{
 				std::cout << i << " " << direction_char[i] << " : 일치" << std::endl;
-				linkGS(&board[x][y], &getAstone(x, y, i));
 			}
 			else
 			{
@@ -170,26 +169,6 @@ const Stone& Board::getAstone(int x, int y, int direction) const
 const Stone& Board::getAstone(const Stone& stone, int direction) const
 {
 	return getAstone(stone.x(), stone.y(), direction);
-}
-
-//s1과 s2를 연결
-// TODO: GS 객체 만들어서 관리하도록 수정
-void Board::linkGS(Stone* s1, Stone* s2) {
-	Stone* s1last = s1;
-
-	while (s1last->nextStone() != nullptr)
-		s1last = s1last->nextStone();
-
-	Stone* s2first = s2;
-
-	while (s2first->backStone() != nullptr)
-		s2first = s2first->backStone();
-
-	if (s1 != s2first) 
-	{
-		s1last->set_nextStone(s2first);
-		s2first->set_backStone(s1last);
-	}
 }
 
 std::set<Stone*> Board::getStoneGroup(Stone* stone)

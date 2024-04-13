@@ -25,7 +25,6 @@ public:
 private:
 	std::set<Stone*> getStoneGroup(Stone* stone);
 	int captureGS(Stone* pStone);
-	void linkGS(Stone* s1, Stone* s2);
 
 	static const char* direction_char[4];
 

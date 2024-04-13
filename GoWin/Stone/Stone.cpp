@@ -33,8 +33,6 @@ Stone::value_array Stone::values() const
 {
 	value_array stone_values{ GridItem::values() };
 	stone_values.emplace_back("sequence", std::to_string(m_sequence));
-	stone_values.emplace_back("backStone", m_backStone ? std::string(*m_backStone) : "nullptr");
-	stone_values.emplace_back("nextStone", m_nextStone ? std::string(*m_nextStone) : "nullptr");
 	stone_values.emplace_back("color", std::to_string((int)m_color));
 	stone_values.emplace_back("killer", std::to_string(m_killer));
 
