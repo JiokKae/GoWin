@@ -114,7 +114,7 @@ int Go::Placement( Coord2d coord_placement )
 		}
 		m_board.setBoardtmp(x, y, sequence);
 		if (m_board.isSolo(m_board.getAstone(x, y, direction)) && (m_board.getAstone(x, y, direction).sequence() == sequence - 1)
-			&& m_board.getAstone(x, y, direction).is_killer() == true)
+			&& m_board.getAstone(x, y, direction).is_capturer() == true)
 			return ERR_KO;
 	}
 

@@ -1,10 +1,12 @@
 ﻿#include "Board.h" 
 #include <iostream>
 
+#define DIRECTION_START 0
 #define LEFT	0
 #define RIGHT	1
 #define UP	2
 #define DOWN	3
+#define DIRECTION_END 4
 
 const char* Board::direction_char[4] = { "[좌]", "[우]", "[상]", "[하]" };
 
@@ -74,43 +76,46 @@ void Board::setHandicap( int num )
 //--------------------------------------------------------------------------------------
 int Board::setBoard(int x, int y, int sequence, Color color) 
 {
-	int ret = 0;
+	int capture_stone_count{ 0 };
 	board[x][y] = Stone(x, y, sequence, color);
 
-	for (int i = 0; i < 4; i++)
+	for (int direction = DIRECTION_START; direction < DIRECTION_END; direction++)
 	{
-		switch (getAstone(x, y, i).state())
+		std::cout << direction << " " << direction_char[direction];
+		switch (getAstone(x, y, direction).state())
 		{
 		case Stone::State::Null:
-			std::cout << i << " " << direction_char[i] << " : 비었음" << std::endl;
+			std::cout << ": 비었음";
 			break;
+
 		case Stone::State::Wall:
-			std::cout << i << " " << direction_char[i] << " : 장외" << std::endl;
+			std::cout << ": 장외";
 			break;
+
 		case Stone::State::Stone:
-			if (color == getAstone(x, y, i).color())
+			if (color == getAstone(x, y, direction).color())
 			{
-				std::cout << i << " " << direction_char[i] << " : 일치" << std::endl;
+				std::cout << ": 일치";
 			}
 			else
 			{
-				std::cout << i << " " << direction_char[i] << " : 불일치" << std::endl;
-				if (isDeadGS(&getAstone(x, y, i)) == true)
+				std::cout << ": 불일치";
+				if (isDeadGS(&getAstone(x, y, direction)) == true)
 				{
-					ret = captureGS(&getAstone(x, y, i));
-					board[x][y].set_killer(true);
-					std::cout << i << " " << direction_char[i] << " : 삭제" << std::endl;
+					capture_stone_count += captureGS(&getAstone(x, y, direction));
+					board[x][y].set_capturer(true);
+					std::cout << ": 따냄";
 				}
 			}
 			break;
+
 		default:
 			break;
 		}
-
-		
+		std::cout << std::endl;
 	}
 
-	return ret;
+	return capture_stone_count;
 }
 
 void Board::setBoardtmp(int x, int y, int sequence) {
