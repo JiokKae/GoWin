@@ -1,10 +1,11 @@
 ﻿#pragma once
 
 #include <string>
+#include "../stdgo.h"
 
-enum class Color;
 class Player {
 public:
+	Player();
 	Player(Color);
 
 	void set_name(const std::wstring&);

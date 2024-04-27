@@ -81,7 +81,7 @@ void BoardGraphic::Draw(HDC destination, const Go& game, const Coord2d& mouse)
 	{
 		for (int y = 1; y < 20; y++)
 		{
-			const Stone& stone = game.ReadCoord({ x, y });
+			const Stone& stone = game.read_coord({ x, y });
 			if (stone.state() != Stone::State::Stone)
 			{
 				continue;
@@ -93,9 +93,9 @@ void BoardGraphic::Draw(HDC destination, const Go& game, const Coord2d& mouse)
 	if (IsMouseInBoard(mouse) == true)
 	{
 		Coord2d board_point = MouseToBoard(mouse.x, mouse.y);
-		if (game.ReadCoord(board_point).state() == Stone::State::Null )
+		if (game.read_coord(board_point).state() == Stone::State::Null )
 		{
-			DrawStone(destination, board_point.x, board_point.y, game.get_current_placement_order(), 0, true);
+			DrawStone(destination, board_point.x, board_point.y, game.current_placement_order(), 0, true);
 		}
 	}
 }

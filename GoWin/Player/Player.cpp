@@ -1,5 +1,14 @@
 ﻿#include "Player.h"
+
 #include <tchar.h>
+
+Player::Player()
+	: m_name{ _T("player") }
+	, m_kyu{ _T("18급") }
+	, m_color{ Color::None }
+	, m_captured_stone{ 0 } {
+
+}
 
 Player::Player(Color color)
 	: m_name{ _T("player") }

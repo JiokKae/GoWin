@@ -10,67 +10,110 @@
 #include <iostream>
 #include <wtypes.h>
 
+Go::Information::Information()
+	: m_game_type(_T("친선대국"))
+	, m_board_size(19)
+	, m_compensation(6)
+	, m_base_time(_T("0"))
+	, m_game_result(_T("결과 없음"))
+{
+	init();
+}
+
+void Go::Information::init()
+{
+	m_placements.clear();
+	m_sequence = 1;
+	m_players.clear();
+	m_players.emplace(Color::Black, Player(Color::Black));
+	m_players.emplace(Color::White, Player(Color::White));
+}
+
+const Player& Go::Information::get_player(Color color) const
+{
+	static Player nullPlayer(Color::Black);
+
+	return m_players.contains(color) == true ? m_players.at(color) : nullPlayer;
+}
+
+void Go::Information::add_captured_stone(Color color, int captured_stone)
+{
+	if (m_players.contains(color) == true)
+	{
+		m_players[color].add_captured_stone(captured_stone);
+	}
+}
+
+void Go::Information::add_placement(PlacementInfo&& placement)
+{
+	m_placements.emplace_back(placement);
+}
+
+void Go::Information::delete_placement()
+{
+	m_placements.pop_back();
+}
+
 Go::Go()
-	: m_mode("Single")
-	, m_board()
+	: m_board()
 	, m_info()
-	, currentPlacementOrderIndex(0)
+	, m_current_placement_order_index(0)
 {
-	Init();
+	init();
 }
 
-Go::~Go()
+const Go::Information& Go::info() const
 {
+	return m_info;
 }
 
-bool Go::Backsies() 
+bool Go::backsies() 
 {
-	if (boardLog.empty() == true)
+	if (m_board_log.empty() == true)
 	{
 		return false;
 	}
 
-	m_board = boardLog.back();
-	boardLog.pop_back();
+	m_board = m_board_log.back();
+	m_board_log.pop_back();
 
 	m_info.delete_placement();
 	set_placement_order_previous();
-	m_info.add_sequence(-1);
-
+	m_info.m_sequence -= 1;
 	return true;
 }
 
-bool Go::Handicap(int num) 
+bool Go::handicap(int num) 
 {
-	if (m_info.sequence() != 1 || num > 9 || num < 2)
+	if (m_info.m_sequence != 1 || num > 9 || num < 2)
 		return false;
-	boardLog.push_back(m_board);
+	m_board_log.push_back(m_board);
 	m_board.setHandicap(num);
 
-	m_info.add_sequence(1);
+	m_info.m_sequence += 1;
 	return true;
 }
 
-bool Go::Init() 
+bool Go::init() 
 {
-	boardLog.clear();
+	m_board_log.clear();
 	m_board.init(19);
-	m_info.Init();
-	currentPlacementOrderIndex = 0;
+	m_info.init();
+	m_current_placement_order_index = 0;
 
-	placementOrders.clear();
-	placementOrders.push_back(Color::Black);
-	placementOrders.push_back(Color::White);
+	m_placement_orders.clear();
+	m_placement_orders.push_back(Color::Black);
+	m_placement_orders.push_back(Color::White);
 
 	return true;
 }
 
-bool Go::Pass() 
+bool Go::pass() 
 {
-	boardLog.push_back(m_board);
+	m_board_log.push_back(m_board);
 
-	m_info.add_placement(PlacementInfo(0, 0, m_info.sequence(), get_current_placement_order()));
-	m_info.add_sequence(1);
+	m_info.add_placement(PlacementInfo(0, 0, m_info.m_sequence, current_placement_order()));
+	m_info.m_sequence += 1;
 	set_placement_order_next();
 	return true;
 }
@@ -78,24 +121,24 @@ bool Go::Pass()
 // function:	착수
 // out:		errorMessage 
 // in:		x, y 좌표
-int Go::Placement( Coord2d coord_placement ) 
+Go::PlacementError Go::placement(Coord2d coord_placement)
 {
 	int x = coord_placement.x;
 	int y = coord_placement.y;
-	int sequence = m_info.sequence();
-	Color color = get_current_placement_order();
+	int sequence = m_info.m_sequence;
+	Color color = current_placement_order();
 
 	// 0, 0 착점은 차례 넘기기
 	if (x == 0 && y == 0) {
-		Pass();
-		return 0;
+		pass();
+		return PlacementError::NONE;
 	}
 	if (m_board.isBoardin(x, y) == false)
-		return ERR_NOTBOARDIN;
+		return PlacementError::NOT_BOARD_IN;
 	if (m_board.isEmpty(x, y) == false)
 	{
 		std::cout << m_board.getStone(x, y);
-		return ERR_NOTEMPTY;
+		return PlacementError::NOT_EMPTY;
 	}
 		
 	if (m_board.isIllegalpoint(x, y, color) == true)
@@ -109,58 +152,58 @@ int Go::Placement( Coord2d coord_placement )
 			if (direction == 3)
 			{
 				m_board.setBoardtmp(x, y, sequence);
-				return ERR_ILLEGALPOINT;
+				return PlacementError::ILLEGAL_POINT;
 			}
 		}
 		m_board.setBoardtmp(x, y, sequence);
 		if (m_board.isSolo(m_board.getAstone(x, y, direction)) && (m_board.getAstone(x, y, direction).sequence() == sequence - 1)
 			&& m_board.getAstone(x, y, direction).is_capturer() == true)
-			return ERR_KO;
+			return PlacementError::KO;
 	}
 
-	boardLog.push_back(m_board);
+	m_board_log.push_back(m_board);
 	int captured_stone = m_board.setBoard(x, y, sequence, color);
 	if (captured_stone != 0)
 		m_info.add_captured_stone(color, captured_stone);
 	
 	// 착수 정보 저장
 	m_info.add_placement(PlacementInfo(x, y, sequence, color));
-	std::wcout << m_info.placements().back().data();
+	std::wcout << m_info.m_placements.back().data();
 
-	m_info.add_sequence(1);
+	m_info.m_sequence += 1;
 	set_placement_order_next();
 
 	if (m_board.isDeadGS(&m_board.getStone(x, y)))
 	{
-		Backsies();
-		return ERR_ILLEGALPOINT;
+		backsies();
+		return PlacementError::ILLEGAL_POINT;
 	}
 		
-	return 0;
+	return PlacementError::NONE;
 }
 
-bool Go::Load(const GiboNGF& gibo)
+bool Go::load(const GiboNGF& gibo)
 {
-	m_info.set_game_type(gibo.battle_type());
-	m_info.set_board_size(gibo.board_size());
-	m_info.set_link(gibo.url());
-	m_info.set_go_type(gibo.go_type());
-	m_info.set_gongje(gibo.gongje());
-	m_info.set_compensation(gibo.compensation());
-	m_info.set_date(gibo.date());
-	m_info.set_base_time(gibo.base_time());
-	m_info.set_game_result(gibo.game_result());
+	m_info.m_game_type = gibo.battle_type();
+	m_info.m_board_size = gibo.board_size();
+	m_info.m_link = gibo.url();
+	m_info.m_go_type = gibo.go_type();
+	m_info.m_gongje = gibo.gongje();
+	m_info.m_compensation = gibo.compensation();
+	m_info.m_date = gibo.date();
+	m_info.m_base_time = gibo.base_time();
+	m_info.m_game_result = gibo.game_result();
 
-	Init();
-	Handicap(m_info.go_type());
+	init();
+	handicap(m_info.m_go_type);
 	for (int i = 0; i < gibo.sequence(); i++)
 	{
 		std::wcout << i << std::endl;
-		const auto& placement = gibo.getPlacements()[i];
-		int errorMSG = Placement(Coord2d(placement.x(), placement.y())); // 확인 TODO
-		if (0 != errorMSG)
+		const GiboNGF::Placement& ngf_placement = gibo.getPlacements()[i];
+		PlacementError errorMSG = placement(Coord2d{ ngf_placement.x(), ngf_placement.y() });
+		if (PlacementError::NONE != errorMSG)
 		{
-			Init();
+			init();
 			return false;
 		}
 	}
@@ -170,20 +213,20 @@ bool Go::Load(const GiboNGF& gibo)
 void SaveNGF(std::wostream& wos, const Go::Information& goInfo, const std::wstring& date)
 {
 	GiboNGF ngf;
-	ngf.set_battle_type(goInfo.game_type());
-	ngf.set_board_size(goInfo.board_size());
+	ngf.set_battle_type(goInfo.m_game_type);
+	ngf.set_board_size(goInfo.m_board_size);
 	ngf.set_white_player(goInfo.get_player(Color::White).name(), goInfo.get_player(Color::White).kyu());
 	ngf.set_black_player(goInfo.get_player(Color::Black).name(), goInfo.get_player(Color::Black).kyu());
 	ngf.set_url(_T("https://blog.naver.com/damas125"));
-	ngf.set_go_type(goInfo.go_type());
-	ngf.set_gongje(goInfo.gongje());
-	ngf.set_compensation(goInfo.compensation());
+	ngf.set_go_type(goInfo.m_go_type);
+	ngf.set_gongje(goInfo.m_gongje);
+	ngf.set_compensation(goInfo.m_compensation);
 	ngf.set_date(date);
-	ngf.set_base_time(goInfo.base_time());
-	ngf.set_game_result(goInfo.game_result());
-	for (int i = 0; i < goInfo.sequence() - 1; i++)
+	ngf.set_base_time(goInfo.m_base_time);
+	ngf.set_game_result(goInfo.m_game_result);
+	for (int i = 0; i < goInfo.m_sequence- 1; i++)
 	{
-		const PlacementInfo& data = goInfo.placements()[i].data();
+		const PlacementInfo& data = goInfo.m_placements[i].data();
 		ngf.add_placement(GiboNGF::Placement(data.sequence, data.x, data.y, Color2Char(data.player)));
 	}
 	ngf.save(wos);
@@ -193,20 +236,20 @@ void SaveSGF(std::wostream& wos, const Go::Information& goInfo, const std::wstri
 {
 	GiboSGF sgf{
 		.application = _T("Go:1.0.2"),
-		.game_name = goInfo.game_type(),
+		.game_name = goInfo.m_game_type,
 		.date = date,
 		.black_name = goInfo.get_player(Color::Black).name(),
 		.black_rank = goInfo.get_player(Color::Black).kyu(),
 		.white_name = goInfo.get_player(Color::White).name(),
 		.white_rank = goInfo.get_player(Color::White).kyu(),
-		.komi = std::to_wstring(goInfo.compensation()) + _T(".5"),
-		.result = goInfo.game_result(),	// TODO: https://www.red-bean.com/sgf/user_guide/index.html format 맞추기
+		.komi = std::to_wstring(goInfo.m_compensation) + _T(".5"),
+		.result = goInfo.m_game_result,	// TODO: https://www.red-bean.com/sgf/user_guide/index.html format 맞추기
 		.user = _T("https://blog.naver.com/damas125"),
-		.size = goInfo.board_size(),
-		.handicap = goInfo.go_type(),
+		.size = goInfo.m_board_size,
+		.handicap = goInfo.m_go_type,
 	};
 	
-	for (const auto& placement : goInfo.placements())
+	for (const auto& placement : goInfo.m_placements)
 	{
 		sgf.placements.emplace_back(GiboSGF::Placement{ .x = placement.data().x, .y = placement.data().y, .color = TCHAR(Color2Char(placement.data().player)) });
 	}
@@ -214,27 +257,27 @@ void SaveSGF(std::wostream& wos, const Go::Information& goInfo, const std::wstri
 	wos << sgf;
 }
 
-bool Go::Save(const std::wstring& directory, const std::wstring& file_extension)
+bool Go::save(const std::wstring& directory, const std::wstring& gibo_extension)
 {
-	if (file_extension != _T(".ngf") && file_extension != _T(".sgf"))
+	if (gibo_extension != _T(".ngf") && gibo_extension != _T(".sgf"))
 	{
 		printf("Save failed: invalid file file extension.\n");
 		return false;
 	}
 
 	printf("기보 저장 시작--------\n");
-	printf("경로 : %ls \n확장자 : %ws\n", directory.c_str(), file_extension.c_str());
+	printf("경로 : %ls \n확장자 : %ws\n", directory.c_str(), gibo_extension.c_str());
 	SYSTEMTIME time;
 	GetLocalTime(&time);
 	std::wstring date = std::format(_T("{}{:0>2}{:0>2} [{:0>2}:{:0>2}]"), time.wYear, time.wMonth, time.wDay, time.wHour, time.wMinute);
 
 	std::wofstream file(directory);
 	file.imbue(std::locale(""));
-	if (file_extension == _T(".ngf"))
+	if (gibo_extension == _T(".ngf"))
 	{
 		SaveNGF(file, m_info, date);
 	} 
-	else if (file_extension == _T(".sgf"))
+	else if (gibo_extension == _T(".sgf"))
 	{
 		SaveSGF(file, m_info, date);
 	}
@@ -242,133 +285,28 @@ bool Go::Save(const std::wstring& directory, const std::wstring& file_extension)
 	return true;
 }
 
-const Stone& Go::ReadCoord( Coord2d coord ) const
+const Stone& Go::read_coord( Coord2d coord ) const
 {
 	return m_board.getStone(coord.x, coord.y);
 }
 
 const PlacementInfo& Go::getLastPlacementInfo() const
 {
-	return m_info.placements().back().data();
+	return m_info.m_placements.back().data();
 }
 
-void Go::Information::add_captured_stone(Color color, int captured_stone)
+Color Go::current_placement_order() const
 {
-	auto playerItr = players.find(color);
-
-	if (playerItr == players.cend())
-	{
-		return;
-	}
-
-	playerItr->second.add_captured_stone(captured_stone);
-}
-
-void Go::Information::add_placement(PlacementInfo&& placement)
-{
-	m_placements.emplace_back(placement);
-}
-
-const Player& Go::Information::get_player(Color color) const
-{
-	auto playerItr = players.find(color);
-
-	if ( playerItr != players.cend() )
-	{
-		return playerItr->second;
-	}
-
-	static Player nullPlayer(Color::Black);
-	return nullPlayer;
-}
-
-const std::wstring& Go::Information::game_type() const
-{
-	return m_game_type;
-}
-
-int Go::Information::board_size() const
-{
-	return m_board_size;
-}
-
-const std::wstring& Go::Information::link() const
-{
-	return m_link;
-}
-
-int Go::Information::go_type() const
-{
-	return m_go_type;
-}
-
-int Go::Information::gongje() const
-{
-	return m_gongje;
-}
-
-int Go::Information::compensation() const
-{
-	return m_compensation;
-}
-
-const std::wstring& Go::Information::date() const
-{
-	return m_date;
-}
-
-const std::wstring& Go::Information::base_time() const
-{
-	return m_base_time;
-}
-
-const std::wstring& Go::Information::game_result() const
-{
-	return m_game_result;
-}
-
-int Go::Information::sequence() const
-{
-	return m_sequence;
-}
-
-const std::vector<Node<PlacementInfo>>& Go::Information::placements() const
-{
-	return m_placements;
-}
-
-Color Go::get_current_placement_order() const
-{
-	return placementOrders.at(currentPlacementOrderIndex);
+	return m_placement_orders.at(m_current_placement_order_index);
 }
 
 void Go::set_placement_order_previous()
 {
-	currentPlacementOrderIndex += placementOrders.size() - 1;
-	currentPlacementOrderIndex %= placementOrders.size();
+	m_current_placement_order_index += m_placement_orders.size() - 1;
+	m_current_placement_order_index %= m_placement_orders.size();
 }
 
 void Go::set_placement_order_next()
 {
-	++currentPlacementOrderIndex %= placementOrders.size();
-}
-
-Go::Information::Information()
-	: m_game_type( _T( "친선대국" ) )
-	, m_board_size( 19 )
-	, m_compensation( 6 )
-	, m_base_time( _T( "0" ) )
-	, m_game_result( _T( "결과 없음" ) )
-	
-{
-	Init();
-}
-
-void Go::Information::Init()
-{
-	m_placements.clear();
-	set_sequence(1);
-	players.clear();
-	players.emplace(std::make_pair(Color::Black, Player(Color::Black)));
-	players.emplace(std::make_pair(Color::White, Player(Color::White)));
+	++m_current_placement_order_index %= m_placement_orders.size();
 }

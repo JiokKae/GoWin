@@ -20,7 +20,7 @@ GoWinApplication::GoWinApplication()
 	}
 	, command_message_callbacks{
 		{Command_MSG::Command::BACKSIES, [this](HWND hWnd) {
-			if (go.Backsies() == false)
+			if (go.backsies() == false)
 			{
 				return;
 			}
@@ -31,7 +31,7 @@ GoWinApplication::GoWinApplication()
 			}
 		}},
 		{Command_MSG::Command::INIT, [this](HWND hWnd) {
-			if (go.Init() == false)
+			if (go.init() == false)
 			{
 				return;
 			}
@@ -42,7 +42,7 @@ GoWinApplication::GoWinApplication()
 			}
 		}},
 		{Command_MSG::Command::PASS, [this](HWND hWnd) {
-			if (go.Pass() == false)
+			if (go.pass() == false)
 			{
 				return;
 			}
@@ -66,7 +66,7 @@ GoWinApplication::GoWinApplication()
 		{ WM_DESTROY, [this](HWND hWnd, WPARAM wParam, LPARAM lParam) { on_destroy(hWnd, wParam, lParam); }},
 	}
 {
-	go.Init();
+	go.init();
 }
 
 void GoWinApplication::set_main_window_handle(HWND handle)
@@ -215,12 +215,12 @@ void GoWinApplication::on_lbutton_down(HWND hWnd, WPARAM wParam, LPARAM lParam)
 		const Coord2d placement_point = board_graphic.MouseToBoard(mouse.x, mouse.y);
 		if (my_socket.status() == MySocket::Status::Client)
 		{
-			my_socket.send_message(std::make_unique<Placement_MSG>(go.info().sequence() + 1, placement_point.x, placement_point.y));
+			my_socket.send_message(std::make_unique<Placement_MSG>(go.info().m_sequence + 1, placement_point.x, placement_point.y));
 			return;
 		}
 
-		int errorMSG = go.Placement(placement_point);
-		if (errorMSG == 0)
+		Go::PlacementError errorMSG = go.placement(placement_point);
+		if (errorMSG == Go::PlacementError::NONE)
 		{
 			if (my_socket.status() == MySocket::Status::Server)
 			{
@@ -233,9 +233,9 @@ void GoWinApplication::on_lbutton_down(HWND hWnd, WPARAM wParam, LPARAM lParam)
 
 			InvalidateRect(hWnd, NULL, FALSE);
 		}
-		else if (errorMSG != ERR_NOTEMPTY)
+		else if (errorMSG != Go::PlacementError::NOT_EMPTY)
 		{
-			MessageBox(hWnd, ERROR_MESSAGES[errorMSG], _T("ERROR"), MB_OK);
+			MessageBox(hWnd, ERROR_MESSAGES[(int)errorMSG], _T("ERROR"), MB_OK);
 		}
 	}
 }
@@ -339,8 +339,8 @@ void GoWinApplication::on_async(HWND hWnd, WPARAM wParam, LPARAM lParam)
 		case Message::Type::PLACEMENT:
 		{
 			Placement_MSG* placement_msg = reinterpret_cast<Placement_MSG*>(&msg);
-			int errorMSG = go.Placement({ placement_msg->x, placement_msg->y });
-			if (errorMSG == 0)
+			Go::PlacementError errorMSG = go.placement({ placement_msg->x, placement_msg->y });
+			if (errorMSG == Go::PlacementError::NONE)
 			{
 				if (my_socket.status() == MySocket::Status::Server)
 				{
@@ -453,7 +453,7 @@ void GoWinApplication::file_open(HWND hWnd)
 		std::wifstream file(result.file_path);
 		file.imbue(std::locale(""));
 
-		go.Load(GiboNGF(file));
+		go.load(GiboNGF(file));
 	}
 	catch (const std::exception&)
 	{
@@ -473,9 +473,9 @@ void GoWinApplication::file_save(HWND hWnd)
 			return;
 		}
 
-		go.Save(result.file_path, get_extension(result.file_path));
+		go.save(result.file_path, get_extension(result.file_path));
 	}
-	catch (const std::exception& e)
+	catch (const std::exception& /*e*/)
 	{
 		ok_message_box(hWnd, strings[string_id::FILE_SAVE_FAIL_TITLE], strings[string_id::FILE_SAVE_FAIL]);
 	}
@@ -489,7 +489,7 @@ void GoWinApplication::backsies(HWND hWnd)
 		return;
 	}
 
-	if (go.Backsies() == false)
+	if (go.backsies() == false)
 	{
 		return;
 	}
@@ -510,7 +510,7 @@ void GoWinApplication::init(HWND hWnd)
 		return;
 	}
 
-	if (go.Init() == false)
+	if (go.init() == false)
 	{
 		return;
 	}
@@ -532,7 +532,7 @@ void GoWinApplication::pass(HWND hWnd)
 		return;
 	}
 
-	if (go.Pass() == false)
+	if (go.pass() == false)
 	{
 		return;
 	}
