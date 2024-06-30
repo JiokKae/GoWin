@@ -52,15 +52,6 @@ private:
 	MySocket my_socket;
 	GoWin::Chatting chatting;
 
-	enum class string_id {
-		INVALID_EXTENSION,
-		FILE_OPEN_FAIL_TITLE,
-		FILE_OPEN_FAIL,
-		FILE_SAVE_FAIL_TITLE,
-		FILE_SAVE_FAIL,
-	};
-	std::map<string_id, std::wstring> strings;
-
 	Coord2d mouse;
 	PAINTSTRUCT ps;
 	GoWin::Font font_gungseo;
@@ -75,14 +66,17 @@ private:
 	HWND hWCS = nullptr;
 	HWND hBCS = nullptr;
 
-private:
-	const TCHAR* ERROR_MESSAGES[5] = {
-	_T(""),
-	_T("바둑판 안에 착수해주세요"),
-	_T("이미 바둑 돌이 있습니다"),
-	_T("착수 금지점입니다"),
-	_T("패 입니다"),
+private:	
+	enum class StringID {
+		INVALID_EXTENSION,
+		FILE_OPEN_FAIL_TITLE,
+		FILE_OPEN_FAIL,
+		FILE_SAVE_FAIL_TITLE,
+		FILE_SAVE_FAIL,
 	};
+	static const std::map<StringID, std::wstring> STRINGS;
+
+	static const TCHAR* ERROR_MESSAGES[5];
 
 	static constexpr int TOGGLE_SHOW_SEQUENCE = 3;
 };

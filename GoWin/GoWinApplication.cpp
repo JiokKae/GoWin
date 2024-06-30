@@ -10,15 +10,24 @@
 #include <fstream>
 #include <memory>
 
+const TCHAR* GoWinApplication::ERROR_MESSAGES[5] = {
+	_T(""),
+	_T("바둑판 안에 착수해주세요"),
+	_T("이미 바둑 돌이 있습니다"),
+	_T("착수 금지점입니다"),
+	_T("패 입니다"),
+};
+
+const std::map<GoWinApplication::StringID, std::wstring> GoWinApplication::STRINGS{
+	{StringID::INVALID_EXTENSION,		_T("지원하는 파일 형식이 아닙니다.")},
+	{StringID::FILE_OPEN_FAIL_TITLE,	_T("파일 열기 실패")},
+	{StringID::FILE_OPEN_FAIL,		_T("파일을 불러오는데 실패했습니다.")},
+	{StringID::FILE_SAVE_FAIL_TITLE,	_T("파일 저장 실패")},
+	{StringID::FILE_SAVE_FAIL,		_T("파일 저장을 실패했습니다.")},
+};
+
 GoWinApplication::GoWinApplication()
-	: strings{
-		{string_id::INVALID_EXTENSION, _T("지원하는 파일 형식이 아닙니다.")},
-		{string_id::FILE_OPEN_FAIL_TITLE, _T("파일 열기 실패")},
-		{string_id::FILE_OPEN_FAIL, _T("파일을 불러오는데 실패했습니다.")},
-		{string_id::FILE_SAVE_FAIL_TITLE, _T("파일 저장 실패")},
-		{string_id::FILE_SAVE_FAIL, _T("파일 저장을 실패했습니다.")},
-	}
-	, command_message_callbacks{
+	: command_message_callbacks{
 		{Command_MSG::Command::BACKSIES, [this](HWND hWnd) {
 			if (go.backsies() == false)
 			{
@@ -439,14 +448,14 @@ void GoWinApplication::file_open(HWND hWnd)
 		auto result = ofn.open();
 		if (result.success == false)
 		{
-			ok_message_box(hWnd, strings[string_id::FILE_OPEN_FAIL_TITLE], strings[string_id::FILE_OPEN_FAIL]);
+			ok_message_box(hWnd, STRINGS.at(StringID::FILE_OPEN_FAIL_TITLE), STRINGS.at(StringID::FILE_OPEN_FAIL));
 			return;
 		}
 
 		std::wstring extension = get_extension(result.file_path);
 		if (extension != _T(".ngf"))
 		{
-			ok_message_box(hWnd, strings[string_id::FILE_OPEN_FAIL_TITLE], strings[string_id::INVALID_EXTENSION]);
+			ok_message_box(hWnd, STRINGS.at(StringID::FILE_OPEN_FAIL_TITLE), STRINGS.at(StringID::INVALID_EXTENSION));
 			return;
 		}
 
@@ -457,7 +466,7 @@ void GoWinApplication::file_open(HWND hWnd)
 	}
 	catch (const std::exception&)
 	{
-		ok_message_box(hWnd, strings[string_id::FILE_OPEN_FAIL_TITLE], strings[string_id::FILE_OPEN_FAIL]);
+		ok_message_box(hWnd, STRINGS.at(StringID::FILE_OPEN_FAIL_TITLE), STRINGS.at(StringID::FILE_OPEN_FAIL));
 	}
 }
 
@@ -477,7 +486,7 @@ void GoWinApplication::file_save(HWND hWnd)
 	}
 	catch (const std::exception& /*e*/)
 	{
-		ok_message_box(hWnd, strings[string_id::FILE_SAVE_FAIL_TITLE], strings[string_id::FILE_SAVE_FAIL]);
+		ok_message_box(hWnd, STRINGS.at(StringID::FILE_SAVE_FAIL_TITLE), STRINGS.at(StringID::FILE_SAVE_FAIL));
 	}
 }
 
