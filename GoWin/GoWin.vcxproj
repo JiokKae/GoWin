@@ -152,15 +152,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="BoardGraphic.h" />
     <ClInclude Include="Board.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="GiboNGF.h" />
     <ClInclude Include="GiboSGF.h" />
     <ClInclude Include="Go.h" />
     <ClInclude Include="GoWinApplication.h" />
+    <ClInclude Include="GoWin\BoardGraphic.h" />
     <ClInclude Include="GoWin\Chatting.h" />
     <ClInclude Include="GoWin\Font.h" />
+    <ClInclude Include="GoWin\Graphic.h" />
     <ClInclude Include="GoWin\OpenFileName.h" />
     <ClInclude Include="Grid\GridItem.h" />
     <ClInclude Include="mydatastructure.h" />
@@ -174,14 +175,15 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="BoardGraphic.cpp" />
     <ClCompile Include="Board.cpp" />
     <ClCompile Include="GiboNGF.cpp" />
     <ClCompile Include="GiboSGF.cpp" />
     <ClCompile Include="Go.cpp" />
     <ClCompile Include="GoWinApplication.cpp" />
+    <ClCompile Include="GoWin\BoardGraphic.cpp" />
     <ClCompile Include="GoWin\Chatting.cpp" />
     <ClCompile Include="GoWin\Font.cpp" />
+    <ClCompile Include="GoWin\Graphic.cpp" />
     <ClCompile Include="Grid\GridItem.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="GoWin\OpenFileName.cpp" />

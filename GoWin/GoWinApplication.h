@@ -1,16 +1,19 @@
 ﻿#pragma once
 #include <functional>
+#include <memory>
 #include "framework.h"
 #include "Go.h"
 #include "MySocket.h"
-#include "BoardGraphic.h"
 #include "GoWin/Chatting.h"
 #include "GoWin/Font.h"
+
+class BoardGraphic;
 
 class GoWinApplication
 {
 public:
 	GoWinApplication();
+	~GoWinApplication();
 
 	void set_main_window_handle(HWND);
 	void set_hInstance(HINSTANCE);
@@ -48,7 +51,7 @@ private:
 	void ok_message_box(HWND, const std::wstring& title, const std::wstring& content);
 	
 	Go go;
-	BoardGraphic board_graphic;
+	std::unique_ptr<BoardGraphic> board_graphic;
 	MySocket my_socket;
 	GoWin::Chatting chatting;
 

@@ -3,6 +3,7 @@
 #include "MyString.h"
 #include "stdgo.h"
 #include "MyWinLibrary.h"
+#include "GoWin/BoardGraphic.h"
 #include "GoWin/OpenFileName.h"
 #include <filesystem>
 #include <algorithm>
@@ -76,6 +77,10 @@ GoWinApplication::GoWinApplication()
 	}
 {
 	go.init();
+}
+
+GoWinApplication::~GoWinApplication()
+{
 }
 
 void GoWinApplication::set_main_window_handle(HWND handle)
@@ -170,13 +175,17 @@ void GoWinApplication::on_create(HWND hWnd, WPARAM /*wParam*/, LPARAM /*lParam*/
 #endif
 	hdc = GetDC(hWnd);
 
-	board_graphic.SetWidth(806);
-	board_graphic.SetHeight(806);
-	board_graphic.SetLeftTopPoint({ 0, 0 });
-	board_graphic.SetSpaceSize(42);
-	board_graphic.SetBorderSize(6);
-	board_graphic.Init(hdc, m_hInstance);
-
+	board_graphic = std::move(std::make_unique<BoardGraphic>(hdc));
+	if (board_graphic)
+	{
+		board_graphic->SetLeftTopPoint(0, 0);
+		board_graphic->SetSpaceSize(42);
+		board_graphic->SetBorderSize(6);
+		board_graphic->AddBitmap("blackStone", m_hInstance, IDB_BLACKSTONE);
+		board_graphic->AddBitmap("whiteStone", m_hInstance, IDB_WHITESTONE);
+		board_graphic->AddBitmap("board", m_hInstance, IDB_BOARD);
+	}
+	
 	hdc_BackGround = CreateCompatibleDC(hdc);
 	HBITMAP bitBackGround = LoadBitmap(m_hInstance, MAKEINTRESOURCE(IDB_BACKGROUND));
 	SelectObject(hdc_BackGround, bitBackGround);
@@ -219,9 +228,12 @@ void GoWinApplication::on_lbutton_down(HWND hWnd, WPARAM wParam, LPARAM lParam)
 {
 	set_mouse_coord(lParam);
 
-	if (board_graphic.IsMouseInBoard(mouse) == true)
+	if (board_graphic && board_graphic->IsPointInBoard(mouse.x, mouse.y) == true)
 	{
-		const Coord2d placement_point = board_graphic.MouseToBoard(mouse.x, mouse.y);
+		const int placement_x = board_graphic->PointToBoard(mouse.x);
+		const int placement_y = board_graphic->PointToBoard(mouse.y);
+		const Coord2d placement_point{ placement_x , placement_y};
+
 		if (my_socket.status() == MySocket::Status::Client)
 		{
 			my_socket.send_message(std::make_unique<Placement_MSG>(go.info().m_sequence + 1, placement_point.x, placement_point.y));
@@ -309,7 +321,10 @@ void GoWinApplication::on_command(HWND hWnd, WPARAM wParam, LPARAM lParam)
 		break;
 
 	case TOGGLE_SHOW_SEQUENCE:
-		board_graphic.TogglePrintSequence();
+		if (board_graphic)
+		{
+			board_graphic->TogglePrintSequence();
+		}
 		InvalidateRect(hWnd, NULL, FALSE);
 		SetFocus(hWnd);
 		break;
@@ -418,7 +433,10 @@ void GoWinApplication::on_paint(HWND hWnd, WPARAM wParam, LPARAM lParam)
 
 	BitBlt(hdcMem, 0, 0, 1200, 820, hdc_BackGround, 0, 0, SRCCOPY);
 
-	board_graphic.Draw(hdcMem, go, mouse);
+	if (board_graphic)
+	{
+		board_graphic->Draw(hdcMem, go, mouse);
+	}
 
 	BitBlt(hdc, 0, 0, 1200, 820, hdcMem, 0, 0, SRCCOPY);
 
@@ -431,7 +449,6 @@ void GoWinApplication::on_destroy(HWND hWnd, WPARAM wParam, LPARAM lParam)
 	DeleteDC(hdcMem); //-2
 
 	DeleteDC(hdc_BackGround);
-	board_graphic.Release();
 
 	ReleaseDC(hWnd, hdc);
 

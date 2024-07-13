@@ -36,9 +36,6 @@
     <ClInclude Include="Resource.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="BoardGraphic.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Board.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -87,11 +84,14 @@
     <ClInclude Include="Grid\GridItem.h">
       <Filter>Grid</Filter>
     </ClInclude>
+    <ClInclude Include="GoWin\BoardGraphic.h">
+      <Filter>GoWin</Filter>
+    </ClInclude>
+    <ClInclude Include="GoWin\Graphic.h">
+      <Filter>GoWin</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="BoardGraphic.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="Board.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -139,6 +139,12 @@
     </ClCompile>
     <ClCompile Include="Grid\GridItem.cpp">
       <Filter>Grid</Filter>
+    </ClCompile>
+    <ClCompile Include="GoWin\BoardGraphic.cpp">
+      <Filter>GoWin</Filter>
+    </ClCompile>
+    <ClCompile Include="GoWin\Graphic.cpp">
+      <Filter>GoWin</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
