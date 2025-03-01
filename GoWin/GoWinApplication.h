@@ -76,10 +76,15 @@ private:
 		FILE_OPEN_FAIL,
 		FILE_SAVE_FAIL_TITLE,
 		FILE_SAVE_FAIL,
+		SYSTEM_CHAT_PASS,
+		SYSTEM_CHAT_INIT,
 	};
 	static const std::map<StringID, std::wstring> STRINGS;
 
 	static const TCHAR* ERROR_MESSAGES[5];
 
 	static constexpr int TOGGLE_SHOW_SEQUENCE = 3;
+
+	static constexpr int WINDOW_WIDTH = 1200;
+	static constexpr int WINDOW_HEIGHT = 820;
 };

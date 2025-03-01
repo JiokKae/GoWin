@@ -25,6 +25,8 @@ const std::map<GoWinApplication::StringID, std::wstring> GoWinApplication::STRIN
 	{StringID::FILE_OPEN_FAIL,		_T("파일을 불러오는데 실패했습니다.")},
 	{StringID::FILE_SAVE_FAIL_TITLE,	_T("파일 저장 실패")},
 	{StringID::FILE_SAVE_FAIL,		_T("파일 저장을 실패했습니다.")},
+	{StringID::SYSTEM_CHAT_PASS,		_T("한수 쉬었습니다.")},
+	{StringID::SYSTEM_CHAT_INIT,		_T("바둑판을 초기화 했습니다.")},
 };
 
 GoWinApplication::GoWinApplication()
@@ -192,7 +194,7 @@ void GoWinApplication::on_create(HWND hWnd, WPARAM /*wParam*/, LPARAM /*lParam*/
 	//DeleteObject(bitBackGround);
 
 	hdcMem = CreateCompatibleDC(hdc); //2
-	hBitmapMem = CreateCompatibleBitmap(hdc, 1200, 820);//3
+	hBitmapMem = CreateCompatibleBitmap(hdc, WINDOW_WIDTH, WINDOW_HEIGHT);//3
 	DeleteObject(SelectObject(hdcMem, hBitmapMem));
 
 	hBCS = CreateWindow(_T("EDIT"), _T("0"), WS_CHILD | WS_VISIBLE | ES_RIGHT | ES_READONLY,
@@ -431,14 +433,14 @@ void GoWinApplication::on_paint(HWND hWnd, WPARAM wParam, LPARAM lParam)
 {
 	hdc = BeginPaint(hWnd, &ps);
 
-	BitBlt(hdcMem, 0, 0, 1200, 820, hdc_BackGround, 0, 0, SRCCOPY);
+	BitBlt(hdcMem, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, hdc_BackGround, 0, 0, SRCCOPY);
 
 	if (board_graphic)
 	{
 		board_graphic->Draw(hdcMem, go, mouse);
 	}
 
-	BitBlt(hdc, 0, 0, 1200, 820, hdcMem, 0, 0, SRCCOPY);
+	BitBlt(hdc, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, hdcMem, 0, 0, SRCCOPY);
 
 	EndPaint(hWnd, &ps);
 }
@@ -547,7 +549,7 @@ void GoWinApplication::init(HWND hWnd)
 	}
 
 	InvalidateRect(hWnd, NULL, FALSE);
-	chatting.system_print(_T("바둑판을 초기화 했습니다."));
+	chatting.system_print(STRINGS.at(StringID::SYSTEM_CHAT_INIT).c_str());
 }
 
 void GoWinApplication::pass(HWND hWnd)
@@ -569,7 +571,7 @@ void GoWinApplication::pass(HWND hWnd)
 	}
 
 	InvalidateRect(hWnd, NULL, FALSE);
-	chatting.system_print(_T("한수 쉬었습니다."));
+	chatting.system_print(STRINGS.at(StringID::SYSTEM_CHAT_PASS).c_str());
 }
 
 void GoWinApplication::set_mouse_coord(LPARAM lparam)
