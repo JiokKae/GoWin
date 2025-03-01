@@ -72,7 +72,7 @@ GoWinApplication::GoWinApplication()
 		{ WM_MOUSEMOVE, [this](HWND hWnd, WPARAM wParam, LPARAM lParam) { on_mouse_move(hWnd, wParam, lParam); }},
 		{ WM_LBUTTONDOWN, [this](HWND hWnd, WPARAM wParam, LPARAM lParam) { on_lbutton_down(hWnd, wParam, lParam); }},
 		{ WM_COMMAND, [this](HWND hWnd, WPARAM wParam, LPARAM lParam) { on_command(hWnd, wParam, lParam); }},
-		{ WM_ASYNC, [this](HWND hWnd, WPARAM wParam, LPARAM lParam) { on_async(hWnd, wParam, lParam); }},
+		{ MySocket::WM_ASYNC, [this](HWND hWnd, WPARAM wParam, LPARAM lParam) { on_async(hWnd, wParam, lParam); }},
 		{ WM_KEYDOWN, [this](HWND hWnd, WPARAM wParam, LPARAM lParam) { on_key_down(hWnd, wParam, lParam); }},
 		{ WM_PAINT, [this](HWND hWnd, WPARAM wParam, LPARAM lParam) { on_paint(hWnd, wParam, lParam); }},
 		{ WM_DESTROY, [this](HWND hWnd, WPARAM wParam, LPARAM lParam) { on_destroy(hWnd, wParam, lParam); }},
@@ -292,7 +292,7 @@ void GoWinApplication::on_command(HWND hWnd, WPARAM wParam, LPARAM lParam)
 		break;
 
 	case IDM_SERVER_CREATE:
-		if (my_socket.Create(hWnd) != INVALID_SOCKET) 
+		if (my_socket.Create(hWnd) == true) 
 		{
 			chatting.system_print(_T("서버 생성"));
 			const HMENU hMenu = GetMenu(hWnd);
@@ -337,7 +337,7 @@ void GoWinApplication::on_async(HWND hWnd, WPARAM wParam, LPARAM lParam)
 	{
 	// 클라이언트의 접속 요청이 있을 때
 	case FD_ACCEPT:
-		if (my_socket.FD_Accept()) 
+		if (my_socket.FD_Accept() == true)
 		{
 			chatting.system_print(_T("클라이언트 접속"));
 		}
@@ -363,7 +363,7 @@ void GoWinApplication::on_async(HWND hWnd, WPARAM wParam, LPARAM lParam)
 		case Message::Type::PLACEMENT:
 		{
 			Placement_MSG* placement_msg = reinterpret_cast<Placement_MSG*>(&msg);
-			Go::PlacementError errorMSG = go.placement({ placement_msg->x, placement_msg->y });
+			Go::PlacementError errorMSG = go.placement(Coord2d{ placement_msg->x, placement_msg->y });
 			if (errorMSG == Go::PlacementError::NONE)
 			{
 				if (my_socket.status() == MySocket::Status::Server)
@@ -414,8 +414,7 @@ void GoWinApplication::on_key_down(HWND hWnd, WPARAM wParam, LPARAM lParam)
 		const std::wstring chat = chatting.send();
 		if (chat.empty() == false && my_socket.IsConnected() == true)
 		{
-			const int ret = my_socket.send_message(std::make_unique<CHAT_MSG>(chat.c_str()));
-			if (ret == SOCKET_ERROR)
+			if (my_socket.send_message(std::make_unique<CHAT_MSG>(chat.c_str())) == false)
 			{
 				chatting.system_print(_T("채팅 보내기 실패"));
 			}
