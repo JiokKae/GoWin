@@ -119,22 +119,20 @@ LRESULT GoWinApplication::main_procedure(HWND hWnd, UINT message, WPARAM wParam,
 
 INT_PTR GoWinApplication::about_procedure(HWND hDlg, UINT message, WPARAM wParam, LPARAM)
 {
+	switch (message)
 	{
-		switch (message)
-		{
-		case WM_INITDIALOG:
-			return INT_PTR(TRUE);
+	case WM_INITDIALOG:
+		return INT_PTR(TRUE);
 
-		case WM_COMMAND:
-			if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
-			{
-				EndDialog(hDlg, LOWORD(wParam));
-				return INT_PTR(TRUE);
-			}
-			break;
+	case WM_COMMAND:
+		if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
+		{
+			EndDialog(hDlg, LOWORD(wParam));
+			return INT_PTR(TRUE);
 		}
-		return INT_PTR(FALSE);
+		break;
 	}
+	return INT_PTR(FALSE);
 }
 
 INT_PTR GoWinApplication::netbox_procedure(HWND hDlg, UINT message, WPARAM wParam, LPARAM)
